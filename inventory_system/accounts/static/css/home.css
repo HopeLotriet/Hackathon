@@ -81,7 +81,7 @@ nav a {
 
 .text-transition {
     text-align: center;
-    /* margin-top: 150px;  */
+    margin-top: 60px; 
     font-size: 1.5em;
     color: #215a23;
     font-weight: bold;
@@ -91,42 +91,49 @@ nav a {
 .text-transition p {
     opacity: 0;
     position: absolute;
+    /* text-align: center; */
     top: 50%;
     left: 50;
-    transform: translate(-50%, -50%);
+    /* transform: translate(-50%, -50%); */
     width: 100%;
-    animation: fadeIn 12s linear infinite;
+    animation: fadeIn 3s linear infinite;
 }
 
 @keyframes fadeIn {
-    0% {
+    0%, 100% {
         opacity: 0;
     }
-    25% {
+    25%, 75% {
         opacity: 1;
     }
-    75% {
-        opacity: 1;
-    }
-    100% {
-        opacity: 0;
-    }
+}
+
+.registration {
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+.reg {
+    border: 2px solid #215a23;
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 50%;
 }
 
 .text-transition .text1 {
-    animation-delay: 0s;
+    animation-delay: 1s;
 }
 
 .text-transition .text2 {
-    animation-delay: 4s; /* Delay based on the duration of the first text animation */
+    animation-delay: 5s; 
 }
 
 .text-transition .text3 {
-    animation-delay: 8s; /* Delay based on the duration of the first two text animations */
+    animation-delay: 9s; 
 }
 
 .text-transition .text4 {
-    animation-delay: 12s; /* Delay based on the duration of the first two text animations */
+    animation-delay: 13s; 
 }
 
 footer {

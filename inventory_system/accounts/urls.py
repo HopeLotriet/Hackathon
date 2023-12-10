@@ -1,11 +1,13 @@
 app_name= 'accounts'
 
-from django.urls import path
-from .views import register, user_login
+from django.urls import path, include
+from django.contrib import admin
 from . import views
 
 urlpatterns = [
     path('', views.home, name='home'),
-    path('register/', views.register, name='register'),
-    path('login/', views.user_login, name='login'),
+    path('signup', views.signup, name='signup'),
+    path('signin', views.signin, name='signin'),
+    path('signup', views.signup, name='signup'),
+    path('signout', views.signout, name='signout'),
 ]
