@@ -13,43 +13,55 @@
         <div class="logo">
             <img src="{% static 'images/logo.jpeg' %}" alt="FarmFresh Logo">
         </div>
-        <h1>FarmFresh</h1>
-        <p>Your Fresh Produce Marketplace</p>
+        <div class="header-content">
+            <h1>FarmFresh</h1>
+            <p>Your Fresh Produce Marketplace</p>
+        </div>
+        
+        <nav>
+            <a href="#home">Home</a>
+            <a href="#products">Products</a>
+            <ul class="sub-menu">
+                <li><a href="#produce">Produce</a></li>
+                <li><a href="#fruits">Fruits</a></li>
+                <li><a href="#vegetables">Vegetables</a></li>
+                <li><a href="#herbs">Herbs</a></li>
+            </ul>
+            <a href="#inventory">Inventory</a>
+            <ul class="sub-menu">
+                <li><a href="#product">Product List</a></li>
+                <li><a href="#stock">Stock List</a></li>
+                <li><a href="#reports">Reports</a></li>
+                        </ul>
+            <a href="#marketing">Marketing</a>
+            <a href="#invoicing">Invoicing</a>
+            <a href="#profile">Profile</a>
+            <ul class="sub-menu">
+                <li><a href="#about">About Us</a></li>
+                
+            </ul>
+            <div class="user-icon" onclick="toggleLoginRegister()">
+                <img src="{% static 'images/user.png' %}" alt="User Profile" width="40">
+            </div>
+        </nav>
     </header>
 
-    <nav>
-        <a href="#home">Home</a>
-        <a href="#products">Products</a>
-        <ul class="sub-menu">
-            <li><a href="#produce">Produce</a></li>
-            <li><a href="#fruits">Fruits</a></li>
-            <li><a href="#vegetables">Vegetables</a></li>
-            <li><a href="#herbs">Herbs</a></li>
-        </ul>
-        <a href="#inventory">Inventory</a>
-        <ul class="sub-menu">
-            <li><a href="#product">Product List</a></li>
-            <li><a href="#stock">Stock List</a></li>
-            <li><a href="#reports">Reports</a></li>
-                    </ul>
-        <a href="#marketing">Marketing</a>
-        <a href="#invoicing">Invoicing</a>
-        <a href="#profile">Profile</a>
-        <ul class="sub-menu">
-            <li><a href="#about">About Us</a></li>
-            
-        </ul>
-        <div class="user-icon" onclick="toggleLoginRegister()"><img src="{% static 'images/user.png' %}" alt="User Profile" width="40"></div>
-    </nav>
-    
-    <div class="container">
-        <div class="main-content">
-            <h2>Welcome to FarmFresh!</h2>
-            <p>Discover the freshest fruits and vegetables directly from local farmers.</p>
-            <p>Explore our wide range of produce and enjoy the taste of farm-to-table goodness.</p>
-            <p>Sign up now to start buying or selling your fresh produce!</p>
+    <main class="container">
+        <div class="text-transition">
+            <p class="text1">Welcome to FarmFresh!</p>
+            <p class="text2">Discover the freshest fruits and vegetables directly from local farmers.</p>
+            <p class="text3">Explore our wide range of produce and enjoy the taste of farm-to-table goodness.</p>
+            <p class="text4">Register now to start buying or selling your fresh produce!</p>
         </div>
-    </div>
+
+
+        <div class="reg">
+            <h2>Register Here</h2>
+        </div>
+    </main>
+
+
+  
 
     <footer>
         <p>&copy; 2023 FarmFresh - Your Fresh Produce Marketplace</p>
