@@ -10,11 +10,6 @@ def home(request):
     return render(request, 'accounts/home.html')
 
 
-
-def home(request):
-    return render(request, "authentication\index.html")
-
-
 def signup(request):
 
     if request.method == "POST":
@@ -93,3 +88,18 @@ def signout(request):
 
 
 # function to send account activation to the user 
+
+def products(request):
+    return render(request, 'accounts/products')
+
+def inventory(request):
+    return render(request, 'accounts/inventory')
+
+def marketing(request):
+    return render(request, 'accounts/marketing')
+
+def invoicing(request):
+    return render(request, 'accounts/invoicing')
+
+def profile(request):
+    return render(request, 'accounts/profile')
