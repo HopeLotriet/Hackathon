@@ -1,0 +1,32 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'accounts/css/style.css' %}">
+    <title>Register</title>
+</head>
+<body>
+    <div class="container">
+        <form method="post" action="{% url 'accounts:register' %}">
+            {% csrf_token %}
+            <h2>Register</h2>
+            <label for="username">Username:</label>
+            <input type="text" name="username" required>
+            <label for="password1">Password:</label>
+            <input type="password" name="password1" required>
+            <label for="password2">Confirm Password:</label>
+            <input type="password" name="password2" required>
+            <label for="user_type">User Type:</label>
+            <select name="user_type">
+                <option value="farmer">Farmer</option>
+                <option value="customer">Customer</option>
+                <option value="retail">Retail</option>
+                <option value="admin">Admin</option>
+            </select>
+            <button type="submit">Register</button>
+        </form>
+    </div>
+</body>
+</html>
