@@ -63,9 +63,15 @@
             </div> -->
         </nav>
     </header>
-    <div class="w3-display-container w3-display-right w3-opacity">
-        <img src="{% static 'images/background.jpg' %}" alt="background">
-    </div>
+    
+    {% block content %}
+  <h2>Product Lists</h2>
+  <ul>
+    {% for product in products %}
+      <li>{{ product.name }} - {{ product.price }} - {{ product.quantity }}</li>
+    {% endfor %}
+  </ul>
+{% endblock %}
 
 
 

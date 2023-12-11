@@ -1,9 +1,11 @@
 from django.shortcuts import render, redirect
 from django.contrib.auth import login, authenticate, logout
+from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
+# from .models import Product
 
 
 def home(request):
@@ -72,7 +74,7 @@ def signin(request):
         if user is not None:
             login(request, user)
             fname = user.first_name
-            return render(request, "authentication/index.html", {'fname': fname})
+            return render(request, "accounts/home.html", {'fname': fname})
         else:
             messages.error(request, "The email and/or password does not match")
             return redirect('home')
@@ -110,7 +112,9 @@ def profile(request):
     return render(request, 'accounts/profile.html', context)
 
 def produce(request):
-    context = {}
+    context = {
+        
+    }
     return render(request, 'accounts/produce.html', context)
 
 def fruits(request):
@@ -126,8 +130,12 @@ def herbs(request):
     return render(request, 'accounts/herbs.html', context)
 
 def productList(request):
-    context = {}
-    return render(request, 'accounts/productList.html', context)
+    products = Product.objects.all()
+    return render(request, 'accounts/product_list.html', {'products': products})
+
+def orderList(request):
+    orders = Order.objects.all()
+    return render(request, 'accounts/order_list.html', {'orders': orders})
 
 def stock(request):
     context = {}
@@ -140,3 +148,12 @@ def reports(request):
 def about(request):
     context = {}
     return render(request, 'accounts/about.html', context)
+
+def is_farmer(user):
+    return user.groups.filter(name='Farmers').exists()
+
+@login_required
+@user_passes_test(is_farmer, login_url='/accounts/login/')
+def farmer_dashboard(request):
+    # Your farmer-specific view logic
+    return render(request, 'accounts/farmer_dashboard.html')
