@@ -90,16 +90,53 @@ def signout(request):
 # function to send account activation to the user 
 
 def products(request):
-    return render(request, 'accounts/products')
+    context = {}
+    return render(request, 'accounts/products.html', context)
 
 def inventory(request):
-    return render(request, 'accounts/inventory')
+    context = {}
+    return render(request, 'accounts/inventory.html', context)
 
 def marketing(request):
-    return render(request, 'accounts/marketing')
+    context = {}
+    return render(request, 'accounts/marketing.html', context)
 
 def invoicing(request):
-    return render(request, 'accounts/invoicing')
+    context = {}
+    return render(request, 'accounts/invoicing.html', context)
 
 def profile(request):
-    return render(request, 'accounts/profile')
+    context = {}
+    return render(request, 'accounts/profile.html', context)
+
+def produce(request):
+    context = {}
+    return render(request, 'accounts/produce.html', context)
+
+def fruits(request):
+    context = {}
+    return render(request, 'accounts/fruits.html', context)
+
+def vegetables(request):
+    context = {}
+    return render(request, 'accounts/vegetables.html', context)
+
+def herbs(request):
+    context = {}
+    return render(request, 'accounts/herbs.html', context)
+
+def productList(request):
+    context = {}
+    return render(request, 'accounts/productList.html', context)
+
+def stock(request):
+    context = {}
+    return render(request, 'accounts/stock.html', context)
+
+def reports(request):
+    context = {}
+    return render(request, 'accounts/reports.html', context)
+
+def about(request):
+    context = {}
+    return render(request, 'accounts/about.html', context)
