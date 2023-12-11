@@ -6,6 +6,8 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
 # from .models import Product
+from .models import Inventory
+from django.shortcuts import get_object_or_404
 
 
 def home(request):
@@ -96,8 +98,19 @@ def products(request):
     return render(request, 'accounts/products.html', context)
 
 def inventory(request):
-    context = {}
-    return render(request, 'accounts/inventory.html', context)
+    inventories = Inventory.objects.all()
+    context = {
+        "title" : "Inventory List",
+        "inventories": inventories
+    }
+    return render(request, 'accounts/inventory.html', context=context)
+
+def per_product_view(request, pk):
+    inventory = get_object_or_404(Inventory, pk=pk)
+    context = {
+        "inventory" : inventory
+    }
+    return render(request, "inventory/per_product.html", context=context)
 
 def marketing(request):
     context = {}
