@@ -5,7 +5,6 @@
 
 {% block content %}
 
-
     <div class="content-section">
         <div class="row mx-auto justify-content-center">
 
@@ -85,9 +84,8 @@
                 </div>
             </div>
 
-
-
-        </div>
-    </div>
-
+      <a href="{% url 'product_update' inventory.id %}" class="btn btn-outline-success btn-sm mb-2">Update</a>
+      <a href="{% url 'product_delete' inventory.id %}" class="btn btn-danger btn-sm mb-2">Delete</a>
+  </div>
+</div>
 {% endblock %}

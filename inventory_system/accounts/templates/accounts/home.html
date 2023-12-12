@@ -38,11 +38,19 @@
                 <div class="w3-dropdown-content w3-bar-block w3-card-4">
                     <a href="{% url 'productList' %}" class="w3-bar-item w3-button">Product List</a>
                     <a href="{% url 'stock' %}" class="w3-bar-item w3-button">Stock List</a>
-                    <a href="{% url 'reports' %}" class="w3-bar-item w3-button">Reports</a>
+                    <a href="{% url 'dashboard' %}" class="w3-bar-item w3-button">Reports</a>
                 </div>
             </div>
 
+            <div class="w3-dropdown-hover">
+                <a href="{% url 'order_homepage' %}" class="w3-button">Order management<i class="fa fa-caret-down"></i></a>
+                <div class="w3-dropdown-content w3-bar-block w3-card-4">
+                    <a href="{% url 'order_list' %}" class="w3-bar-item w3-button">Order List</a>
+                    <a href="{% url 'create_order' %}" class="w3-bar-item w3-button">Create Order</a>
+                </div>
+            </div>
 
+            
             <a href="{% url 'marketing' %}" class="w3-bar-item w3-button">Marketing</a>
             <a href="{% url 'invoicing' %}" class="w3-bar-item w3-button">Invoicing</a>
             <div class="w3-button">

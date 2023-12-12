@@ -1,0 +1,16 @@
+{% extends 'accounts/home.html' %}
+{% load static %}
+
+{% block title %}Order management{% endblock %}
+
+{% block content %}
+
+    <h2>create order</h2>
+    
+    <form method="post" action="{% url 'create_order' %}">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create Order</button>
+    </form>
+    
+{% endblock %}
