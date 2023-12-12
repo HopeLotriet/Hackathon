@@ -1,0 +1,41 @@
+{% extends 'accounts/home.html' %}
+{% load static %}
+
+{% block title %}Order management{% endblock %}
+
+{% block content %}
+
+<table>
+    <thead>
+    <tr>
+        <th>Order id</th>
+        <th>Customer</th>
+        <th>Product</th>
+        <th>quantity_ordered</th>
+        <th>Order status</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    {% for order in orders %}
+    <tr>
+        <td>{{order.id}}</td>
+        <td>{{order.customer}}</td>
+        <td>{{ order.product }}</td>
+        <td>{{ order.quantity_ordered }} units</td>
+        <td>
+            {{order.order_status}}
+            <form method="post" action="{% url 'update_order_status' order.id %}">
+                {% csrf_token %}
+                {{ form.as_p }}
+                <button type="submit" class="btn btn-primary">Update Status</button>
+            </form>
+            
+    </td>
+    </tr>
+    {% endfor %}
+    </tbody>
+
+</table>
+
+{% endblock %}

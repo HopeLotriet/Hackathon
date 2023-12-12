@@ -6,11 +6,11 @@ from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
 # from .models import Product
-from .models import Inventory
+from .models import Inventory, Order
 from django.shortcuts import get_object_or_404
 
 #Update form import
-from .forms import InventoryUpdateForm, AddInventoryForm
+from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm
 # flash messages
 from django.contrib import messages
 # dataframe
@@ -217,6 +217,43 @@ def dashboard(request):
 
 
 
+#Order management
+def order_homepage(request):
+    return render(request, 'accounts/order_homepage.html')
+
+def order_list(request):
+    order_lists = Order.objects.all()
+    print(order_lists)
+    return render(request, 'accounts/order_list.html', {'orders': order_lists})
+
+def create_order(request):
+    if request.method == 'POST':
+        order_form = OrderForm(request.POST)
+        if order_form.is_valid():
+            order_form.save()
+            return redirect('order_list')
+    else:
+        order_form = OrderForm()
+
+    return render(request, 'accounts/create_order.html', {'form': order_form})
+
+def update_order_status(request, order_id):
+    order = Order.objects.get(id=order_id)
+    if request.method == 'POST':
+        form = UpdateStatusForm(request.POST)
+        if form.is_valid():
+            new_status = form.cleaned_data['new_status']
+            order.order_status = new_status
+            order.save()
+            return redirect('order_list')
+    else:
+        form = UpdateStatusForm()
+
+    return render(request, 'accounts/update_status.html', {'form': form, 'order': order})
+    
+
+
+#to be completed
 def marketing(request):
     context = {}
     return render(request, 'accounts/marketing.html', context)
@@ -236,10 +273,6 @@ def produce(request):
 def productList(request):
     products = Product.objects.all()
     return render(request, 'accounts/product_list.html', {'products': products})
-
-def orderList(request):
-    orders = Order.objects.all()
-    return render(request, 'accounts/order_list.html', {'orders': orders})
 
 def stock(request):
     context = {}
