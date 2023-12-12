@@ -20,6 +20,7 @@ import plotly
 import plotly.express as px
 # json
 import json
+import crispy_bootstrap4
 
 
 def home(request):
@@ -136,17 +137,17 @@ def update(request, pk):
             inventory.sales = float(inventory.cost_per_item) * float(inventory.quantity_sold)
             inventory.save()
             messages.success(request, "Update Successful")
-            return redirect(f"/inventory/per_product_view/{pk}/")
+            return redirect(f'/inventory/per_product_view/{pk}/')
     else:
         updateForm = InventoryUpdateForm(instance=inventory)
 
-    return render(request, "accounts/inventory_update.html", {'form' : updateForm})
+    return render(request, 'accounts/inventory_update.html', {'form' : updateForm})
 
 def delete(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
     inventory.delete()
     messages.success(request, "Inventory Deleted")
-    return redirect("/inventory/")
+    return redirect('/inventory/')
 
 def add_product(request):
     if request.method == "POST":
@@ -156,11 +157,11 @@ def add_product(request):
             new_invetory.sales = float(updateForm.data['cost_per_item']) * float(updateForm.data['quantity_sold'])
             new_invetory.save()
             messages.success(request, "Successfully Added Product")
-            return redirect(f"/inventory/")
+            return redirect(f'/inventory/')
     else:
         updateForm = AddInventoryForm()
 
-    return render(request, "accounts/inventory_add.html", {'form' : updateForm})
+    return render(request, 'accounts/inventory_add.html', {'form' : updateForm})
 
 def dashboard(request):
     inventories = Inventory.objects.all()
