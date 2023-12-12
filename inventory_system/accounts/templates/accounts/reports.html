@@ -1,7 +1,9 @@
 {% extends 'accounts/home.html' %}
 {% load static %}
+{% block title %}FarmFresh-Reports{% endblock %}
 
-<<<<<<< HEAD
+{% block content %}
+
     <div class="content-section">     
         <div class="row mx-auto justify-content-center">
     
@@ -47,12 +49,4 @@
         var graph4 = {{ best_performing_product_per_product | safe}};
         Plotly.plot("chart4", graph4,{});
     </script>
-=======
-
-{% block title %}FarmFresh-Reports{% endblock %}
-
-{% block content %}
->>>>>>> 9b38a08aa140c542a5da18db65c57915828dd294
-
-<p>Reports</p>
 {% endblock %}
