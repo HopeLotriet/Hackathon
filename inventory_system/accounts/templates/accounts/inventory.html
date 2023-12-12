@@ -1,4 +1,6 @@
+{% extends 'accounts/home.html' %}
 {% load static %}
+<<<<<<< HEAD
 <!DOCTYPE html>
 <html lang="en">
 <head meta charset="UTF-8">
@@ -99,7 +101,45 @@
     <footer>
         <p>&copy; 2023 FarmFresh - Your Fresh Produce Marketplace</p>
     </footer>
+=======
+>>>>>>> 9b38a08aa140c542a5da18db65c57915828dd294
 
 
-</body>
-</html>
+{% block title %}FarmFresh-Inventory{% endblock %}
+
+{% block content %}
+
+<div class="content-section">
+    <table class="table-table-striped table-bordered table-hover">
+        <thead class="thead-dark">
+            <tr>
+                <th scope="col">#</th>
+                <th scope="col">Name</th>
+                <th scope="col">Quantity In Stock</th>
+                <th scope="col">Quantity Sold</th>
+                <th scope="col">Cost Per Item</th>
+                <th scope="col">Sales or Revenue</th>
+                <th scope="col">Stock Date</th>
+                <th scope="col">Last Sales date</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for inventory in inventories %}
+            <tr style="cursor: pointer; cursor:hand;"
+                onclick="window.location = `{% url 'per_product' inventory.id %}`">
+                <th scope="row">{{ forloop.counter }}</th>
+                <th scope="row">{{ inventory.name }}</th>
+                <th scope="row">{{ inventory.quantity_in_stock }}</th>
+                <th scope="row">{{ inventory.quantity_sold }}</th>
+                <th scope="row">{{ inventory.cost_per_item }}</th>
+                <th scope="row">{{ inventory.sales }}</th>
+                <th scope="row">{{ inventory.stock_date }}</th>
+                <th scope="row">{{ inventory.last_sales_date }}</th>
+
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+{% endblock %}

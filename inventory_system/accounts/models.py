@@ -51,7 +51,11 @@ class CustomUser(AbstractUser):
 # # Add other models as needed (e.g., Customer, Invoice, etc.)
 
 class Inventory(models.Model):
+<<<<<<< HEAD
     name = models.CharField(max_length=100, null=False, blank=False)
+=======
+    Name = models.CharField(max_length=100, null=False, blank=False)
+>>>>>>> 9b38a08aa140c542a5da18db65c57915828dd294
     cost_per_item = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
     quantity_in_stock = models.IntegerField(null=False, blank=False)
     quantity_sold = models.IntegerField(null=False, blank=False)

@@ -1,4 +1,7 @@
-{% extends 'home.html' %}
+{% extends 'accounts/home.html' %}
+{% load static %}
+
+{% block title %}FarmFresh-OrderList{% endblock %}
 
 {% block content %}
   <h2>Order List</h2>
@@ -8,3 +11,6 @@
     {% endfor %}
   </ul>
 {% endblock %}
+
+
+
