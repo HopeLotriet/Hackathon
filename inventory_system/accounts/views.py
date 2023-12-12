@@ -117,7 +117,7 @@ def inventory(request):
     }
     return render(request, 'accounts/inventory.html', context=context)
 
-def per_product_view(request, pk):
+def per_product(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
     context = {
         "inventory" : inventory
@@ -213,7 +213,7 @@ def dashboard(request):
         "best_performing_product_per_product": best_performing_product_per_product
     }
 
-    return render(request,"accounts/dashboard.html", context=context)
+    return render(request,"accounts/reports.html", context=context)
 
 
 
