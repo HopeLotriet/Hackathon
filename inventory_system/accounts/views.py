@@ -130,18 +130,6 @@ def produce(request):
     }
     return render(request, 'accounts/produce.html', context)
 
-def fruits(request):
-    context = {}
-    return render(request, 'accounts/fruits.html', context)
-
-def vegetables(request):
-    context = {}
-    return render(request, 'accounts/vegetables.html', context)
-
-def herbs(request):
-    context = {}
-    return render(request, 'accounts/herbs.html', context)
-
 def productList(request):
     products = Product.objects.all()
     return render(request, 'accounts/product_list.html', {'products': products})

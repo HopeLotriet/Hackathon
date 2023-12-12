@@ -1,81 +1,10 @@
+{% extends 'accounts/home.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="stylesheet" type="text/css" href="{% static '/css/home.css' %}">
-    <link rel="stylesheet" type="text/css" href="{% static '/css/w3.css' %}">
-    <script src="{% static 'fontawesomefree/js/all.min.js' %}"></script>
- 
-    <title>FarmFresh</title>
-</head>
-<body>
-    <header>
-        <div class="logo">
-            <img src="{% static 'images/logo.jpeg' %}" alt="FarmFresh Logo">
-        </div>
-        <div class="header-content">
-            <h1>FarmFresh</h1>
-            <p>Your Fresh Produce Marketplace</p>
-        </div>
-        
-        <nav>
-            <a href="{% url 'home' %}" class="w3-bar-item w3-button">Home</a>
-            <div class="w3-dropdown-hover">
-                <a href="{% url 'products' %}" class="w3-button">Products<i class="fa fa-caret-down"></i></a>
-                <div class="w3-dropdown-content w3-bar-block w3-card-4">
-                    <a href="{% url 'produce' %}" class="w3-bar-item w3-button">Produce</a>
-                    <a href="{% url 'fruits' %}" class="w3-bar-item w3-button">Fruits</a>
-                    <a href="{% url 'vegetables' %}" class="w3-bar-item w3-button">Vegetables</a>
-                    <a href="{% url 'herbs' %}" class="w3-bar-item w3-button">Herbs</a>
-                </div>
-            </div>
-           
-            <div class="w3-dropdown-hover">
-                <a href="{% url 'inventory' %}" class="w3-button">Inventory<i class="fa fa-caret-down"></i></a>
-                <div class="w3-dropdown-content w3-bar-block w3-card-4">
-                    <a href="{% url 'productList' %}" class="w3-bar-item w3-button">Product List</a>
-                    <a href="{% url 'stock' %}" class="w3-bar-item w3-button">Stock List</a>
-                    <a href="{% url 'reports' %}" class="w3-bar-item w3-button">Reports</a>
-               </div>
-            </div>
-            
-
-            <a href="{% url 'marketing' %}" class="w3-bar-item w3-button">Marketing</a>
-            <a href="{% url 'invoicing' %}" class="w3-bar-item w3-button">Invoicing</a>
-            <div class="w3-button">
-                <a href="{% url 'profile' %}" class="w3-button">Profile<i class="fa fa-caret-down"></i></a>
-                <div class="w3-dropdown-content w3-bar-block w3-card-4">
-                 <a href="{% url 'about' %}" class="w3-bar-item w3-button">About Us</a>
-                    
-                </div>
-            </div>
-            
-
-            <!-- <div>
-                <input type="text" class="w3-bar-item w3-input" placeholder="Search"><a href="#" class="w3-bar-item w3-button w3-green">Go</a>
-            </div> -->
-
-            <div class="w3-bar-item w3-button"><i class="fa fa-user" aria-hidden="true"></i></div>
-            <!-- <div class="user-icon" onclick="toggleLoginRegister()">
-                <img src="{% static 'images/user.png' %}" alt="User Profile" width="40">
-            </div> -->
-        </nav>
-    </header>
-    <div class="w3-display-container w3-display-right w3-opacity">
-        <img src="{% static 'images/background.jpg' %}" alt="background">
-    </div>
 
 
+{% block title %}FarmFresh-Reports{% endblock %}
 
-  
+{% block content %}
 
-    <footer>
-        <p>&copy; 2023 FarmFresh - Your Fresh Produce Marketplace</p>
-    </footer>
-
-
-
-</body>
-</html>
+<p>Reports</p>
+{% endblock %}
