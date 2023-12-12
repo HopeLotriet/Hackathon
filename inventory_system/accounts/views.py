@@ -213,9 +213,7 @@ def dashboard(request):
         "best_performing_product_per_product": best_performing_product_per_product
     }
 
-    return render(request,"accounts/reports.html", context=context)
-
-
+    return render(request,"accounts/dashboard.html", context=context)
 
 def marketing(request):
     context = {}
