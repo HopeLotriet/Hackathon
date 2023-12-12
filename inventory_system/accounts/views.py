@@ -120,7 +120,7 @@ def inventory(request):
 def per_product(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
     context = {
-        "inventory" : inventory
+        'inventory' : inventory
     }
     return render(request, "accounts/per_product.html", context=context)
 
@@ -230,9 +230,7 @@ def profile(request):
     return render(request, 'accounts/profile.html', context)
 
 def produce(request):
-    context = {
-        
-    }
+    context = {}
     return render(request, 'accounts/produce.html', context)
 
 def productList(request):
