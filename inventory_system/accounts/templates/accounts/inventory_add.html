@@ -1,4 +1,12 @@
+{% extends 'accounts/home.html' %}
+{% load static %}
+
+{% block title %}FarmFresh-Inventory_Add{% endblock %}
+
 {% load crispy_forms_tags %} 
+
+{% block content %}
+
 <div class="content-section">
     {{ form.media }} 
     <form method="POST">
@@ -14,3 +22,5 @@
       </fieldset>
     </form>
 </div>
+
+{% endblock %}

@@ -1,6 +1,11 @@
+{% extends 'accounts/home.html' %}
+{% load static %}
+
 {% block title %}FarmFresh-Per_Product{% endblock %}
 
 {% block content %}
+
+
     <div class="content-section">
         <div class="row mx-auto justify-content-center">
 
@@ -41,9 +46,9 @@
                 <div class="card-body">
                     <h5 class="card-title text-center">Price Per {{ inventory.name }}</h5>
                     <div style="font-size: 30px;" class="text-center">
-                    <span><i class="fas fa-dollar-sign"></i>"></i></span>
+                    <span><i class="fas fa-dollar-sign"></i></i></span>
                 </div>
-                <h3 class="text-center">{{ inventory.price_per_item }}</h3>
+                <h3 class="text-center">{{ inventory.cost_per_item }}</h3>
                 </div>
             </div>
 
@@ -76,7 +81,7 @@
                     <div style="font-size: 30px;" class="text-center">
                     <span><i class="fas fa-calendar-alt"></i></span>
                 </div>
-                <h3 class="text-center">{{ inventory.last_ss_date }}</h3>
+                <h3 class="text-center">{{ inventory.last_sales_date }}</h3>
                 </div>
             </div>
 
