@@ -51,13 +51,13 @@ class CustomUser(AbstractUser):
 # # Add other models as needed (e.g., Customer, Invoice, etc.)
 
 class Inventory(models.Model):
-    Item = models.CharField(max_length=100, null=False, blank=False)
-    Cost_Per_Item = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
-    Quantity_In_Stock = models.IntegerField(null=False, blank=False)
-    Quantity_Sold = models.IntegerField(null=False, blank=False)
-    Sales = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
-    Stock_Date = models.DateField(auto_now_add=True)
-    Last_Sales_Date = models.DateField(auto_now=True)
+    name = models.CharField(max_length=100, null=False, blank=False)
+    cost_per_item = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
+    quantity_in_stock = models.IntegerField(null=False, blank=False)
+    quantity_sold = models.IntegerField(null=False, blank=False)
+    sales = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
+    stock_date = models.DateField(auto_now_add=True)
+    last_sales_date = models.DateField(auto_now=True)
 
     def __str__(self) -> str:
         return self.name

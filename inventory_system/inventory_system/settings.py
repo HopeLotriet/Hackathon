@@ -56,7 +56,8 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
-    'fontawesomefree'
+    'fontawesomefree',
+    'crispy_forms'
 ]
 
 MIDDLEWARE = [
@@ -71,10 +72,13 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'inventory_system.urls'
 
+CRISPY_TEMPLATE_PACK = 'bootstrap4'  # Use 'bootstrap4' or another template pack of your choice
+
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / "templates"],
+        'DIRS': [(os.path.join( BASE_DIR, 'templates' ))],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [

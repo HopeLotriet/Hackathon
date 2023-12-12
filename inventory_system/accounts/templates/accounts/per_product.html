@@ -1,8 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+<head meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{% static '/css/home.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static '/css/w3.css' %}">
@@ -28,9 +27,6 @@
                 <a href="{% url 'products' %}" class="w3-button">Products<i class="fa fa-caret-down"></i></a>
                 <div class="w3-dropdown-content w3-bar-block w3-card-4">
                     <a href="{% url 'produce' %}" class="w3-bar-item w3-button">Produce</a>
-                    <a href="{% url 'fruits' %}" class="w3-bar-item w3-button">Fruits</a>
-                    <a href="{% url 'vegetables' %}" class="w3-bar-item w3-button">Vegetables</a>
-                    <a href="{% url 'herbs' %}" class="w3-bar-item w3-button">Herbs</a>
                 </div>
             </div>
            
@@ -66,18 +62,88 @@
         </nav>
     </header>
    
-    <div class="content-section">
+    <div class="content-section">     
         <div class="row mx-auto justify-content-center">
-            <div class="card m-4" style="width: 18rem;">
-                <div class="card-body">
-                    <h5 class="cart-title text-center">Product Name</h5>
-                    <div style="font-size: 30px;" class="text-center">
-                    <span></span>
-                </div>
-                <h3 class="text-center">{{ inventory.name }}</h3>
-                </div>
+    
+          <div class="card m-4" style="width: 18rem;">
+            <div class="card-body">
+              <h5 class="card-title text-center">Product Name</h5>
+              <div style="font-size: 30px;" class="text-center">
+                <span><i class="fab fa-product-hunt"></i></span>
+              </div>
+              <h3 class="text-center">{{ inventory.name }}</h6>
             </div>
-        </div>
+          </div>
+    
+          <div class="card m-4" style="width: 18rem;">
+            <div class="card-body">
+              <h5 class="card-title text-center">Quantity In Stock</h5>
+              <div style="font-size: 30px;" class="text-center">
+                <span><i class="fas fa-warehouse"></i></span>
+              </div>
+              <h3 class="text-center">{{ inventory.quantity_in_stock }}</h6>
+            </div>
+          </div>
+    
+          <div class="card m-4" style="width: 18rem;">
+            <div class="card-body">
+              <h5 class="card-title text-center">Quantity Sold</h5>
+              <div style="font-size: 30px;" class="text-center">
+                <span><i class="fas fa-warehouse"></i></span>
+              </div>
+              <h3 class="text-center">{{ inventory.quantity_sold }}</h6>
+            </div>
+          </div>
+    
+          <div class="card m-4" style="width: 18rem;">
+            <div class="card-body">
+              <h5 class="card-title text-center">Price Per {{ inventory.name }}</h5>
+              <div style="font-size: 30px;" class="text-center">
+                <span><i class="fas fa-dollar-sign"></i></span>
+              </div>
+              <h3 class="text-center">{{ inventory.cost_per_item }}</h6>
+            </div>
+          </div>
+    
+          <div class="card m-4" style="width: 18rem;">
+            <div class="card-body">
+              <h5 class="card-title text-center">Sales Or Revenue</h5>
+              <div style="font-size: 30px;" class="text-center">
+                <span><i class="fas fa-dollar-sign"></i></span>
+              </div>
+              <h3 class="text-center">{{ inventory.sales }}</h6>
+            </div>
+          </div>
+    
+          <div class="card m-4" style="width: 18rem;">
+            <div class="card-body">
+              <h5 class="card-title text-center">Stock Date</h5>
+              <div style="font-size: 30px;" class="text-center">
+                <span><i class="fas fa-calendar-alt"></i></span>
+              </div>
+              <h3 class="text-center">{{ inventory.stock_date }}</h6>
+            </div>
+          </div>
+    
+          <div class="card m-4" style="width: 18rem;">
+            <div class="card-body">
+              <h5 class="card-title text-center">Last Sales Date</h5>
+              <div style="font-size: 30px;" class="text-center">
+                <span><i class="fas fa-calendar-alt"></i></span>
+              </div>
+              <h3 class="text-center">{{ inventory.last_sales_date }}</h6>
+            </div>
+          </div>
+    
+          <a href="{% url 'product_update' inventory.id %}" class="btn btn-outline-success btn-sm mb-2">Update</a>
+          <a href="{% url 'product_delete' inventory.id %}" class="btn btn-danger btn-sm mb-2">Delete</a>
+      </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
+    </div>
     </div>
 
     

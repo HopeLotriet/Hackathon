@@ -1,8 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
+<head meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" type="text/css" href="{% static '/css/home.css' %}">
     <link rel="stylesheet" type="text/css" href="{% static '/css/w3.css' %}">
@@ -28,9 +27,6 @@
                 <a href="{% url 'products' %}" class="w3-button">Products<i class="fa fa-caret-down"></i></a>
                 <div class="w3-dropdown-content w3-bar-block w3-card-4">
                     <a href="{% url 'produce' %}" class="w3-bar-item w3-button">Produce</a>
-                    <a href="{% url 'fruits' %}" class="w3-bar-item w3-button">Fruits</a>
-                    <a href="{% url 'vegetables' %}" class="w3-bar-item w3-button">Vegetables</a>
-                    <a href="{% url 'herbs' %}" class="w3-bar-item w3-button">Herbs</a>
                 </div>
             </div>
            
@@ -81,7 +77,7 @@
                     </tr>
             </thead>
             <tbody>
-                {% for inventory in inventories }
+                {% for inventory in inventories %}
                 <tr style="cursor: pointer; cursor:hand;">
                     <th scope="row">{{ forloop.counter }}</th>
                     <th scope="row">{{ inventory.name }}</th>
@@ -91,10 +87,10 @@
                     <th scope="row">{{ inventory.sales }}</th>
                     <th scope="row">{{ inventory.stock_date }}</th>
                     <th scope="row">{{ inventory.last_sales_date }}</th>
-
                 </tr>
                 {% endfor %}
             </tbody>
+            
         </table>
     </div>
 
