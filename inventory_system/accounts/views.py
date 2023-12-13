@@ -137,7 +137,7 @@ def update(request, pk):
             inventory.sales = float(inventory.cost_per_item) * float(inventory.quantity_sold)
             inventory.save()
             messages.success(request, "Update Successful")
-            return redirect(f"/inventory/per_product/{pk}/")
+            return redirect(f"/per_product/{pk}/")
     else:
         updateForm = InventoryUpdateForm(instance=inventory)
 
