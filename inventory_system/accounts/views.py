@@ -107,8 +107,12 @@ def signout(request):
 # function to send account activation to the user 
 
 def products(request):
-    context = {}
-    return render(request, 'accounts/products.html', context)
+    inventories = Inventory.objects.all()
+    context = {
+        "title": "Inventory List",
+        "inventories": inventories
+    }
+    return render(request, 'accounts/products.html', context=context)
 
 def stock(request):
     inventories = Inventory.objects.all()
