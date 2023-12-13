@@ -119,7 +119,7 @@ def stock(request):
     if low_stock_inventory.exists():
         # Display a message for each low stock item
         for item in low_stock_inventory:
-            messages.warning(request, f"Low stock alert: {item.name} - Quantity in stock: {item.quantity_in_stock}")
+            messages.warning(request, f"Low stock alert: {item.name} - quantity in stock: {item.quantity_in_stock}")
 
     context = {
         "title": "Inventory List",
