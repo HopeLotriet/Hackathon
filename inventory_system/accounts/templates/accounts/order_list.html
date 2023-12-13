@@ -25,6 +25,7 @@
         <td scope="row">{{ order.quantity_ordered }} units</td>
         <td scope="row">
             {{order.order_status}}
+            <a href="{% url 'update_order_status' order.id %}">Update Status</a>
     </td>
     </tr>
     {% endfor %}

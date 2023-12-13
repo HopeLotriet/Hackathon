@@ -2,9 +2,7 @@
 from django.urls import path, include
 from django.contrib import admin
 from . import views
-from .views import per_product, update, delete, add_product, dashboard, order_list
-
-
+from .views import per_product, update, delete, add_product, dashboard, order_list, create_order, update_order_status
 
 
 urlpatterns = [
@@ -25,4 +23,6 @@ urlpatterns = [
     path("dashboard/", views.dashboard, name="dashboard"),
     path('about/', views.about, name='about'),
     path('order_list', order_list, name='order_list'),
+    path('create order', create_order, name='create_order'),
+    path('update_order_status/<int:order_id>/', update_order_status, name='update_order_status'),
 ]

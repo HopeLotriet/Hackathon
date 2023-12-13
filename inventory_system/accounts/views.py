@@ -15,6 +15,8 @@ import plotly
 import plotly.express as px
 import json
 from django.conf import settings
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
 
 
 def home(request):
@@ -156,7 +158,7 @@ def delete(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
     inventory.delete()
     messages.success(request, "Inventory Deleted")
-    return redirect('/inventory/')
+    return redirect('/stock/')
 
 def add_product(request):
     if request.method == "POST":
@@ -166,7 +168,7 @@ def add_product(request):
             new_invetory.sales = float(updateForm.data['cost_per_item']) * float(updateForm.data['quantity_sold'])
             new_invetory.save()
             messages.success(request, "Successfully Added Product")
-            return redirect(f'/inventory/')
+            return redirect(f'/stock/')
     else:
         updateForm = AddInventoryForm()
 
@@ -268,10 +270,12 @@ def create_order(request):
             messages.error(request, "Invalid order form. Please check your inputs.")
     else:
         order_form = OrderForm()
+    return render(request, 'accounts/create_order.html', {'form': order_form})
 
 def update_order_status(request, order_id):
     order = Order.objects.get(id=order_id)
-    
+    name = order.customer
+
     if request.method == 'POST':
         form = UpdateStatusForm(request.POST)
         
@@ -279,12 +283,40 @@ def update_order_status(request, order_id):
             new_status = form.cleaned_data['new_status']
             order.order_status = new_status
             order.save()
-            
+
+            #generate update emails
+            status = ""
+            if new_status == "pending":
+                status = ' is currently being processed'
+            elif new_status == "shipped":
+                status = ' has been shipped'
+            else:
+                status = "is delivered"
+
+            email_body = f"""
+            Hello, {name}!
+
+            Thank you for placing your order with FarmFresh.
+
+            Please note that your order {status}.
+
+            Best regards,
+            FarmFresh
+            """
+        
+            email = send_mail(
+                'Order status update',
+                email_body,
+                'from@example.com',
+                #make it dynamic once registration is complete
+                ['amogelangmonnanyana@gmail.com']  
+                )
+                
             return redirect('order_list')
     else:
         form = UpdateStatusForm()
+
     return render(request, 'accounts/update_status.html', {'form': form, 'order': order})
-    
 
 
 #to be completed
