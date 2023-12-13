@@ -269,19 +269,21 @@ def create_order(request):
     else:
         order_form = OrderForm()
 
-#def update_order_status(request, order_id):
-#    order = Order.objects.get(id=order_id)
-#    if request.method == 'POST':
-#        form = UpdateStatusForm(request.POST)
-#        if form.is_valid():
-#            new_status = form.cleaned_data['new_status']
-#            order.order_status = new_status
-#            order.save()
-#            return redirect('order_list')
-#    else:
-#        form = UpdateStatusForm()
-#
-#    return render(request, 'accounts/update_status.html', {'form': form, 'order': order})
+def update_order_status(request, order_id):
+    order = Order.objects.get(id=order_id)
+    
+    if request.method == 'POST':
+        form = UpdateStatusForm(request.POST)
+        
+        if form.is_valid():
+            new_status = form.cleaned_data['new_status']
+            order.order_status = new_status
+            order.save()
+            
+            return redirect('order_list')
+    else:
+        form = UpdateStatusForm()
+    return render(request, 'accounts/update_status.html', {'form': form, 'order': order})
     
 
 
