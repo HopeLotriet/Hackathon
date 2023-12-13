@@ -150,3 +150,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #the settings.py must use the custom user model
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+LOW_QUANTITY = 5

@@ -1,5 +1,7 @@
+from django import forms
 from django.forms import ModelForm, ChoiceField, Select, Form
 from .models import Inventory, Order
+
 
 class InventoryUpdateForm(ModelForm):
     class Meta:
