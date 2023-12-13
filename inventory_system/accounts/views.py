@@ -239,7 +239,8 @@ def create_order(request):
         if order_form.is_valid():
             order = order_form.save(commit=False)
             product_name = order.product
-
+            name = order.customer
+            status = ' is currently being processed'
             try:
                 # Retrieve the product from the database based on the name
                 inventory = Inventory.objects.get(name=product_name)
@@ -251,6 +252,25 @@ def create_order(request):
                 ordered_quantity = order.quantity_ordered
                 inventory.quantity_in_stock = max(0, quantity_in_stock - ordered_quantity)
 
+                #Automated mail update
+                email_body = f"""
+                Hello, {name}!
+
+                Thank you for placing your order with FarmFresh.
+
+                Please note that your order {status}.
+
+                Best regards,
+                FarmFresh
+                """
+                email = send_mail(
+                    'Order status update',
+                    email_body,
+                    'from@example.com',
+                    #make it dynamic once registration is complete
+                    ['amogelangmonnanyana@gmail.com']  
+                    )
+                
                 # Save the updated inventory back to the database
                 inventory.save()
 
