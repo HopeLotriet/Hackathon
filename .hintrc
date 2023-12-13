@@ -5,6 +5,12 @@
   "hints": {
     "meta-viewport": "off",
     "no-inline-styles": "off",
-    "meta-charset-utf-8": "off"
+    "meta-charset-utf-8": "off",
+    "axe/structure": [
+      "default",
+      {
+        "list": "off"
+      }
+    ]
   }
 }
