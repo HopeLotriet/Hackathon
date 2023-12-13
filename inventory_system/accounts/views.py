@@ -20,7 +20,7 @@ import plotly
 import plotly.express as px
 # json
 import json
-import crispy_bootstrap4
+from django.conf import settings
 
 
 def home(request):
@@ -110,13 +110,24 @@ def products(request):
     context = {}
     return render(request, 'accounts/products.html', context)
 
-def inventory(request):
+def stock(request):
     inventories = Inventory.objects.all()
+
+      # Check for low stock items
+    low_stock_inventory = inventories.filter(quantity_in_stock__lte=LOW_QUANTITY)
+
+    if low_stock_inventory.exists():
+        # Display a message for each low stock item
+        for item in low_stock_inventory:
+            messages.warning(request, f"Low stock alert: {item.name} - Quantity in stock: {item.quantity_in_stock}")
+
     context = {
-        "title" : "Inventory List",
+        "title": "Inventory List",
         "inventories": inventories
-    }
-    return render(request, 'accounts/inventory.html', context=context)
+     }
+    return render(request, 'accounts/stock.html', context=context)
+
+LOW_QUANTITY = getattr(settings, 'LOW_QUANTITY', 5)
 
 def per_product(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
@@ -137,7 +148,7 @@ def update(request, pk):
             inventory.sales = float(inventory.cost_per_item) * float(inventory.quantity_sold)
             inventory.save()
             messages.success(request, "Update Successful")
-            return redirect(f"/inventory/per_product/{pk}/")
+            return redirect(f"/per_product/{pk}/")
     else:
         updateForm = InventoryUpdateForm(instance=inventory)
 
@@ -267,9 +278,6 @@ def profile(request):
     context = {}
     return render(request, 'accounts/profile.html', context)
 
-def stock(request):
-    context = {}
-    return render(request, 'accounts/stock.html', context)
 
 def reports(request):
     context = {}
