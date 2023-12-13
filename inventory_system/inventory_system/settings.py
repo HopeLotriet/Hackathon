@@ -17,7 +17,7 @@ import os
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-
+EMAIL_BACKEND =
 EMAIL_USE_TLS = True
 EMAIL_HOST = True
 EMAIL_HOST_USER = True
@@ -56,12 +56,7 @@ INSTALLED_APPS = [
     'accounts',
     'fontawesomefree',
     'crispy_forms',
-<<<<<<< HEAD
     'crispy_bootstrap4',
-=======
-    'crispy_bootstrap4'
-    
->>>>>>> 52f785cf8b19568bb6a60e41ea82d08916b585a7
 ]
 
 MIDDLEWARE = [

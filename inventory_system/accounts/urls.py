@@ -2,8 +2,8 @@
 from django.urls import path, include
 from django.contrib import admin
 from . import views
-from .views import inventory, per_product, update, delete, add_product, dashboard, order_list
-from .views import per_product, update, delete, add_product, dashboard, order_list, create_order, update_order_status, order_homepage
+from .views import per_product, update, delete, add_product, dashboard, order_list
+
 
 
 

@@ -47,7 +47,7 @@
                                 data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Order management</a>
                             <div class="dropdown-menu" aria-labelledby="orderDropdown">
                                 <a href="{% url 'order_list' %}" class="dropdown-item">Order List</a>
-                                <a href="{% url 'create_order' %}" class="dropdown-item">Create Order</a>
+                               
                             </div>
                         </li>
 
@@ -68,34 +68,6 @@
                 </div>
             </nav>
         </div>
-<<<<<<< HEAD
-        <div class="header-content">
-            <h1>FarmFresh</h1>
-            <p>Your Fresh Produce Marketplace</p>
-        </div>
-
-        <nav>
-            <a href="{% url 'home' %}" class="w3-bar-item w3-button">Home</a>
-            
-            <a href="{% url 'products' %}" class="w3-bar-item w3-button">Products</a>
-            <a href="{% url 'inventory' %}" class="w3-bar-item w3-button">Inventory</a>
-            <a href="{% url 'order_list' %}" class="w3-bar-item w3-button">Order management</a>
-            <a href="{% url 'dashboard' %}" class="w3-bar-item w3-button">Reports</a>
-            <a href="{% url 'marketing' %}" class="w3-bar-item w3-button">Marketing</a>
-            <a href="{% url 'invoicing' %}" class="w3-bar-item w3-button">Invoicing</a>
-            <div class="w3-button">
-                <a href="{% url 'profile' %}" class="w3-button">Profile<i class="fa fa-caret-down"></i></a>
-                <div class="w3-dropdown-content w3-bar-block w3-card-4">
-                    <a href="{% url 'about' %}" class="w3-bar-item w3-button">About Us</a>
-
-                </div>
-            </div>
-
-            <div class="w3-bar-item w3-button"><i class="fa fa-user" aria-hidden="true"></i></div>
-
-        </nav>
-=======
->>>>>>> 6b1863980e13eec6e565c729c2e004ab4705133b
     </header>
 
     {% block content %}
