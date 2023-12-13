@@ -5,20 +5,14 @@ from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
-# from .models import Product
 from .models import Inventory, Order
+from .models import Inventory
 from django.shortcuts import get_object_or_404
-
-#Update form import
 from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm
-# flash messages
 from django.contrib import messages
-# dataframe
 from django_pandas.io import read_frame
-# plotly
 import plotly
 import plotly.express as px
-# json
 import json
 from django.conf import settings
 
@@ -242,8 +236,35 @@ def create_order(request):
     if request.method == 'POST':
         order_form = OrderForm(request.POST)
         if order_form.is_valid():
-            order_form.save()
-            return redirect('order_list')
+            order = order_form.save(commit=False)
+            product_name = order.product
+
+            try:
+                # Retrieve the product from the database based on the name
+                inventory = Inventory.objects.get(name=product_name)
+
+                # Retrieve the current quantity in stock
+                quantity_in_stock = inventory.quantity_in_stock
+
+                # Subtract the ordered quantity from the quantity in stock
+                ordered_quantity = order.quantity_ordered
+                inventory.quantity_in_stock = max(0, quantity_in_stock - ordered_quantity)
+
+                # Save the updated inventory back to the database
+                inventory.save()
+
+                # Now save the order with the updated inventory quantity in stock
+                order.save()
+
+                # Add a success message to be displayed to the user
+                messages.success(request, "Order created successfully.")
+
+                return redirect('order_list')
+
+            except Inventory.DoesNotExist:
+                messages.error(request, f"Product '{product_name}' not found in inventory.")
+        else:
+            messages.error(request, "Invalid order form. Please check your inputs.")
     else:
         order_form = OrderForm()
 
