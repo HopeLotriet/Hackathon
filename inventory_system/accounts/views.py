@@ -17,6 +17,8 @@ import json
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
+from .models import Invoice
+from .forms import InvoiceForm
 
 
 def home(request):
@@ -368,3 +370,54 @@ def is_farmer(user):
 def farmer_dashboard(request):
     # Your farmer-specific view logic
     return render(request, 'accounts/farmer_dashboard.html')
+
+def invoicing(request):
+    invoices = Invoice.objects.all()
+
+    context = {
+        'invoices': invoices,
+    }
+
+    return render(request, 'accounts/invoicing.html', context)
+
+def create_invoice(request):
+    if request.method == 'POST':
+        form = InvoiceForm(request.POST)
+        if form.is_valid():
+            invoice = form.save()
+            return redirect('invoice_detail', pk=invoice.pk)
+    else:
+        form = InvoiceForm()
+
+    context = {'form': form}
+    return render(request, 'accounts/create_invoice.html', context)
+
+def invoice_detail(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+    context = {'invoice': invoice}
+    return render(request, 'accounts/invoice_detail.html', context)
+
+def edit_invoice(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+
+    if request.method == 'POST':
+        form = InvoiceForm(request.POST, instance=invoice)
+        if form.is_valid():
+            form.save()
+            return redirect('invoice_detail', pk=pk)
+    else:
+        form = InvoiceForm(instance=invoice)
+
+    context = {'form': form, 'invoice': invoice}
+    return render(request, 'accounts/edit_invoice.html', context)
+
+def delete_invoice(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+    invoice.delete()
+    return redirect('invoicing')
+
+def mark_invoice_as_paid(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+    invoice.payment_status = 'paid'
+    invoice.save()
+    return redirect('invoice_detail', pk=pk)

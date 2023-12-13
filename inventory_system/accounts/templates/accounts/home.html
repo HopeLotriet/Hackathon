@@ -19,6 +19,11 @@
 </head>
 
 <style>
+
+    body {
+        overflow:visible;
+    }
+
     .custom-text-size {
         font-size: 20px;
     }
@@ -72,14 +77,20 @@
                                 management</a>
                             <div class="dropdown-menu" aria-labelledby="orderDropdown">
                                 <a href="{% url 'order_list' %}" class="dropdown-item">Order List</a>
-                                <a href="{% url 'create_order' %}" class="dropdown-item">create_order</a>
+                                <a href="{% url 'create_order' %}" class="dropdown-item">Create_order</a>
                             </div>
                         </li>
 
                         <li class="nav-item"><a href="{% url 'marketing' %}"
                                 class="nav-link custom-text-size">Marketing</a></li>
-                        <li class="nav-item"><a href="{% url 'invoicing' %}"
-                                class="nav-link custom-text-size">Invoicing</a></li>
+                                <li class="nav-item dropdown">
+                                    <a class="nav-link dropdown-toggle custom-text-size" href="#" id="orderDropdown"
+                                        role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Invoicing</a>
+                                    <div class="dropdown-menu" aria-labelledby="orderDropdown">
+                                        <a href="{% url 'invoicing' %}" class="dropdown-item">Invoice</a>
+                                        <a href="{% url 'create_invoice' %}" class="dropdown-item">Create Invoice</a>
+                                    </div>
+                                </li>
 
                                 <li class="nav-item"><a href="{% url 'profile' %}"
                                     class="nav-link custom-text-size">Profile</a></li>

@@ -3,6 +3,7 @@ from django.urls import path, include
 from django.contrib import admin
 from . import views
 from .views import per_product, update, delete, add_product, dashboard, order_list, create_order, update_order_status
+from .views import invoicing, create_invoice, invoice_detail, edit_invoice, delete_invoice, mark_invoice_as_paid
 
 
 urlpatterns = [
@@ -18,6 +19,11 @@ urlpatterns = [
     path("reports/", views.reports, name="dashboard"),
     path('marketing/', views.marketing, name='marketing'),
     path('invoicing/', views.invoicing, name='invoicing'),
+    path('create_invoice/', create_invoice, name='create_invoice'),
+    path('invoice/<int:pk>/', invoice_detail, name='invoice_detail'),
+    path('edit_invoice/<int:pk>/', edit_invoice, name='edit_invoice'),
+    path('delete_invoice/<int:pk>/', delete_invoice, name='delete_invoice'),
+    path('mark_as_paid/<int:pk>/', mark_invoice_as_paid, name='mark_invoice_as_paid'),
     path('profile/', views.profile, name='profile'),
     path('stock/', views.stock, name='stock'),
     path("dashboard/", views.dashboard, name="dashboard"),
