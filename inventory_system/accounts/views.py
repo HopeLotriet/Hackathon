@@ -227,8 +227,6 @@ def dashboard(request):
 
     return render(request,"accounts/dashboard.html", context=context)
 
-
-
 #Order management
 def order_list(request):
     order_lists = Order.objects.all()
@@ -261,16 +259,18 @@ def create_order(request):
 
                 # Add a success message to be displayed to the user
                 messages.success(request, "Order created successfully.")
-
                 return redirect('order_list')
 
             except Inventory.DoesNotExist:
                 messages.error(request, f"Product '{product_name}' not found in inventory.")
         else:
             messages.error(request, "Invalid order form. Please check your inputs.")
+
     else:
         order_form = OrderForm()
     return render(request, 'accounts/create_order.html', {'form': order_form})
+
+    return render(request, 'accounts/create_order.html', {'form': order_form, 'messages': messages.get_messages(request)})
 
 def update_order_status(request, order_id):
     order = Order.objects.get(id=order_id)

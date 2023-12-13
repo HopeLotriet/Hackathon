@@ -22,6 +22,7 @@ urlpatterns = [
     path('stock/', views.stock, name='stock'),
     path("dashboard/", views.dashboard, name="dashboard"),
     path('about/', views.about, name='about'),
+    path('create_order/', views.create_order, name='create_order'),
     path('order_list', order_list, name='order_list'),
     path('create order', create_order, name='create_order'),
     path('update_order_status/<int:order_id>/', update_order_status, name='update_order_status'),
