@@ -5,20 +5,14 @@ from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
-# from .models import Product
 from .models import Inventory, Order
+from .models import Inventory
 from django.shortcuts import get_object_or_404
-
-#Update form import
 from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm
-# flash messages
 from django.contrib import messages
-# dataframe
 from django_pandas.io import read_frame
-# plotly
 import plotly
 import plotly.express as px
-# json
 import json
 from django.conf import settings
 
@@ -239,30 +233,57 @@ def order_list(request):
     print(order_lists)
     return render(request, 'accounts/order_list.html', {'orders': order_lists})
 
-#def create_order(request):
-#    if request.method == 'POST':
-#        order_form = OrderForm(request.POST)
-#        if order_form.is_valid():
-#            order_form.save()
-#            return redirect('order_list')
-#    else:
-#        order_form = OrderForm()
-#
-#    return render(request, 'accounts/create_order.html', {'form': order_form})
+def create_order(request):
+    if request.method == 'POST':
+        order_form = OrderForm(request.POST)
+        if order_form.is_valid():
+            order = order_form.save(commit=False)
+            product_name = order.product
 
-#def update_order_status(request, order_id):
-#    order = Order.objects.get(id=order_id)
-#    if request.method == 'POST':
-#        form = UpdateStatusForm(request.POST)
-#        if form.is_valid():
-#            new_status = form.cleaned_data['new_status']
-#            order.order_status = new_status
-#            order.save()
-#            return redirect('order_list')
-#    else:
-#        form = UpdateStatusForm()
-#
-#    return render(request, 'accounts/update_status.html', {'form': form, 'order': order})
+            try:
+                # Retrieve the product from the database based on the name
+                inventory = Inventory.objects.get(name=product_name)
+
+                # Retrieve the current quantity in stock
+                quantity_in_stock = inventory.quantity_in_stock
+
+                # Subtract the ordered quantity from the quantity in stock
+                ordered_quantity = order.quantity_ordered
+                inventory.quantity_in_stock = max(0, quantity_in_stock - ordered_quantity)
+
+                # Save the updated inventory back to the database
+                inventory.save()
+
+                # Now save the order with the updated inventory quantity in stock
+                order.save()
+
+                # Add a success message to be displayed to the user
+                messages.success(request, "Order created successfully.")
+
+                return redirect('order_list')
+
+            except Inventory.DoesNotExist:
+                messages.error(request, f"Product '{product_name}' not found in inventory.")
+        else:
+            messages.error(request, "Invalid order form. Please check your inputs.")
+    else:
+        order_form = OrderForm()
+
+def update_order_status(request, order_id):
+    order = Order.objects.get(id=order_id)
+    
+    if request.method == 'POST':
+        form = UpdateStatusForm(request.POST)
+        
+        if form.is_valid():
+            new_status = form.cleaned_data['new_status']
+            order.order_status = new_status
+            order.save()
+            
+            return redirect('order_list')
+    else:
+        form = UpdateStatusForm()
+    return render(request, 'accounts/update_status.html', {'form': form, 'order': order})
     
 
 
