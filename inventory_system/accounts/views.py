@@ -267,14 +267,6 @@ def profile(request):
     context = {}
     return render(request, 'accounts/profile.html', context)
 
-def produce(request):
-    context = {}
-    return render(request, 'accounts/produce.html', context)
-
-def productList(request):
-    products = Product.objects.all()
-    return render(request, 'accounts/product_list.html', {'products': products})
-
 def stock(request):
     context = {}
     return render(request, 'accounts/stock.html', context)

@@ -26,17 +26,13 @@
 
         <nav>
             <a href="{% url 'home' %}" class="w3-bar-item w3-button">Home</a>
-            <div class="w3-dropdown-hover">
-                <a href="{% url 'products' %}" class="w3-button">Products<i class="fa fa-caret-down"></i></a>
-                <div class="w3-dropdown-content w3-bar-block w3-card-4">
-                    <a href="{% url 'produce' %}" class="w3-bar-item w3-button">Produce</a>
-                </div>
-            </div>
+            
+            <a href="{% url 'products' %}" class="w3-bar-item w3-button">Products</a>
+                
 
             <div class="w3-dropdown-hover">
                 <a href="{% url 'inventory' %}" class="w3-button">Inventory<i class="fa fa-caret-down"></i></a>
                 <div class="w3-dropdown-content w3-bar-block w3-card-4">
-                    <a href="{% url 'productList' %}" class="w3-bar-item w3-button">Product List</a>
                     <a href="{% url 'stock' %}" class="w3-bar-item w3-button">Stock List</a>
                     <a href="{% url 'dashboard' %}" class="w3-bar-item w3-button">Reports</a>
                 </div>
@@ -67,18 +63,16 @@
     </header>
 
 
-
+{% block content %}
     <main class="container">
-        {% block content %}
         <div class="text-transition">
             <p class="text1">Welcome to FarmFresh!</p>
             <p class="text2">Discover the freshest fruits and vegetables directly from local farmers.</p>
             <p class="text3">Explore our wide range of produce and enjoy the taste of farm-to-table goodness.</p>
             <p class="text4">Register now to start buying or selling your fresh produce!</p>
         </div>
-        {% endblock %}
     </main>
-
+ {% endblock %}
 
 
     <footer>
