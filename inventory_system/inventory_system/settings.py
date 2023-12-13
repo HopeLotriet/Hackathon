@@ -55,7 +55,13 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'fontawesomefree',
-    'crispy_forms'
+    'crispy_forms',
+<<<<<<< HEAD
+    'crispy_bootstrap4',
+=======
+    'crispy_bootstrap4'
+    
+>>>>>>> 52f785cf8b19568bb6a60e41ea82d08916b585a7
 ]
 
 MIDDLEWARE = [
@@ -148,3 +154,5 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 #the settings.py must use the custom user model
 
 AUTH_USER_MODEL = 'accounts.CustomUser'
+
+LOW_QUANTITY = 5

@@ -3,6 +3,7 @@ from django.urls import path, include
 from django.contrib import admin
 from . import views
 from .views import inventory, per_product, update, delete, add_product, dashboard, order_list
+from .views import per_product, update, delete, add_product, dashboard, order_list, create_order, update_order_status, order_homepage
 
 
 
@@ -12,7 +13,6 @@ urlpatterns = [
     path('signin/', views.signin, name='signin'),
     path('signout/', views.signout, name='signout'),
     path('products/', views.products, name='products'),
-    path('inventory/', views.inventory, name='inventory'),
     path('per_product/<int:pk>/', views.per_product, name='per_product'),
     path("product_update/<int:pk>/", views.update, name="product_update"),
     path("delete/<int:pk>/", views.delete, name="product_delete"),

@@ -32,7 +32,7 @@
 
             <div class="card m-4" style="width: 18rem;">
                 <div class="card-body">
-                    <h5 class="card-title text-center">Quantity SOld</h5>
+                    <h5 class="card-title text-center">Quantity Sold</h5>
                     <div style="font-size: 30px;" class="text-center">
                     <span><i class="fas fa-warehouse"></i></span>
                 </div>
@@ -84,8 +84,8 @@
                 </div>
             </div>
 
-      <a href="{% url 'product_update' inventory.id %}" class="btn btn-outline-success btn-sm mb-2">Update</a>
-      <a href="{% url 'product_delete' inventory.id %}" class="btn btn-danger btn-sm mb-2">Delete</a>
+            <a href="{% if inventory.id %}{% url 'product_update' inventory.id %}{% endif %}" class="btn btn-outline-success btn-sm mb-2">Update</a>
+            <a href="{% if inventory.id %}{% url 'product_delete' inventory.id %}{% endif %}" class="btn btn-danger btn-sm mb-2">Delete</a>            
   </div>
 </div>
 {% endblock %}
