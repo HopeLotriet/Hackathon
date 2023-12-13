@@ -268,8 +268,7 @@ def create_order(request):
 
     else:
         order_form = OrderForm()
-    return render(request, 'accounts/create_order.html', {'form': order_form})
-
+    
     return render(request, 'accounts/create_order.html', {'form': order_form, 'messages': messages.get_messages(request)})
 
 def update_order_status(request, order_id):
