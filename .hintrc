@@ -11,6 +11,12 @@
       {
         "list": "off"
       }
+    ],
+    "axe/text-alternatives": [
+      "default",
+      {
+        "document-title": "off"
+      }
     ]
   }
 }

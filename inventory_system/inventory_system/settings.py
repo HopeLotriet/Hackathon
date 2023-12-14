@@ -151,3 +151,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 AUTH_USER_MODEL = 'accounts.CustomUser'
 
 LOW_QUANTITY = 5
+
+# login redirect path settings
+LOGIN_REDIRECT_URL = '/accounts'
+LOGIN_URL = 'login'
