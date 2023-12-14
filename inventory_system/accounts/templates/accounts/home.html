@@ -71,8 +71,6 @@
                         <li class="nav-item"><a href="{% url 'products' %}"
                                 class="nav-link custom-text-size">Products</a></li>
 
-                        <li class="nav-item"><a href="{% url 'products' %}"
-                                class="nav-link custom-text-size">Products</a></li>
                         {% if request.user.is_authenticated and request.user.is_staff %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle custom-text-size" href="#" id="inventoryDropdown"
@@ -82,9 +80,8 @@
                                 <a href="{% url 'stock' %}" class="dropdown-item">Stock List</a>
                                 <a href="{% url 'dashboard' %}" class="dropdown-item">Reports</a>
                             </div>
-                        </li>
-                       
-
+                        </li>               
+                        {% endif %}
 
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle custom-text-size" href="#" id="orderDropdown"
@@ -121,7 +118,7 @@
 
                             </div>
                         </li>
-                        {% endif %}
+                        
                     </ul>
                 </div>
             </nav>

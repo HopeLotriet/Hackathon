@@ -313,18 +313,21 @@ def create_order(request):
     return render(request, 'accounts/create_order.html', {'form': order_form, 'messages': messages.get_messages(request)})
 
 def update_order_status(request, order_id):
-        order = Order.objects.get(id=order_id)
-        name = order.customer
-
-        if request.method == 'POST':
-            form = UpdateStatusForm(request.POST)
+    order = Order.objects.get(id=order_id)
+    name = order.customer
+    
+    if request.method == 'POST':
+        form = UpdateStatusForm(request.POST)
+                
+        if form.is_valid():
+            current_status = order.order_status
             
-            if form.is_valid():
+            if current_status != 'Order canceled':
                 new_status = form.cleaned_data['new_status']
                 order.order_status = new_status
                 order.save()
 
-                #generate update emails
+                # Generate update emails
                 status = ""
                 if new_status == "pending":
                     status = ' is currently being processed'
@@ -343,20 +346,22 @@ def update_order_status(request, order_id):
                 Best regards,
                 FarmFresh
                 """
-            
+                    
                 email = send_mail(
                     'Order status update',
                     email_body,
                     'from@example.com',
-                    #make it dynamic once registration is complete
-                    ['amogelangmonnanyana@gmail.com']  
-                    )
-                    
-                return redirect('order_list')
-        else:
-            form = UpdateStatusForm()
+                    # Make it dynamic once registration is complete
+                    ['amogelangmonnanyana@gmail.com']
+                )
 
-        return render(request, 'accounts/update_status.html', {'form': form, 'order': order})
+            # Redirect in both cases
+            return redirect('order_list')
+            
+    else:
+        form = UpdateStatusForm()
+
+    return render(request, 'accounts/update_status.html', {'form': form, 'order': order})
 
 def order_history(request):
     previous_orders = []
@@ -371,20 +376,27 @@ def order_history(request):
 
     return render(request, 'accounts/order_history.html', {'form':form ,'orders': previous_orders})
 
+
+
 def return_order(request, order_id):
-    if order_history:
-        returning_order = get_object_or_404(Order, id=order_id)
+    current_order = get_object_or_404(Order, id=order_id)
+    if current_order.order_status != "Order canceled":
 
-        product_name = returning_order.product
-        inventory = get_object_or_404(Inventory, name=product_name)
+        if order_history:
+            returning_order = get_object_or_404(Order, id=order_id)
 
-        quantity_in_stock = inventory.quantity_in_stock
-        returning_quantity = returning_order.quantity_ordered
-        inventory.quantity_in_stock = max(0, quantity_in_stock + returning_quantity)
-        inventory.save()  # Save the updated inventory
+            product_name = returning_order.product
+            inventory = get_object_or_404(Inventory, name=product_name)
 
-        returning_order.order_status = "Order canceled"
-        returning_order.save()
+            quantity_in_stock = inventory.quantity_in_stock
+            returning_quantity = returning_order.quantity_ordered
+            inventory.quantity_in_stock = max(0, quantity_in_stock + returning_quantity)
+            inventory.save()  # Save the updated inventory
+
+            returning_order.order_status = "Order canceled"
+            returning_order.save()
+    else:
+        pass
 
     return redirect('order_history')
 
