@@ -1,0 +1,47 @@
+{% extends 'accounts/home.html' %}
+{% load static %}
+
+{% block title %}FarmFresh - Invoicing{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5">
+    <h1 class="text-center mb-4">Invoice Details</h1>
+
+    <div class="row">
+        <div class="col-md-6">
+            <p><strong>Invoice Number:</strong> {{ invoice.pk }}</p>
+            <p><strong>Total Amount:</strong> {{ invoice.total_amount }}</p>
+            <p><strong>Billing Name:</strong> {{ invoice.billing_name }}</p>
+            <p><strong>Billing Address:</strong> {{ invoice.billing_address }}</p>
+            <p><strong>Billing Email:</strong> {{ invoice.billing_email }}</p>
+        </div>
+
+        <div class="col-md-6">
+            <p><strong>Payment Status:</strong> {{ invoice.payment_status }}</p>
+            <p><strong>Payment Method:</strong> {{ invoice.payment_method }}</p>
+            <p><strong>Payment Due Date:</strong> {{ invoice.payment_due_date }}</p>
+            <p><strong>Notes:</strong> {{ invoice.notes }}</p>
+            <p><strong>Status:</strong> {{ invoice.status }}</p>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-6">
+            <p><strong>Discount Amount:</strong> {{ invoice.discount_amount }}</p>
+            <p><strong>Tax Amount:</strong> {{ invoice.tax_amount }}</p>
+        </div>
+
+        <div class="col-md-6">
+            <!-- Link to PDF Document (if available) -->
+            {% if invoice.pdf_document %}
+            <p><strong>PDF Document:</strong> <a href="{{ invoice.pdf_document.url }}" target="_blank">View PDF</a></p>
+            {% endif %}
+        </div>
+    </div>
+
+    <!-- Back to Invoicing link -->
+    <p class="mt-3"><a href="{% url 'invoicing' %}" class="btn btn-secondary">Back to Invoicing</a></p>
+</div>
+
+{% endblock %}

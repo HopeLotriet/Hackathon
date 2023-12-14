@@ -8,13 +8,17 @@ from django.contrib import messages
 from .models import Inventory, Order
 from .models import Inventory
 from django.shortcuts import get_object_or_404
-from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm
+from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm
 from django.contrib import messages
 from django_pandas.io import read_frame
 import plotly
 import plotly.express as px
 import json
 from django.conf import settings
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from .models import Invoice
+from .forms import InvoiceForm
 
 
 def home(request):
@@ -156,7 +160,7 @@ def delete(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
     inventory.delete()
     messages.success(request, "Inventory Deleted")
-    return redirect('/inventory/')
+    return redirect('/stock/')
 
 def add_product(request):
     if request.method == "POST":
@@ -166,7 +170,7 @@ def add_product(request):
             new_invetory.sales = float(updateForm.data['cost_per_item']) * float(updateForm.data['quantity_sold'])
             new_invetory.save()
             messages.success(request, "Successfully Added Product")
-            return redirect(f'/inventory/')
+            return redirect(f'/stock/')
     else:
         updateForm = AddInventoryForm()
 
@@ -237,6 +241,8 @@ def create_order(request):
         if order_form.is_valid():
             order = order_form.save(commit=False)
             product_name = order.product
+            name = order.customer
+            status = ' is currently being processed'
 
             try:
                 # Retrieve the product from the database based on the name
@@ -249,6 +255,25 @@ def create_order(request):
                 ordered_quantity = order.quantity_ordered
                 inventory.quantity_in_stock = max(0, quantity_in_stock - ordered_quantity)
 
+                #Automated mail update
+                email_body = f"""
+                Hello, {name}!
+
+                Thank you for placing your order with FarmFresh.
+
+                Please note that your order {status}.
+
+                Best regards,
+                FarmFresh
+                """
+                email = send_mail(
+                    'Order status update',
+                    email_body,
+                    'from@example.com',
+                    #make it dynamic once registration is complete
+                    ['amogelangmonnanyana@gmail.com']  
+                    )
+                
                 # Save the updated inventory back to the database
                 inventory.save()
 
@@ -266,25 +291,85 @@ def create_order(request):
 
     else:
         order_form = OrderForm()
-
+    
     return render(request, 'accounts/create_order.html', {'form': order_form, 'messages': messages.get_messages(request)})
 
 def update_order_status(request, order_id):
-    order = Order.objects.get(id=order_id)
-    
-    if request.method == 'POST':
-        form = UpdateStatusForm(request.POST)
-        
-        if form.is_valid():
-            new_status = form.cleaned_data['new_status']
-            order.order_status = new_status
-            order.save()
+        order = Order.objects.get(id=order_id)
+        name = order.customer
+
+        if request.method == 'POST':
+            form = UpdateStatusForm(request.POST)
             
-            return redirect('order_list')
+            if form.is_valid():
+                new_status = form.cleaned_data['new_status']
+                order.order_status = new_status
+                order.save()
+
+                #generate update emails
+                status = ""
+                if new_status == "pending":
+                    status = ' is currently being processed'
+                elif new_status == "shipped":
+                    status = ' has been shipped'
+                else:
+                    status = "is delivered"
+
+                email_body = f"""
+                Hello, {name}!
+
+                Thank you for placing your order with FarmFresh.
+
+                Please note that your order {status}.
+
+                Best regards,
+                FarmFresh
+                """
+            
+                email = send_mail(
+                    'Order status update',
+                    email_body,
+                    'from@example.com',
+                    #make it dynamic once registration is complete
+                    ['amogelangmonnanyana@gmail.com']  
+                    )
+                    
+                return redirect('order_list')
+        else:
+            form = UpdateStatusForm()
+
+        return render(request, 'accounts/update_status.html', {'form': form, 'order': order})
+
+def order_history(request):
+    previous_orders = []
+    if request.method == 'POST':
+        form = UserInputForm(request.POST)
+        if form.is_valid():
+            # Do something with the user input, for example, save it to the database
+            user_name = form.cleaned_data['user_input']
+            previous_orders = Order.objects.filter(customer=user_name)
     else:
-        form = UpdateStatusForm()
-    return render(request, 'accounts/update_status.html', {'form': form, 'order': order})
-    
+        form = UserInputForm()
+
+    return render(request, 'accounts/order_history.html', {'form':form ,'orders': previous_orders})
+
+def return_order(request, order_id):
+    if order_history:
+        returning_order = get_object_or_404(Order, id=order_id)
+
+        product_name = returning_order.product
+        inventory = get_object_or_404(Inventory, name=product_name)
+
+        quantity_in_stock = inventory.quantity_in_stock
+        returning_quantity = returning_order.quantity_ordered
+        inventory.quantity_in_stock = max(0, quantity_in_stock + returning_quantity)
+        inventory.save()  # Save the updated inventory
+
+        returning_order.order_status = "Order canceled"
+        returning_order.save()
+
+    return redirect('order_history')
+
 
 
 #to be completed
@@ -317,3 +402,54 @@ def is_farmer(user):
 def farmer_dashboard(request):
     # Your farmer-specific view logic
     return render(request, 'accounts/farmer_dashboard.html')
+
+def invoicing(request):
+    invoices = Invoice.objects.all()
+
+    context = {
+        'invoices': invoices,
+    }
+
+    return render(request, 'accounts/invoicing.html', context)
+
+def create_invoice(request):
+    if request.method == 'POST':
+        form = InvoiceForm(request.POST)
+        if form.is_valid():
+            invoice = form.save()
+            return redirect('invoice_detail', pk=invoice.pk)
+    else:
+        form = InvoiceForm()
+
+    context = {'form': form}
+    return render(request, 'accounts/create_invoice.html', context)
+
+def invoice_detail(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+    context = {'invoice': invoice}
+    return render(request, 'accounts/invoice_detail.html', context)
+
+def edit_invoice(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+
+    if request.method == 'POST':
+        form = InvoiceForm(request.POST, instance=invoice)
+        if form.is_valid():
+            form.save()
+            return redirect('invoice_detail', pk=pk)
+    else:
+        form = InvoiceForm(instance=invoice)
+
+    context = {'form': form, 'invoice': invoice}
+    return render(request, 'accounts/edit_invoice.html', context)
+
+def delete_invoice(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+    invoice.delete()
+    return redirect('invoicing')
+
+def mark_invoice_as_paid(request, pk):
+    invoice = get_object_or_404(Invoice, pk=pk)
+    invoice.payment_status = 'paid'
+    invoice.save()
+    return redirect('invoice_detail', pk=pk)

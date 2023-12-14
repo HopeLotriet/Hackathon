@@ -1,0 +1,17 @@
+{% extends 'accounts/home.html' %}
+{% load static %}
+
+
+{% block title %}FarmFresh-Invoicing{% endblock %}
+
+{% block content %}
+
+<div class="container mt-5 mb-5">
+    <h1 class="text-center mb-4">Create Invoice</h1>
+
+    <form method="post" enctype="multipart/form-data">
+        {% csrf_token %}
+        {{ form.as_p }}
+        <button type="submit">Create Invoice</button>
+    </form>
+    {% endblock %}
