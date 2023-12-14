@@ -5,10 +5,9 @@ from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.contrib import messages
-from .models import Inventory, Order
-from .models import Inventory
+from .models import Inventory, Order, Invoice
 from django.shortcuts import get_object_or_404
-from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm
+from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm, InvoiceForm
 from django.contrib import messages
 from django_pandas.io import read_frame
 import plotly
@@ -17,8 +16,12 @@ import json
 from django.conf import settings
 from django.core.mail import send_mail
 from django.template.loader import render_to_string
-from .models import Invoice
-from .forms import InvoiceForm
+import barcode
+from barcode.writer import ImageWriter
+from PIL import Image
+from io import BytesIO
+from django.core.files.base import ContentFile
+from barcode import Code128
 
 
 def home(request):
@@ -166,15 +169,30 @@ def add_product(request):
     if request.method == "POST":
         updateForm = AddInventoryForm(data=request.POST)
         if updateForm.is_valid():
-            new_invetory = updateForm.save(commit=False)
-            new_invetory.sales = float(updateForm.data['cost_per_item']) * float(updateForm.data['quantity_sold'])
-            new_invetory.save()
+            new_inventory = updateForm.save(commit=False)
+            new_inventory.sales = float(updateForm.data['cost_per_item']) * float(updateForm.data['quantity_sold'])
+
+            # Generate barcode and save it to the new inventory item
+            barcode_data = new_inventory.name + " "  # You can modify this based on your barcode data
+            code128 = Code128(barcode_data, writer=ImageWriter())  # Adjust add_checksum based on your needs
+            image = code128.render()
+
+            # Convert the barcode image to PNG format
+            image_io = BytesIO()
+            image.save(image_io, format='PNG')
+            image_file = ContentFile(image_io.getvalue())
+            new_inventory.barcode.save(f'barcode_{barcode_data}.png', image_file, save=False)
+
+            new_inventory.save()
+
             messages.success(request, "Successfully Added Product")
-            return redirect(f'/stock/')
+            return redirect('/stock/')  # You can adjust the redirect URL
+
     else:
         updateForm = AddInventoryForm()
 
-    return render(request, 'accounts/inventory_add.html', {'form' : updateForm})
+    return render(request, 'accounts/inventory_add.html', {'form': updateForm})
+
 
 def dashboard(request):
     inventories = Inventory.objects.all()
@@ -453,3 +471,4 @@ def mark_invoice_as_paid(request, pk):
     invoice.payment_status = 'paid'
     invoice.save()
     return redirect('invoice_detail', pk=pk)
+

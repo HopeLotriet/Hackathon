@@ -10,9 +10,11 @@ class InventoryUpdateForm(ModelForm):
 
 
 class AddInventoryForm(ModelForm):
+    barcode = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={'placeholder': 'Barcode'}))
+
     class Meta:
         model = Inventory
-        fields = ["name", "cost_per_item", "quantity_in_stock", "quantity_sold"]
+        fields = ["name", "cost_per_item", "quantity_in_stock", "quantity_sold", "barcode"]
 
 class OrderForm(ModelForm):
     class Meta:
