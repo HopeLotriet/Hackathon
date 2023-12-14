@@ -1,12 +1,19 @@
 {% extends 'accounts/home.html' %}
 {% load static %}
 
-{% block title %}Order management{% endblock %}
+
+{% block title %}Order history{% endblock %}
 
 {% block content %}
 
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Submit</button>
+</form>
+
 <div class="container mt-5">
-    <h1 class="text-center mb-4">Orders</h1>
+    <h1 class="text-center mb-4">Order history</h1>
 
 <table class="table table-striped table-bordered table-hover">
     <thead class="thead-dark">
@@ -26,14 +33,15 @@
         <td scope="row">{{order.customer}}</td>
         <td scope="row">{{ order.product }}</td>
         <td scope="row">{{ order.quantity_ordered }} units</td>
+        <td scope="row">{{order.order_status}}</td>
         <td scope="row">
-            {{order.order_status}}
-            <a href="{% url 'update_order_status' order.id %}">Update Status</a>
-    </td>
+            <a href="{% url 'return_order' order.id %}" class="btn btn-danger btn-sm mb-2">Return order</a>
+        </td>
     </tr>
     {% endfor %}
     </tbody>
 
 </table>
+
 </div>
 {% endblock %}

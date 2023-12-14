@@ -21,6 +21,8 @@ class OrderForm(ModelForm):
         model = Order
         fields = ['product', 'customer','quantity_ordered']
 
+
+
 class UpdateStatusForm(Form):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -29,6 +31,8 @@ class UpdateStatusForm(Form):
     ]
     new_status = ChoiceField(choices=STATUS_CHOICES, widget=Select(attrs={'class': 'form-control'}))
 
+class UserInputForm(forms.Form):
+    user_input = forms.CharField(label='user_name', max_length=100)
 
 class InvoiceForm(forms.ModelForm):
     class Meta:
@@ -62,4 +66,3 @@ class InvoiceForm(forms.ModelForm):
        
         if payment_status == 'paid' and not payment_due_date:
             self.add_error('payment_due_date', 'Payment due date is required for paid invoices.')
-

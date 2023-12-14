@@ -11,6 +11,18 @@
       {
         "list": "off"
       }
+    ],
+    "axe/text-alternatives": [
+      "default",
+      {
+        "document-title": "off"
+      }
+    ],
+    "axe/parsing": [
+      "default",
+      {
+        "duplicate-id-aria": "off"
+      }
     ]
   }
 }
