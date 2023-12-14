@@ -3,6 +3,7 @@ from django.contrib import admin
 from . import views
 from .views import per_product, update, delete, add_product, dashboard, order_list, create_order, update_order_status, order_history, return_order
 from .views import invoicing, create_invoice, invoice_detail, edit_invoice, delete_invoice, mark_invoice_as_paid
+from .views import registration
 
 
 urlpatterns = [
@@ -28,5 +29,6 @@ urlpatterns = [
     path('update_order_status/<int:order_id>/', update_order_status, name='update_order_status'),
     path('order_history', order_history, name='order_history'),
     path('return_order/<int:order_id>/', return_order, name='return_order'),
+    path('registration/', registration, name='registration'),
     path('stock/', views.stock, name='stock'),
 ]

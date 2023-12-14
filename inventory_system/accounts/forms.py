@@ -1,6 +1,8 @@
 from django import forms
 from django.forms import ModelForm, ChoiceField, Select, Form
 from .models import Inventory, Order, Invoice
+from django.contrib.auth.forms import UserCreationForm
+from .models import CustomUser
 
 
 class InventoryUpdateForm(ModelForm):
@@ -66,3 +68,11 @@ class InvoiceForm(forms.ModelForm):
        
         if payment_status == 'paid' and not payment_due_date:
             self.add_error('payment_due_date', 'Payment due date is required for paid invoices.')
+
+class RegistrationForm(UserCreationForm):
+    # Add additional fields if necessary
+    # For example: email = forms.EmailField()
+
+    class Meta:
+        model = CustomUser
+        fields = ['username', 'password1', 'password2']

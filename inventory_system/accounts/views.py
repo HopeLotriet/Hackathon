@@ -8,9 +8,10 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from .models import Inventory, Order, Invoice
 from django.shortcuts import get_object_or_404
-from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm, InvoiceForm
+from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm, InvoiceForm, RegistrationForm
 from django.contrib import messages
 from django_pandas.io import read_frame
+import pandas as pd
 import plotly
 import plotly.express as px
 import json
@@ -27,6 +28,19 @@ from barcode import Code128
 
 def home(request):
     return render(request, 'accounts/home.html')
+
+def registration(request):
+    if request.method == 'POST':
+        form = RegistrationForm(request.POST)
+        if form.is_valid():
+            user = form.save()
+            login(request, user)
+            return redirect('login')  # Redirect to the home page or any desired URL
+    else:
+        form = RegistrationForm()
+
+    return render(request, 'system/register.html', {'form': form})
+
 
 def products(request):
     inventories = Inventory.objects.all()
@@ -118,9 +132,11 @@ def add_product(request):
 def dashboard(request):
     inventories = Inventory.objects.all()
     df = read_frame(inventories)
-    
+
+       
     # sales graph
     print(df.columns)
+    df['last_sales_dates'] = pd.to_datetime
     sales_graph_df = df.groupby(by="last_sales_date", as_index=False, sort=False)['sales'].sum()
     print(sales_graph_df.sales)
     print(sales_graph_df.columns)
@@ -129,6 +145,7 @@ def dashboard(request):
 
     
     # best performing product
+    df['quantity_sold'] = df['quantity_sold'].astype(int)
     best_performing_product_df = df.groupby(by="name").sum().sort_values(by="quantity_sold")
     best_performing_product = px.bar(best_performing_product_df, 
                                     x = best_performing_product_df.index, 
@@ -167,6 +184,7 @@ def dashboard(request):
     }
 
     return render(request,"accounts/dashboard.html", context=context)
+
 
 #Order management
 def order_list(request):
@@ -322,8 +340,6 @@ def return_order(request, order_id):
     return redirect('order_history')
 
 
-
-#to be completed
 def marketing(request):
     context = {}
     return render(request, 'accounts/marketing.html', context)
