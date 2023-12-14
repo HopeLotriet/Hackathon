@@ -1,4 +1,5 @@
 from django.shortcuts import render, redirect
+from django.urls import reverse
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import UserCreationForm
@@ -26,86 +27,6 @@ from barcode import Code128
 
 def home(request):
     return render(request, 'accounts/home.html')
-
-
-def signup(request):
-
-    if request.method == "POST":
-        username = request.POST['username']
-        fname = request.POST['fname']
-        lname = request.POST['lname']
-        email = request.POST['email']
-        PhoneNumber = request.POST['PhoneNumber']
-        Password = request.POST['Password']
-        ConfirmPassword = request.POST['ConfirmPassword']
-
-        # validating user info if already existing so that user cannot create an account with the same info 
-        if User.objects.filter(username=username):
-            messages.error(request, "Username already exist! Please try some other username.")
-            return redirect('home')
-        
-        if User.objects.filter(email=email).exists():
-            messages.error(request, "Email Already Registered!!")
-            return redirect('home')
-        
-        if len(username)>20:
-            messages.error(request, "Username must be under 20 charcters!!")
-            return redirect('home')
-        
-        if Password != ConfirmPassword:
-            messages.error(request, "Passwords didn't matched!!")
-            return redirect('home')
-        
-        if not username.isalnum():
-            messages.error(request, "Username must be Alpha-Numeric!!")
-            return redirect('home')
-
-
-# if all logic is correct then a user is created which takes the username, email and password
-        myUser= User.objects.create_user(username, email, Password)
-        myUser.first_name = fname
-        myUser.last_name = lname
-        myUser.phone_number = PhoneNumber
-
-
-        myUser.save()
-
-        messages.success(request, "Your account has been successfully created.")
-
-        return redirect('/signin')
-
-
-    return render(request, 'accounts/signup.html')
-
-
-# signin function to authenticate user into the dashboard 
-
-def signin(request):
-    if request.method == "POST":
-        email = request.POST['email']
-        Password = request.POST['Password']
-
-        user = authenticate(email=email, Password=Password)
-
-        if user is not None:
-            login(request, user)
-            fname = user.first_name
-            return render(request, "accounts/home.html", {'fname': fname})
-        else:
-            messages.error(request, "The email and/or password does not match")
-            return redirect('home')
-
-    return render(request, 'accounts/signin.html')
-
-
-# Logout function to redirect to the signin page 
-def signout(request):
-    logout(request)
-    messages.success(request, "logged out successfully")
-    return redirect('/signin')
-
-
-# function to send account activation to the user 
 
 def products(request):
     inventories = Inventory.objects.all()
@@ -153,7 +74,7 @@ def update(request, pk):
             inventory.sales = float(inventory.cost_per_item) * float(inventory.quantity_sold)
             inventory.save()
             messages.success(request, "Update Successful")
-            return redirect(f"/per_product/{pk}/")
+            return redirect(reverse('per_product', kwargs={'pk': pk}))
     else:
         updateForm = InventoryUpdateForm(instance=inventory)
 
@@ -163,7 +84,7 @@ def delete(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
     inventory.delete()
     messages.success(request, "Inventory Deleted")
-    return redirect('/stock/')
+    return redirect('stock')
 
 def add_product(request):
     if request.method == "POST":
@@ -173,8 +94,8 @@ def add_product(request):
             new_inventory.sales = float(updateForm.data['cost_per_item']) * float(updateForm.data['quantity_sold'])
 
             # Generate barcode and save it to the new inventory item
-            barcode_data = new_inventory.name + " "  # You can modify this based on your barcode data
-            code128 = Code128(barcode_data, writer=ImageWriter())  # Adjust add_checksum based on your needs
+            barcode_data = new_inventory.name + " " + str(new_inventory.cost_per_item)  # You can modify this based on your barcode data
+            code128 = Code128(barcode_data, writer=ImageWriter())
             image = code128.render()
 
             # Convert the barcode image to PNG format
@@ -186,7 +107,7 @@ def add_product(request):
             new_inventory.save()
 
             messages.success(request, "Successfully Added Product")
-            return redirect('/stock/')  # You can adjust the redirect URL
+            return redirect('stock')  # You can adjust the redirect URL
 
     else:
         updateForm = AddInventoryForm()

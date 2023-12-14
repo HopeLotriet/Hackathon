@@ -20,7 +20,6 @@ urlpatterns = [
     path('delete_invoice/<int:pk>/', delete_invoice, name='delete_invoice'),
     path('mark_as_paid/<int:pk>/', mark_invoice_as_paid, name='mark_invoice_as_paid'),
     path('profile/', views.profile, name='profile'),
-    path('stock/', views.stock, name='stock'),
     path("dashboard/", views.dashboard, name="dashboard"),
     path('about/', views.about, name='about'),
     path('create_order/', views.create_order, name='create_order'),
@@ -29,4 +28,5 @@ urlpatterns = [
     path('update_order_status/<int:order_id>/', update_order_status, name='update_order_status'),
     path('order_history', order_history, name='order_history'),
     path('return_order/<int:order_id>/', return_order, name='return_order'),
+    path('stock/', views.stock, name='stock'),
 ]
