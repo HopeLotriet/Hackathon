@@ -71,8 +71,9 @@
                         <li class="nav-item"><a href="{% url 'products' %}"
                                 class="nav-link custom-text-size">Products</a></li>
 
-                        
-                        <!-- {% if request.user.is_authenticated %} -->
+                        <li class="nav-item"><a href="{% url 'products' %}"
+                                class="nav-link custom-text-size">Products</a></li>
+                        {% if request.user.is_authenticated and request.user.is_staff %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle custom-text-size" href="#" id="inventoryDropdown"
                                 role="button" data-bs-toggle="dropdown" aria-haspopup="true"
@@ -82,7 +83,7 @@
                                 <a href="{% url 'dashboard' %}" class="dropdown-item">Reports</a>
                             </div>
                         </li>
-                        <!-- {% endif %} -->
+                       
 
 
                         <li class="nav-item dropdown">
@@ -91,7 +92,7 @@
                                 management</a>
                             <div class="dropdown-menu" aria-labelledby="orderDropdown">
                                 <a href="{% url 'order_list' %}" class="dropdown-item">Order List</a>
-                                <a href="{% url 'create_order' %}" class="dropdown-item">Create Order</a>
+                                <a href="{% url 'create_order' %}" class="dropdown-item">create_order</a>
                                 <a href="{% url 'order_history'%}" class="dropdown-item">Order history</a>
                             </div>
                         </li>
@@ -120,7 +121,7 @@
 
                             </div>
                         </li>
-                       
+                        {% endif %}
                     </ul>
                 </div>
             </nav>
