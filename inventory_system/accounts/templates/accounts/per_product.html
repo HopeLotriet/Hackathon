@@ -84,6 +84,16 @@
                 </div>
             </div>
 
+            <div class="card m-4" style="width: 18rem;">
+                <div class="card-body">
+                    <h5 class="card-title text-center">Barcode</h5>
+                    <div style="font-size: 30px;" class="text-center">
+                    <span><i class="fas fa-barcode"></i></i></span>
+                </div>
+                <h3 class="text-center">{{ inventory.barcode_data }}</h3>
+                </div>
+            </div>
+
             <a href="{% if inventory.id %}{% url 'product_update' inventory.id %}{% endif %}" class="btn btn-outline-success btn-sm mb-2">Update</a>
             <a href="{% if inventory.id %}{% url 'product_delete' inventory.id %}{% endif %}" class="btn btn-danger btn-sm mb-2">Delete</a>            
   </div>
