@@ -193,30 +193,6 @@ def add_product(request):
 
     return render(request, 'accounts/inventory_add.html', {'form': updateForm})
 
-# def generate_barcode_image(barcode_data):
-#     # Create a Code128 barcode
-#     code128 = barcode.get('code128', barcode_data, writer=ImageWriter(), add_checksum=False)
-
-#     # Save the barcode image to a BytesIO buffer
-#     buffer = BytesIO()
-#     code128.write(buffer)
-#     buffer.seek(0)
-
-#     return buffer
-
-# def add_product(request):
-#     if request.method == "POST":
-#         updateForm = AddInventoryForm(data=request.POST)
-#         if updateForm.is_valid():
-#             new_invetory = updateForm.save(commit=False)
-#             new_invetory.sales = float(updateForm.data['cost_per_item']) * float(updateForm.data['quantity_sold'])
-#             new_invetory.save()
-#             messages.success(request, "Successfully Added Product")
-#             return redirect(f'/stock/')
-#     else:
-#         updateForm = AddInventoryForm()
-
-#     return render(request, 'accounts/inventory_add.html', {'form' : updateForm})
 
 def dashboard(request):
     inventories = Inventory.objects.all()
