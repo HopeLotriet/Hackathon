@@ -19,6 +19,8 @@ class OrderForm(ModelForm):
         model = Order
         fields = ['product', 'customer','quantity_ordered']
 
+
+
 class UpdateStatusForm(Form):
     STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -26,3 +28,6 @@ class UpdateStatusForm(Form):
         ('delivered', 'Delivered'),
     ]
     new_status = ChoiceField(choices=STATUS_CHOICES, widget=Select(attrs={'class': 'form-control'}))
+
+class UserInputForm(forms.Form):
+    user_input = forms.CharField(label='user_name', max_length=100)

@@ -2,7 +2,7 @@
 from django.urls import path, include
 from django.contrib import admin
 from . import views
-from .views import per_product, update, delete, add_product, dashboard, order_list, create_order, update_order_status
+from .views import per_product, update, delete, add_product, dashboard, order_list, create_order, update_order_status, order_history, return_order
 
 
 urlpatterns = [
@@ -26,4 +26,6 @@ urlpatterns = [
     path('order_list', order_list, name='order_list'),
     path('create order', create_order, name='create_order'),
     path('update_order_status/<int:order_id>/', update_order_status, name='update_order_status'),
+    path('order_history', order_history, name='order_history'),
+    path('return_order/<int:order_id>/', return_order, name='return_order'),
 ]
