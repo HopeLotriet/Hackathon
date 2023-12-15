@@ -50,6 +50,7 @@ def products(request):
     }
     return render(request, 'accounts/products.html', context=context)
 
+@login_required()
 def stock(request):
     inventories = Inventory.objects.all()
 
@@ -69,6 +70,7 @@ def stock(request):
 
 LOW_QUANTITY = getattr(settings, 'LOW_QUANTITY', 5)
 
+@login_required()
 def per_product(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
     context = {
@@ -76,6 +78,7 @@ def per_product(request, pk):
     }
     return render(request, "accounts/per_product.html", context=context)
 
+@login_required()
 def update(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
     if request.method == "POST":
@@ -94,12 +97,14 @@ def update(request, pk):
 
     return render(request, 'accounts/inventory_update.html', {'form' : updateForm})
 
+@login_required()
 def delete(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
     inventory.delete()
     messages.success(request, "Inventory Deleted")
     return redirect('stock')
 
+@login_required()
 def add_product(request):
     if request.method == "POST":
         updateForm = AddInventoryForm(data=request.POST)
@@ -128,7 +133,7 @@ def add_product(request):
 
     return render(request, 'accounts/inventory_add.html', {'form': updateForm})
 
-
+@login_required()
 def dashboard(request):
     inventories = Inventory.objects.all()
     df = read_frame(inventories)
@@ -136,12 +141,13 @@ def dashboard(request):
        
     # sales graph
     print(df.columns)
-    df['last_sales_dates'] = pd.to_datetime
+    
     sales_graph_df = df.groupby(by="last_sales_date", as_index=False, sort=False)['sales'].sum()
     print(sales_graph_df.sales)
     print(sales_graph_df.columns)
     sales_graph = px.line(sales_graph_df, x = sales_graph_df.last_sales_date, y = sales_graph_df.sales, title="Sales Trend")
     sales_graph = json.dumps(sales_graph, cls=plotly.utils.PlotlyJSONEncoder)
+
 
     
     # best performing product
@@ -187,11 +193,13 @@ def dashboard(request):
 
 
 #Order management
+@login_required()
 def order_list(request):
     order_lists = Order.objects.all()
     print(order_lists)
     return render(request, 'accounts/order_list.html', {'orders': order_lists})
 
+@login_required()
 def create_order(request):
     if request.method == 'POST':
         order_form = OrderForm(request.POST)
@@ -251,6 +259,7 @@ def create_order(request):
     
     return render(request, 'accounts/create_order.html', {'form': order_form, 'messages': messages.get_messages(request)})
 
+@login_required()
 def update_order_status(request, order_id):
     order = Order.objects.get(id=order_id)
     name = order.customer
@@ -302,6 +311,7 @@ def update_order_status(request, order_id):
 
     return render(request, 'accounts/update_status.html', {'form': form, 'order': order})
 
+@login_required()
 def order_history(request):
     previous_orders = []
     if request.method == 'POST':
@@ -316,7 +326,7 @@ def order_history(request):
     return render(request, 'accounts/order_history.html', {'form':form ,'orders': previous_orders})
 
 
-
+@login_required()
 def return_order(request, order_id):
     current_order = get_object_or_404(Order, id=order_id)
     if current_order.order_status != "Order canceled":
@@ -344,18 +354,9 @@ def marketing(request):
     context = {}
     return render(request, 'accounts/marketing.html', context)
 
-def invoicing(request):
-    context = {}
-    return render(request, 'accounts/invoicing.html', context)
-
 def profile(request):
     context = {}
     return render(request, 'accounts/profile.html', context)
-
-
-def reports(request):
-    context = {}
-    return render(request, 'accounts/reports.html', context)
 
 def about(request):
     context = {}
@@ -370,6 +371,7 @@ def farmer_dashboard(request):
     # Your farmer-specific view logic
     return render(request, 'accounts/farmer_dashboard.html')
 
+@login_required()
 def invoicing(request):
     invoices = Invoice.objects.all()
 
@@ -379,6 +381,7 @@ def invoicing(request):
 
     return render(request, 'accounts/invoicing.html', context)
 
+@login_required()
 def create_invoice(request):
     if request.method == 'POST':
         form = InvoiceForm(request.POST)
@@ -391,11 +394,13 @@ def create_invoice(request):
     context = {'form': form}
     return render(request, 'accounts/create_invoice.html', context)
 
+@login_required()
 def invoice_detail(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     context = {'invoice': invoice}
     return render(request, 'accounts/invoice_detail.html', context)
 
+@login_required()
 def edit_invoice(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
 
@@ -410,11 +415,13 @@ def edit_invoice(request, pk):
     context = {'form': form, 'invoice': invoice}
     return render(request, 'accounts/edit_invoice.html', context)
 
+@login_required()
 def delete_invoice(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     invoice.delete()
     return redirect('invoicing')
 
+@login_required()
 def mark_invoice_as_paid(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     invoice.payment_status = 'paid'
