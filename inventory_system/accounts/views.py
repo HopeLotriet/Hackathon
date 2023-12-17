@@ -153,9 +153,11 @@ def dashboard(request):
     # best performing product
     df['quantity_sold'] = df['quantity_sold'].astype(int)
     best_performing_product_df = df.groupby(by="name").sum().sort_values(by="quantity_sold")
+    colors = px.colors.qualitative.Set3[:len(best_performing_product_df)]
     best_performing_product = px.bar(best_performing_product_df, 
                                     x = best_performing_product_df.index, 
-                                    y = best_performing_product_df.quantity_sold, 
+                                    y = best_performing_product_df.quantity_sold,
+                                    color=best_performing_product_df.index,
                                     title="Best Performing Product"
                                 )
     best_performing_product = json.dumps(best_performing_product, cls=plotly.utils.PlotlyJSONEncoder)
