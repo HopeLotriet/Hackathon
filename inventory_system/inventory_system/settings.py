@@ -152,6 +152,8 @@ AUTH_USER_MODEL = 'accounts.CustomUser'
 
 LOW_QUANTITY = 5
 
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
 # login redirect path settings
 LOGIN_REDIRECT_URL = "/accounts"
 LOGIN_URL = "login"

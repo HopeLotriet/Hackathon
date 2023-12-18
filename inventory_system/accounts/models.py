@@ -1,18 +1,19 @@
 # accounts/models.py
 from django.contrib.auth.models import AbstractUser
-from django.contrib.auth.models import User
+from django.contrib.auth.models import User,  Permission
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
 from django.conf import settings
+from django.contrib.contenttypes.models import ContentType
 
 
 class CustomUser(AbstractUser):
     user_types = [
-        ('farmer', 'Farmer'),
+        ('accountant', 'Accountant'),
         ('customer', 'Customer'),
-        ('retail', 'Retail'),
+        ('supplier', 'Supplier'),
         ('admin', 'Admin'),
     ]
     
@@ -89,3 +90,46 @@ class Invoice(models.Model):
 
     def __str__(self):
         return f"Invoice #{self.pk}"
+    
+# Create your models here.
+class CustomerPermissions(models.Model):
+    class Meta:
+        permissions = (
+            ("view_cart", "Can view cart"),
+            ("add_to_cart", "Can add items to cart"),
+            ("remove_from_cart", "Can remove items from cart"),
+            ("update_cart", "Can update cart"),
+            ("clear_cart", "Can clear cart"),
+            ("checkout", "Can proceed to checkout"),
+            ("view_order_history", "Can view order history"),
+            ("view_product_details", "Can view product details"),
+        )
+
+class StaffPermissions(models.Model):
+    class Meta:
+        permissions = (
+            ("view_dashboard", "Can view dashboard"),
+            ("manage_orders", "Can manage orders"),
+            ("manage_products", "Can manage products"),
+            ("view_products", "Manage products"),
+            ("view_inventory", "Manage inventory")
+            # Add more permissions as needed
+        )
+
+class SupplierPermissions(models.Model):
+    class Meta:
+        permissions = (
+            ("view_inventory", "Manage inventory"),
+            ("add_products", "Add products to inventory")
+            # Add more permissions as needed
+        )
+
+class accountantPermissions(models.Model):
+  
+    class Meta:
+        permissions = (
+            ("view_records", "Manage records"),
+            ("add_record", "Add record"),
+            ("update_record", "Update records"),
+            # Add more permissions as needed
+        )

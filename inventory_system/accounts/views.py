@@ -4,11 +4,11 @@ from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 from django.contrib import messages
 from .models import Inventory, Order, Invoice
 from django.shortcuts import get_object_or_404
-from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm, InvoiceForm, RegistrationForm
+from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm, InvoiceForm, CreateUserForm
 from django.contrib import messages
 from django_pandas.io import read_frame
 import pandas as pd
@@ -24,22 +24,50 @@ from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
 from barcode import Code128
+from django.contrib.auth.models import Group
+from django.core.exceptions import ObjectDoesNotExist
 
 
 def home(request):
     return render(request, 'accounts/home.html')
 
 def registration(request):
-    if request.method == 'POST':
-        form = RegistrationForm(request.POST)
+    group_name = ''  # Provide a default value
+
+    if request.method == "POST":
+        User = get_user_model()
+        form = CreateUserForm(request.POST)
         if form.is_valid():
             user = form.save()
-            login(request, user)
-            return redirect('login')  # Redirect to the home page or any desired URL
-    else:
-        form = RegistrationForm()
 
-    return render(request, 'system/register.html', {'form': form})
+            role = form.cleaned_data['role']
+
+            if role == 'customer':
+                group_name = 'customer'
+            elif role == 'admin':
+                group_name = 'admin'
+            elif role == 'supplier':
+                group_name = 'supplier'
+            elif role == 'accountant':
+                group_name = 'accountant'
+
+            try:
+                group = Group.objects.get(name=group_name)
+            except ObjectDoesNotExist:
+                # Create the group if it doesn't exist
+                group = Group.objects.create(name=group_name)
+
+            user.groups.add(group)
+
+            return redirect('login')
+
+    else:
+        form = CreateUserForm()
+
+    context = {
+        'form': form,
+    }
+    return render(request, 'system/registration.html', context)
 
 
 def products(request):
