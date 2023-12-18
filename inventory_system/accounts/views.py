@@ -10,6 +10,7 @@ from .models import Inventory, Order, Invoice
 from django.shortcuts import get_object_or_404
 from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm, InvoiceForm, CreateUserForm
 from django.contrib import messages
+import io
 from django_pandas.io import read_frame
 import pandas as pd
 import plotly
@@ -26,6 +27,10 @@ from django.core.files.base import ContentFile
 from barcode import Code128
 from django.contrib.auth.models import Group
 from django.core.exceptions import ObjectDoesNotExist
+from django.http import FileResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+from reportlab.lib.pagesizes import letter
 
 
 def home(request):
@@ -457,4 +462,56 @@ def mark_invoice_as_paid(request, pk):
     invoice.payment_status = 'paid'
     invoice.save()
     return redirect('invoice_detail', pk=pk)
+
+def invoice_pdf(request, pk):
+    #get the invoice
+    invoice = get_object_or_404(Invoice, pk=pk)
+    # Create Bytestream buffer
+    buf = io.BytesIO()
+    # Create a canvas
+    c = canvas.Canvas(buf, pagesize=letter, bottomup=0)
+    # Create a text object
+    textob = c.beginText()
+    textob.setTextOrigin(inch, inch)
+    textob.setFont("Helvetica", 14)
+
+    # Add invoice details to the PDF
+    textob.textLine(f"Invoice Number: {invoice.pk}")
+    textob.textLine(f"Total Amount: {invoice.total_amount}")
+    textob.textLine(f"Billing Name: {invoice.billing_name}")
+    textob.textLine(f"Billing Address: {invoice.billing_address}")
+    textob.textLine(f"Billing Email: {invoice.billing_email}")
+    textob.textLine(f"Payment Status: {invoice.payment_status}")
+    textob.textLine(f"Payment Method: {invoice.payment_method}")
+    textob.textLine(f"Payment Due Date: {invoice.payment_due_date}")
+    textob.textLine(f"Notes: {invoice.notes}")
+    textob.textLine(f"Status: {invoice.status}")
+
+    # Get the related order details
+    order = invoice.order
+    textob.textLine(f"Order ID: {order.id}")
+    textob.textLine(f"Order Date: {order.order_date}")
+    textob.textLine(f"Product: {order.product}")
+    textob.textLine(f"Customer: {order.customer}")
+    textob.textLine(f"Quantity Ordered: {order.quantity_ordered}")
+    textob.textLine(f"Order Status: {order.order_status}")
+
+    # Loop through the items or details in the order
+    # You may need to adjust this based on your actual model structure
+    # For example, if you have an OrderItem model related to Order
+    for item in order.orderitem_set.all():
+        textob.textLine(f"Item: {item.name}")
+        textob.textLine(f"Quantity: {item.quantity}")
+        textob.textLine(f"Cost Per Item: {item.cost_per_item}")
+
+
+    # Finish Up
+        c.drawText(textob)
+        c.showPage()
+        c.save()
+        buf.seek(0)
+
+
+    # Return the PDF as a response
+    return FileResponse(buf, as_attachment=True, filename=f'invoice_{invoice.pk}_pdf.pdf')
 

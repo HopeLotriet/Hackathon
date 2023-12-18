@@ -31,4 +31,5 @@ urlpatterns = [
     path('return_order/<int:order_id>/', return_order, name='return_order'),
     # path('registration/', registration, name='registration'),
     path('stock/', views.stock, name='stock'),
+    path('invoice/<int:pk>/pdf/', views.invoice_pdf, name='generate_pdf'),
 ]
