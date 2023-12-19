@@ -29,7 +29,6 @@ urlpatterns = [
     path('update_order_status/<int:order_id>/', update_order_status, name='update_order_status'),
     path('order_history', order_history, name='order_history'),
     path('return_order/<int:order_id>/', return_order, name='return_order'),
-    # path('registration/', registration, name='registration'),
     path('stock/', views.stock, name='stock'),
     path('invoice/<int:pk>/pdf/', views.invoice_pdf, name='generate_pdf'),
     path('view_cart', view_cart, name='view_cart'),

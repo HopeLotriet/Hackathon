@@ -51,8 +51,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
+    'transactions',
     'fontawesomefree',
-    'crispy_forms',
+    'widget_tweaks',                            # uses 'django-widget-tweaks' app
+    'crispy_forms',                             # uses 'django-crispy-forms' app
+    'login_required', 
     'crispy_bootstrap4',
 ]
 
