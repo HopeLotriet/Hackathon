@@ -668,3 +668,5 @@ def invoice_pdf(request, pk):
     # Return the PDF as a response
     return FileResponse(buf, as_attachment=True, filename=f'invoice_{invoice.pk}_pdf.pdf')
 
+
+

@@ -8,23 +8,23 @@
 
 {% block content %}
 
-<div class="content-section mb-5">
-    {{ form.media }} 
-    <form method="POST">
-        <fieldset>
-            <legend class="border-bottom pb-2 mb-4 text-center">Inventory Add Form</legend>
-            {% csrf_token %}
-            <div class="form-group">
-                {{ form|crispy }}
-            </div>
-            <div class="form-group pt-4">
-                <button class="btn btn-outline-success" type="submit">Submit</button>
-            </div>
-      </fieldset>
-    </form>
+<div class="content-wrapper">
+    <div class="content-section mb-5">
+        {{ form.media }} 
+        <form method="POST">
+            <fieldset>
+                <legend class="border-bottom pb-2 mb-4 text-center">Inventory Add Form</legend>
+                {% csrf_token %}
+                <div class="form-group">
+                    {{ form|crispy }}
+                </div>
+                <div class="form-group pt-4">
+                    <button class="btn btn-outline-success" type="submit">Submit</button>
+                </div>
+          </fieldset>
+        </form>
+    </div>
 </div>
 
-<br>
-<br>
 
 {% endblock %}
