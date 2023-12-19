@@ -55,8 +55,9 @@ INSTALLED_APPS = [
     'fontawesomefree',
     'widget_tweaks',                            # uses 'django-widget-tweaks' app
     'crispy_forms',                             # uses 'django-crispy-forms' app
-    'login_required', 
+    # 'login_required', 
     'crispy_bootstrap4',
+    'django_filters',
 ]
 
 MIDDLEWARE = [
