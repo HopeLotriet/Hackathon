@@ -6,7 +6,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse
 from django.contrib.auth import get_user_model
 from django.contrib import messages
-from .models import Inventory, Order, Invoice
+from .models import Inventory, Order, Invoice , cart, OrderAmount
 from django.shortcuts import get_object_or_404
 from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm, InvoiceForm, CreateUserForm
 from django.contrib import messages
@@ -225,6 +225,122 @@ def dashboard(request):
     }
 
     return render(request,"accounts/dashboard.html", context=context)
+
+#adding items to cart for customers
+def view_cart(request):
+    cart_items = cart.objects.all()
+    amount = OrderAmount.objects.all()
+    return render(request, 'accounts/cart.html', {'items': cart_items, 'amount': amount})
+
+def add_to_cart(request, item_id):
+    #add items to cart
+    item = get_object_or_404(Inventory, id=item_id)
+    item_name = item.name
+    item_cost = item.cost_per_item
+    quantities = 1
+    
+
+    new_entry = cart(item = item_name, cost_per_item = item_cost, quantity=quantities, total_amount=item_cost)
+    new_entry.save()
+
+   # Retrieve all instances of OrderAmount
+    existing_amounts = OrderAmount.objects.all()
+
+    if existing_amounts.exists():
+        existing_amount = existing_amounts.first()
+        existing_amount.amount_due += item_cost
+        existing_amount.save()
+    else:
+        # If no instances exist, create a new one
+        new_price = OrderAmount(amount_due=item_cost)
+        new_price.save()
+
+    messages.success(request, "Item added to cart")
+    return redirect("products")
+
+def delete_from_cart(request, item_id):
+    #remove from cart
+    item = get_object_or_404(cart, id=item_id)
+    item_cost = item.total_amount
+    
+    #decrease total price
+    existing_amount = OrderAmount.objects.all().first()
+    existing_amount.amount_due -= item_cost
+    
+    
+    item.delete()
+    existing_amount.save() 
+    
+    messages.success(request, "Item removed from cart")
+
+  
+    return redirect('view_cart')
+
+def increase_cart_quantity(request, item_id):
+    item = get_object_or_404(cart, id=item_id)
+    
+    #increase quantity
+    new_quantity=item.quantity
+    new_quantity = new_quantity + 1
+    item.quantity = new_quantity
+
+    #increase total_amount
+    price = item.cost_per_item
+    new_amount = item.total_amount
+    new_amount = new_amount + price
+    item.total_amount = new_amount
+
+    item.save()
+
+    #increase total price
+    existing_amount = OrderAmount.objects.all().first()
+    existing_amount.amount_due += price
+    existing_amount.save()
+    
+    
+    return redirect("view_cart")
+
+def decrease_cart_quantity(request, item_id):
+    item = get_object_or_404(cart, id=item_id)
+    existing_amount = OrderAmount.objects.all().first()
+    
+    new_quantity=item.quantity
+    new_amount = item.total_amount
+    price = item.cost_per_item
+
+    if new_quantity > 0 and new_amount > 0  and existing_amount.amount_due > 0:
+        #decrease quantity
+        new_quantity = new_quantity - 1
+        item.quantity = new_quantity
+
+        #decrease price
+        new_amount = new_amount - price
+        item.total_amount = new_amount
+
+        #decrease total price
+        existing_amount.amount_due -= price
+        
+        item.save()
+        existing_amount.save()
+
+    elif new_quantity <=0 and new_amount <= 0:
+        item.delete()
+
+    elif existing_amount.amount_due <= 0:
+        item.delete()
+        all_amounts = OrderAmount.objects.all()
+        all_amounts.delete()
+
+    return redirect("view_cart")
+
+def delete_cart(request):
+    cart_entry = cart.objects.all()
+    cart_entry.delete()
+
+    cart_amount = OrderAmount.objects.all()
+    cart_amount.delete()
+    messages.success(request, "Cart cleared!")
+    return redirect("view_cart")
 
 
 #Order management

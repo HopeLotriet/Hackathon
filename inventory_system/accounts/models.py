@@ -130,3 +130,18 @@ class accountantPermissions(models.Model):
             ("update_record", "Update records"),
             # Add more permissions as needed
         )
+
+class cart(models.Model):
+    item = models.CharField(max_length=100, null=False, blank=False)
+    cost_per_item = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
+    quantity = models.IntegerField(null=False, blank=False)
+    total_amount = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
+
+    def __str__(self) -> str:
+        return self.item
+    
+class OrderAmount(models.Model):
+    amount_due = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
+
+    def __str__(self) -> str:
+        return self.amount_due
