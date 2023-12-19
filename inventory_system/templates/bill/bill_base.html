@@ -1,51 +1,36 @@
+{% extends 'accounts/home.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <!-- Bootstrap CSS -->
-    <link rel="stylesheet" type="text/css" href="{% static 'accounts/static/bootstrap/bootstrap.min.css' %}">
 
-    <!-- font awesome cdn -->
-    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+{% block title %}FarmFresh - Bill{% endblock %}
 
-    <!-- Main CSS, then Sidebar CSS, Bill CSS-->
-    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">    
-    <link rel="stylesheet" type="text/css" href="{% static 'css/bill.css' %}">
 
-    <title>IMS - {% block title %}Title Missing{% endblock title %}</title>
-</head>
-<body>
-    <main class="container">
-        <div id="content" class="bg-white">
+{% block content %}
 
-            <div class="row">
-                <div class="col-md-12">
-                                    
-                    {% if messages %}
+<div class="content-wrapper">
+    <div class="container mt-5 mb-5">
+        <main class="container">
+            <div id="content" class="bg-white">
+
+                <div class="row">
+                    <div class="col-md-12">
+
+                        {% if messages %}
                         {% for message in messages %}
-                            <div class="alert alert-{{ message.tags }}"> {{ message }} </div>
+                        <div class="alert alert-{{ message.tags }}"> {{ message }} </div>
                         {% endfor %}
-                    {% endif %}
-                    
-                    <div class="container">
-                        {% block content %}{% endblock content %}
+                        {% endif %}
+
+                        <div class="container">
+
+                        </div>
+
                     </div>
-                    
                 </div>
+                <br>
+
             </div>
-            <br>
 
-        </div>
-    
-    </main>    
-
-    <!-- jQuery first, then Popper.js, then Bootstrap JS -->
-    <script src="{% static 'accounts/static/bootstrap/jquery-3.3.1.slim.min.js' %}"></script>
-    <script src="{% static 'accounts/static/bootstrap/popper.min.js' %}"></script>
-    <script src="{% static 'accounts/static/bootstrap/bootstrap.min.js' %}"></script>
-
-    
-</body>
-</html>
+        </main>
+    </div>
+</div>
+{% endblock %}

@@ -1,22 +1,18 @@
-{% extnds 'system/login.html' %}
+{% extends 'system/login.html' %}
+{% load static %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    {% block content %}
+{% block content %}
+    <div class="content-section mt-5">
+        <div class="image-container">
+            <img src="{% static 'images/logout.jpg' %}" alt="Logout Image" class="img-fluid mb-4">
+        </div>
 
-            <h4>Logout Page</h4>
-            <hr>
-            <div class="alert alert-info">
-                <h5>You have been logged out</h5>
-            </div>
-            <a href="{% url 'login' %}">Login Again</a>
+        <div class="alert alert-info text-center">
+            <h5>You have been logged out</h5>
+        </div>
 
+        <div class="text-center">
+            <a href="{% url 'login' %}" class="btn btn-outline-success">Login Again</a>
+        </div>
+    </div>
 {% endblock %}
-</body>
-</html>
