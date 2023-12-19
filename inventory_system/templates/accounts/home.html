@@ -136,7 +136,16 @@
                             </div>
                         </li>
 
-                        <li class="nav-item"><a href="{% url 'suppliers-list' %}" class="nav-link custom-text-size">Supplier</a>
+                    
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle custom-text-size" href="#" id="orderDropdown"
+                                role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Transactions</a>
+                            <div class="dropdown-menu" aria-labelledby="orderDropdown">
+                                <a href="{% url 'suppliers-list' %}" class="dropdown-item">Suppliers</a>
+                                <a href="{% url 'purchases-list' %}" class="dropdown-item">Purchases</a>
+                                <a href="{% url 'sales-list' %}" class="dropdown-item">Sales</a>
+                              
+                            </div>
                         </li>
 
                         <li class="nav-item"><a href="{% url 'profile' %}" class="nav-link custom-text-size">Profile</a>
