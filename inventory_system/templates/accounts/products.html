@@ -28,6 +28,7 @@
                 <th scope="row">{{ inventory.name }}</th>
                 <th scope="row">{{ inventory.cost_per_item }}</th>
                 <th scope="row">{{ inventory.quantity_in_stock }}</th>
+                <th><a href="{% url 'add_to_cart' inventory.id %}">Add to cart</a></th>
             </tr>
             {% endfor %}
         </tbody>
