@@ -6,12 +6,17 @@
 
 {% block content %}
 
-<div class="container mt-5">
-    <h1 class="text-center mb-4">Edit Invoice</h1>
+<div class="content-wrapper">
+    <div class="container mt-5">
+        <h1 class="text-center mb-4">Edit Invoice</h1>
 
-    <form method="post" enctype="multipart/form-data">
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">Update Invoice</button>
-    </form>
-    {% endblock %}
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">Update Invoice</button>
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

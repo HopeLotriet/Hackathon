@@ -24,11 +24,14 @@
 
 <style>
     body {
-        overflow: visible;
+        /* overflow: hidden; */
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
     }
 
     .custom-text-size {
-        font-size: 20px;
+        font-size: 25px;
     }
 
     .content-section {
@@ -40,13 +43,18 @@
 
     .header-content {
         margin-left: 0;
-
     }
 
     .header-content h1 {
         margin-left: 10px;
 
     }
+
+    .content-wrapper {
+        flex: 1;
+    }
+
+  
 </style>
 
 <body>
@@ -71,7 +79,7 @@
                         <li class="nav-item"><a href="{% url 'products' %}"
                                 class="nav-link custom-text-size">Products</a></li>
 
-                      
+
                         {% if request.user.is_authenticated and request.user.is_staff %}
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle custom-text-size" href="#" id="inventoryDropdown"
@@ -82,7 +90,7 @@
                                 <a href="{% url 'dashboard' %}" class="dropdown-item">Reports</a>
                             </div>
                         </li>
-                       
+
 
 
                         <li class="nav-item dropdown">
@@ -121,6 +129,16 @@
                             </div>
                         </li>
                         {% endif %}
+
+                        <form class="form-inline my-2 my-lg-0 ml-3">
+                            <div class="input-group">
+                                <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+                                <div class="input-group-append">
+                                    <button class="btn btn-outline-light" type="submit"><i
+                                            class="fa-solid fa-magnifying-glass"></i></button>
+                                </div>
+                            </div>
+                        </form>
                     </ul>
                 </div>
             </nav>
@@ -129,6 +147,7 @@
 
     {% block content %}
 
+  <div class="content-wrapper">
     <div class="container mt-4">
 
         <img src="{% static 'images/back.jpg' %}" alt="FarmFresh Logo" class="img-fluid mb-4">
@@ -139,11 +158,12 @@
 
         <img src="{% static 'images/image4.jpg' %}" alt="Image 4" class="img-fluid mb-4">
     </div>
+  </div>
 
 
     {% endblock %}
 
-    <footer class="bg-dark text-white text-center py-3 fixed-bottom">
+    <footer class="bg-dark text-white text-center py-3">
         <p>&copy; 2023 FarmFresh - Your Fresh Produce Marketplace</p>
     </footer>
 
