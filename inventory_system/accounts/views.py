@@ -26,10 +26,18 @@ from django.core.files.base import ContentFile
 from barcode import Code128
 from django.contrib.auth.models import Group
 from django.core.exceptions import ObjectDoesNotExist
+from django_filters.views import FilterView
+from .filters import StockFilter
 
 
 def home(request):
     return render(request, 'accounts/home.html')
+
+class StockListView(FilterView):
+    filterset_class = StockFilter
+    queryset = Inventory.objects.filter(is_deleted=False)
+    template_name = 'stock.html'
+    paginate_by = 10
 
 def registration(request):
     group_name = ''  # Provide a default value

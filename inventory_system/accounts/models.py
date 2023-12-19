@@ -28,6 +28,7 @@ class Inventory(models.Model):
     sales = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
     stock_date = models.DateField(auto_now_add=True)
     last_sales_date = models.DateField(auto_now=True)
+    is_deleted = models.BooleanField(default=False)
     barcode = models.ImageField(upload_to='barcodes/', blank=True, null=True)
 
     def __str__(self) -> str:
