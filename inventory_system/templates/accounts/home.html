@@ -99,8 +99,8 @@
                                 class="nav-link custom-text-size">Products</a></li>
                         <li class="nav-item"><a href="{% url 'view_cart' %}" class="nav-link custom-text-size">Cart</a></li>
 
-
-                        {% if request.user.is_authenticated and request.user.is_staff %}
+                      
+                        
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle custom-text-size" href="#" id="inventoryDropdown"
                                 role="button" data-bs-toggle="dropdown" aria-haspopup="true"
@@ -116,7 +116,7 @@
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle custom-text-size" href="#" id="orderDropdown"
                                 role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Order
-                                management</a>
+                                Management</a>
                             <div class="dropdown-menu" aria-labelledby="orderDropdown">
                                 <a href="{% url 'order_list' %}" class="dropdown-item">Order List</a>
                                 <a href="{% url 'create_order' %}" class="dropdown-item">Create Order</a>
@@ -136,6 +136,9 @@
                             </div>
                         </li>
 
+                        <li class="nav-item"><a href="{% url 'suppliers-list' %}" class="nav-link custom-text-size">Supplier</a>
+                        </li>
+
                         <li class="nav-item"><a href="{% url 'profile' %}" class="nav-link custom-text-size">Profile</a>
                         </li>
 
@@ -148,14 +151,13 @@
 
                             </div>
                         </li>
-                        {% endif %}
-
-                       
+                        
                     </ul>
                 </div>
             </nav>
         </div>
     </header>
+
 
     {% block content %}
 
@@ -172,6 +174,7 @@
     </div>
   </div>
 
+ 
 
     {% endblock %}
 

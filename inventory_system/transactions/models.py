@@ -24,10 +24,10 @@ class PurchaseBill(models.Model):
     def __str__(self):
 	    return "Bill no: " + str(self.billno)
 
-    def get_items_list(self):
+def get_items_list(self):
         return PurchaseItem.objects.filter(billno=self)
 
-    def get_total_price(self):
+def get_total_price(self):
         purchaseitems = PurchaseItem.objects.filter(billno=self)
         total = 0
         for item in purchaseitems:
@@ -79,10 +79,10 @@ class SaleBill(models.Model):
     def __str__(self):
 	    return "Bill no: " + str(self.billno)
 
-    def get_items_list(self):
+def get_items_list(self):
         return SaleItem.objects.filter(billno=self)
         
-    def get_total_price(self):
+def get_total_price(self):
         saleitems = SaleItem.objects.filter(billno=self)
         total = 0
         for item in saleitems:
