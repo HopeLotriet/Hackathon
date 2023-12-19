@@ -1,7 +1,7 @@
 from django.urls import path, include
 from django.contrib import admin
 from . import views
-from .views import per_product, update, delete, add_product, dashboard, order_list, create_order, update_order_status, order_history, return_order
+from .views import per_product, update, delete, add_product, dashboard, order_list, create_order, update_order_status, order_history, return_order, order_details
 from .views import invoicing, create_invoice, invoice_detail, edit_invoice, delete_invoice, mark_invoice_as_paid, add_to_cart, view_cart, delete_cart, decrease_cart_quantity, increase_cart_quantity, delete_from_cart
 from .views import registration
 
@@ -16,7 +16,7 @@ urlpatterns = [
     path('marketing/', views.marketing, name='marketing'),
     path('invoicing/', views.invoicing, name='invoicing'),
     path('create_invoice/', create_invoice, name='create_invoice'),
-    path('invoice/<int:pk>/', invoice_detail, name='invoice_detail'),
+    path('invoice', invoice_detail, name='invoice_detail'),
     path('edit_invoice/<int:pk>/', edit_invoice, name='edit_invoice'),
     path('delete_invoice/<int:pk>/', delete_invoice, name='delete_invoice'),
     path('mark_as_paid/<int:pk>/', mark_invoice_as_paid, name='mark_invoice_as_paid'),
@@ -37,5 +37,6 @@ urlpatterns = [
     path('increase_cart_quantity/<int:item_id>/', increase_cart_quantity, name="increase_cart_quantity"),
     path('decrease_cart_quantity/<int:item_id>/', decrease_cart_quantity, name="decrease_cart_quantity"),
     path('add_to_cart/<int:item_id>/', add_to_cart, name="add_to_cart"),
-     path('delete_cart', delete_cart, name='delete_cart'),
+    path('delete_cart', delete_cart, name='delete_cart'),
+    path('order_details', order_details, name='order_details'),
 ]

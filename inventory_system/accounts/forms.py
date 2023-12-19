@@ -41,22 +41,10 @@ class InvoiceForm(forms.ModelForm):
     class Meta:
         model = Invoice
         fields = [
-            'order',
-            'total_amount',
-            'billing_name',
             'billing_address',
-            'billing_email',
-            'payment_status',
             'payment_method',
-            'payment_due_date',
             'notes',
-            'status',
         ]
-
-        widgets = {
-            'payment_due_date': forms.DateInput(attrs={'type': 'date'}),
-            'status': forms.Select(choices=Invoice.STATUS_CHOICES),
-        }
 
     def clean(self):
         cleaned_data = super().clean()

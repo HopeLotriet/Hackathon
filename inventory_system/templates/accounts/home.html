@@ -73,7 +73,7 @@
                         <li class="nav-item"><a href="{% url 'view_cart' %}" class="nav-link custom-text-size">Cart</a></li>
 
                       
-                        {% if request.user.is_authenticated and request.user.is_staff %}
+                        
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle custom-text-size" href="#" id="inventoryDropdown"
                                 role="button" data-bs-toggle="dropdown" aria-haspopup="true"
@@ -121,7 +121,7 @@
 
                             </div>
                         </li>
-                        {% endif %}
+                        
                     </ul>
                 </div>
             </nav>
