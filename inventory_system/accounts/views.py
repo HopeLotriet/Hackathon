@@ -33,7 +33,9 @@ from django.http import FileResponse
 from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
-
+import uuid
+from django.utils import timezone
+from datetime import datetime, timedelta
 
 def home(request):
     return render(request, 'accounts/home.html')
@@ -541,23 +543,60 @@ def invoicing(request):
     return render(request, 'accounts/invoicing.html', context)
 
 @login_required()
+
+@login_required()
 def create_invoice(request):
     if request.method == 'POST':
         form = InvoiceForm(request.POST)
         if form.is_valid():
             invoice = form.save()
-            return redirect('invoice_detail', pk=invoice.pk)
+            return redirect('order_details')
     else:
         form = InvoiceForm()
 
     context = {'form': form}
     return render(request, 'accounts/create_invoice.html', context)
 
+def order_details(request):
+    # Get the last created invoice
+    invoice = Invoice.objects.all().last()
+
+    #fetch required information
+    #billing name
+    logged_user = request.user
+    customer_name = f"{logged_user.first_name} {logged_user.last_name}"
+
+    # order id
+    prefix = 'ORDER'
+    timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
+    random_part = uuid.uuid4().hex[:6].upper()
+    order_id = f'{prefix}-{timestamp}-{random_part}'
+
+    #billing email
+    email = logged_user.email
+
+    #payment date
+    due_date = datetime.now().date() + timedelta(days=7)
+
+    #Amount due
+    order_amount = OrderAmount.objects.all().first()
+    payment_amount = order_amount.amount_due
+
+    # Update invoice entry
+    invoice.order = order_id
+    invoice.billing_name = customer_name
+    invoice.billing_email = email
+    invoice.payment_due_date = due_date
+    invoice.total_amount = payment_amount
+    invoice.save()
+    return redirect('invoice_detail')
+
 @login_required()
-def invoice_detail(request, pk):
-    invoice = get_object_or_404(Invoice, pk=pk)
+def invoice_detail(request):
+    invoice = Invoice.objects.all().last()
     context = {'invoice': invoice}
     return render(request, 'accounts/invoice_detail.html', context)
+
 
 @login_required()
 def edit_invoice(request, pk):
@@ -620,10 +659,8 @@ def invoice_pdf(request, pk):
     textob.textLine(f"Quantity Ordered: {order.quantity_ordered}")
     textob.textLine(f"Order Status: {order.order_status}")
 
-    # Loop through the items or details in the order
-    # You may need to adjust this based on your actual model structure
-    # For example, if you have an OrderItem model related to Order
-    for item in order.orderitem_set.all():
+    orderitems = order.orderitem_set.all()
+    for item in orderitems:
         textob.textLine(f"Item: {item.name}")
         textob.textLine(f"Quantity: {item.quantity}")
         textob.textLine(f"Cost Per Item: {item.cost_per_item}")

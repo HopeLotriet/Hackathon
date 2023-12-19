@@ -69,9 +69,9 @@ class Invoice(models.Model):
         ('paid', 'Paid'),
     ]
 
-    order = models.OneToOneField(Order, on_delete=models.CASCADE)
+    order = models.CharField(max_length=255, default="----")
     date_created = models.DateTimeField(auto_now_add=True)
-    total_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    total_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     
     billing_name = models.CharField(max_length=255)
     billing_address = models.TextField()
@@ -145,4 +145,4 @@ class OrderAmount(models.Model):
     amount_due = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
 
     def __str__(self) -> str:
-        return self.amount_due
+        return str(self.amount_due)
