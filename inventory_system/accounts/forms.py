@@ -50,10 +50,7 @@ class InvoiceForm(forms.ModelForm):
             'payment_method',
             'payment_due_date',
             'notes',
-            'discount_amount',
-            'tax_amount',
             'status',
-            'pdf_document',
         ]
 
         widgets = {

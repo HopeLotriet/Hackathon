@@ -6,10 +6,11 @@ from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse
 from django.contrib.auth import get_user_model
 from django.contrib import messages
-from .models import Inventory, Order, Invoice
+from .models import Inventory, Order, Invoice , cart, OrderAmount
 from django.shortcuts import get_object_or_404
 from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm, InvoiceForm, CreateUserForm
 from django.contrib import messages
+import io
 from django_pandas.io import read_frame
 import pandas as pd
 import plotly
@@ -28,6 +29,10 @@ from django.contrib.auth.models import Group
 from django.core.exceptions import ObjectDoesNotExist
 from django_filters.views import FilterView
 from .filters import StockFilter
+from django.http import FileResponse
+from reportlab.pdfgen import canvas
+from reportlab.lib.units import inch
+from reportlab.lib.pagesizes import letter
 
 
 def home(request):
@@ -228,6 +233,122 @@ def dashboard(request):
     }
 
     return render(request,"accounts/dashboard.html", context=context)
+
+#adding items to cart for customers
+def view_cart(request):
+    cart_items = cart.objects.all()
+    amount = OrderAmount.objects.all()
+    return render(request, 'accounts/cart.html', {'items': cart_items, 'amount': amount})
+
+def add_to_cart(request, item_id):
+    #add items to cart
+    item = get_object_or_404(Inventory, id=item_id)
+    item_name = item.name
+    item_cost = item.cost_per_item
+    quantities = 1
+    
+
+    new_entry = cart(item = item_name, cost_per_item = item_cost, quantity=quantities, total_amount=item_cost)
+    new_entry.save()
+
+   # Retrieve all instances of OrderAmount
+    existing_amounts = OrderAmount.objects.all()
+
+    if existing_amounts.exists():
+        existing_amount = existing_amounts.first()
+        existing_amount.amount_due += item_cost
+        existing_amount.save()
+    else:
+        # If no instances exist, create a new one
+        new_price = OrderAmount(amount_due=item_cost)
+        new_price.save()
+
+    messages.success(request, "Item added to cart")
+    return redirect("products")
+
+def delete_from_cart(request, item_id):
+    #remove from cart
+    item = get_object_or_404(cart, id=item_id)
+    item_cost = item.total_amount
+    
+    #decrease total price
+    existing_amount = OrderAmount.objects.all().first()
+    existing_amount.amount_due -= item_cost
+    
+    
+    item.delete()
+    existing_amount.save() 
+    
+    messages.success(request, "Item removed from cart")
+
+  
+    return redirect('view_cart')
+
+def increase_cart_quantity(request, item_id):
+    item = get_object_or_404(cart, id=item_id)
+    
+    #increase quantity
+    new_quantity=item.quantity
+    new_quantity = new_quantity + 1
+    item.quantity = new_quantity
+
+    #increase total_amount
+    price = item.cost_per_item
+    new_amount = item.total_amount
+    new_amount = new_amount + price
+    item.total_amount = new_amount
+
+    item.save()
+
+    #increase total price
+    existing_amount = OrderAmount.objects.all().first()
+    existing_amount.amount_due += price
+    existing_amount.save()
+    
+    
+    return redirect("view_cart")
+
+def decrease_cart_quantity(request, item_id):
+    item = get_object_or_404(cart, id=item_id)
+    existing_amount = OrderAmount.objects.all().first()
+    
+    new_quantity=item.quantity
+    new_amount = item.total_amount
+    price = item.cost_per_item
+
+    if new_quantity > 0 and new_amount > 0  and existing_amount.amount_due > 0:
+        #decrease quantity
+        new_quantity = new_quantity - 1
+        item.quantity = new_quantity
+
+        #decrease price
+        new_amount = new_amount - price
+        item.total_amount = new_amount
+
+        #decrease total price
+        existing_amount.amount_due -= price
+        
+        item.save()
+        existing_amount.save()
+
+    elif new_quantity <=0 and new_amount <= 0:
+        item.delete()
+
+    elif existing_amount.amount_due <= 0:
+        item.delete()
+        all_amounts = OrderAmount.objects.all()
+        all_amounts.delete()
+
+    return redirect("view_cart")
+
+def delete_cart(request):
+    cart_entry = cart.objects.all()
+    cart_entry.delete()
+
+    cart_amount = OrderAmount.objects.all()
+    cart_amount.delete()
+    messages.success(request, "Cart cleared!")
+    return redirect("view_cart")
 
 
 #Order management
@@ -465,4 +586,56 @@ def mark_invoice_as_paid(request, pk):
     invoice.payment_status = 'paid'
     invoice.save()
     return redirect('invoice_detail', pk=pk)
+
+def invoice_pdf(request, pk):
+    #get the invoice
+    invoice = get_object_or_404(Invoice, pk=pk)
+    # Create Bytestream buffer
+    buf = io.BytesIO()
+    # Create a canvas
+    c = canvas.Canvas(buf, pagesize=letter, bottomup=0)
+    # Create a text object
+    textob = c.beginText()
+    textob.setTextOrigin(inch, inch)
+    textob.setFont("Helvetica", 14)
+
+    # Add invoice details to the PDF
+    textob.textLine(f"Invoice Number: {invoice.pk}")
+    textob.textLine(f"Total Amount: {invoice.total_amount}")
+    textob.textLine(f"Billing Name: {invoice.billing_name}")
+    textob.textLine(f"Billing Address: {invoice.billing_address}")
+    textob.textLine(f"Billing Email: {invoice.billing_email}")
+    textob.textLine(f"Payment Status: {invoice.payment_status}")
+    textob.textLine(f"Payment Method: {invoice.payment_method}")
+    textob.textLine(f"Payment Due Date: {invoice.payment_due_date}")
+    textob.textLine(f"Notes: {invoice.notes}")
+    textob.textLine(f"Status: {invoice.status}")
+
+    # Get the related order details
+    order = invoice.order
+    textob.textLine(f"Order ID: {order.id}")
+    textob.textLine(f"Order Date: {order.order_date}")
+    textob.textLine(f"Product: {order.product}")
+    textob.textLine(f"Customer: {order.customer}")
+    textob.textLine(f"Quantity Ordered: {order.quantity_ordered}")
+    textob.textLine(f"Order Status: {order.order_status}")
+
+    # Loop through the items or details in the order
+    # You may need to adjust this based on your actual model structure
+    # For example, if you have an OrderItem model related to Order
+    for item in order.orderitem_set.all():
+        textob.textLine(f"Item: {item.name}")
+        textob.textLine(f"Quantity: {item.quantity}")
+        textob.textLine(f"Cost Per Item: {item.cost_per_item}")
+
+
+    # Finish Up
+        c.drawText(textob)
+        c.showPage()
+        c.save()
+        buf.seek(0)
+
+
+    # Return the PDF as a response
+    return FileResponse(buf, as_attachment=True, filename=f'invoice_{invoice.pk}_pdf.pdf')
 
