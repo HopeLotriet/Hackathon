@@ -31,18 +31,15 @@
     }
 
     .custom-text-size {
-        font-size: 25px;
-    }
-
-    .content-section {
-        background: #fff;
-        margin: 40px;
-        padding: 1.5rem 1.5rem;
-        border-radius: 10px;
+        font-size: 18px;
     }
 
     .header-content {
-        margin-left: 0;
+        /* margin-left: 0; */
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 10px;
     }
 
     .header-content h1 {
@@ -54,17 +51,39 @@
         flex: 1;
     }
 
-  
+    .search-bar {
+        display: flex;
+        align-items: center;
+    }
+
+    .search-bar form {
+        margin-left: auto; /* Push the search bar to the right */
+    }
 </style>
 
 <body>
     <header class="bg-success text-white">
+        <div class="header-content">
+            <div class="d-flex align-items-center">
+                <img src="{% static 'images/logo.jpeg' %}" alt="FarmFresh Logo" style="max-width: 150px;">
+                <h1 class="mb-0">FarmFresh</h1>
+                <p class="mb-0">Your Fresh Produce Marketplace</p>
+            </div>
 
-        <div class="d-flex align-items-center header-content">
-            <img src="{% static 'images/logo.jpeg' %}" alt="FarmFresh Logo" style="max-width: 150px;">
-            <h1 class="mb-0">FarmFresh</h1>
-            <p class="mb-0">Your Fresh Produce Marketplace</p>
+            <div class="search-bar">
+                <form class="form-inline my-2 my-lg-0">
+                    <div class="input-group">
+                        <input class="form-control" type="search" placeholder="Search" aria-label="Search">
+                        <div class="input-group-append">
+                            <button class="btn btn-outline-light" type="submit"><i
+                                    class="fa-solid fa-magnifying-glass"></i></button>
+                        </div>
+                    </div>
+                </form>
+            </div>
         </div>
+
+       
 
         <div class="container d-flex justify-content-end">
 
@@ -131,15 +150,7 @@
                         </li>
                         {% endif %}
 
-                        <form class="form-inline my-2 my-lg-0 ml-3">
-                            <div class="input-group">
-                                <input class="form-control" type="search" placeholder="Search" aria-label="Search">
-                                <div class="input-group-append">
-                                    <button class="btn btn-outline-light" type="submit"><i
-                                            class="fa-solid fa-magnifying-glass"></i></button>
-                                </div>
-                            </div>
-                        </form>
+                       
                     </ul>
                 </div>
             </nav>
