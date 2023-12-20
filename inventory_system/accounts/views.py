@@ -767,3 +767,14 @@ def confirm_order(request, pk):
     order_amount.delete()
 
     return render(request, 'accounts/confirm_order.html', {'message': message})
+
+#Search for something
+def search(request):
+    if request.method == "POST":
+        searched = request.POST['searched']
+        inventories = Inventory.objects.filter(name__contains=searched)
+
+        return render(request, 'accounts/search.html', {'searched':searched,
+                                                        'inventories': inventories})
+    else:
+        return render(request, 'accounts/search.html', {})
