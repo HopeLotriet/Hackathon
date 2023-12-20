@@ -37,16 +37,14 @@
     .content-wrapper {
         flex: 1;
     }
-
 </style>
 
 <body>
- 
+
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
         <div class="container-fluid py-3">
-            <a class="navbar-brand fs-1" href="#"><img
-                src="{% static 'images/logo.jpeg' %}" alt="FarmFresh Logo" width="75"
-                class="d-inline-block align-text-top">FarmFresh</a>
+            <a class="navbar-brand fs-1" href="#"><img src="{% static 'images/logo.jpeg' %}" alt="FarmFresh Logo"
+                    width="75" class="d-inline-block align-text-top">FarmFresh</a>
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
                 data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
                 aria-label="Toggle navigation">
@@ -59,7 +57,15 @@
                     </li>
 
                     <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'products' %}">Products</a>
+                    </li>
+
+                    <li class="nav-item">
                         <a class="nav-link active" href="{% url 'view_cart' %}">Cart</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'order_history' %}">Order History</a>
                     </li>
 
                     <li class="nav-item dropdown">
@@ -83,28 +89,7 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="{% url 'order_list' %}">Order List</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="{% url 'create_order' %}">Create Order</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="{% url 'order_history' %}">Order History</a></li>
-                        </ul>
-                    </li>
 
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Invoicing
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{% url 'invoicing' %}">Invoice</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="{% url 'create_invoice' %}">Create Invoice</a></li>
                         </ul>
                     </li>
 
@@ -145,7 +130,8 @@
 
                 <form class="d-flex" method="POST" action="{% url 'search' %}">
                     {% csrf_token %}
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="searched">
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"
+                        name="searched">
                     <button class="btn btn-outline-success" type="submit">Search</button>
                 </form>
             </div>
@@ -154,20 +140,20 @@
 
     {% block content %}
 
-    <div class="content-wrapper">
-        <div class="container mt-4">
-
+    <div class="row">
+        <div class="col-12">
             <img src="{% static 'images/back.jpg' %}" alt="FarmFresh Logo" class="img-fluid mb-4">
-
-            <img src="{% static 'images/image1.jpg' %}" alt="Image 2" class="img-fluid mb-4">
-
-            <img src="{% static 'images/image2.jpg' %}" alt="Image 3" class="img-fluid mb-4">
-
-            <img src="{% static 'images/image4.jpg' %}" alt="Image 4" class="img-fluid mb-4">
         </div>
     </div>
 
+    <div class="row">
+        <div class="col-12">
+            <img src="{% static 'images/image1.jpg' %}" alt="Image 1" class="img-fluid mb-4">
+        </div>
+    </div>
 
+    </div>
+    </div>
 
     {% endblock %}
 
