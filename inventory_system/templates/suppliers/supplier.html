@@ -50,9 +50,9 @@
             {% for purchase in bills %}
             <tr>
                 <td class="align-middle"> <p>{{ purchase.billno }}</p> </td>
-                <td class="align-middle">{% for item in purchase.get_items_list %} {{ item.stock.name }} <br> {% endfor %}</td>
-                <td class="align-middle">{% for item in purchase.get_items_list %} {{ item.quantity }} <br> {% endfor %}</td>     
-                <td class="align-middle">${{ purchase.get_total_price }}</td>
+                <td class="align-middle">{% for item in formset %} {{ form.stock }} <br> {% endfor %}</td>
+                <td class="align-middle">{% for item in formset %} {{ form.quantity }} <br> {% endfor %}</td>     
+                <td class="align-middle">${{ item.get_total_price }}</td>
                 <td class="align-middle">{{ purchase.time.date }}</td>
                 <td class="align-middle"> <a href="{% url 'purchase-bill' purchase.billno %}" class="btn btn-secondary">View Bill</a> <a href="{% url 'delete-purchase' purchase.pk %}" class="btn btn-danger">Delete Bill</a> </td>
             </tr>

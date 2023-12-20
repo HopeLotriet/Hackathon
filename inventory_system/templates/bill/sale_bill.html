@@ -1,5 +1,4 @@
-{% extends bill_base %}
-{% extends 'accounts/home.html' %}
+{% extends 'bill/bill_base.html' %}
 {% load static %}
 
 
@@ -8,9 +7,8 @@
 
 {% block content %}
     
-    <div style="color:#575757; font-style: bold; font-size: 3rem;  border-bottom: 1px solid white;">Sale Bill No : {{ bill.billno }}</div>
+    <div style="text-align: center; color:#575757; font-style: bold; font-size: 3rem;  border-bottom: 1px solid white;">Sale Bill No : {{ bill.billno }}</div>
 
-    <!-- <br><br> -->
 
     <form method="post">
     {% csrf_token %}
@@ -30,10 +28,10 @@
                     
                         <tr style="text-align: center;">
                             <td >
-                                <span style="font-size: 350%;">DJANGOIMS</span> <br>
+                                <span style="font-size: 350%;">UJHACKATHON</span> <br>
                                 <span style="font-size: 120%; font-weight: bold;">DEALERS IN : Products</span> <br>
-                                <span style="font-weight: bold;">REGD ADDRESS :</span> 971 Center Street<br>Umatilla, OR 97882<br>
-                                <span style="font-weight: bold;">EMAIL : djangoims@mail.com</span> <br><br>
+                                <span style="font-weight: bold;">REGD ADDRESS :</span> 69 Kingsway Ave<br>Auckland Park, OR 2092<br>
+                                <span style="font-weight: bold;">EMAIL : ujhackathon@gmail.com</span> <br><br>
                             </td>
                         </tr>
                     
@@ -136,7 +134,20 @@
                                     </tr>
                                     <tr>
                                         <td class="inner-box" style="font-weight: bold;">&nbsp;TOTAL</td>
-                                        <td class="inner-box align-middle">&nbsp; <input type="text" name="total" class="align-middle" pattern="[0-9]+\.[0-9]+" style="border: 0; overflow: hidden;" value="{% if billdetails.total %}{{ billdetails.total }}{% endif %}"> </td>
+                                        <td class="inner-box align-middle">
+                                            {% with total=0 %}
+                                            {% for item in formset %}
+                                            {% if item.quantity and item.perprice %}
+                                            {% with item_total=item.quantity * item.perprice %}
+                                            {% with total=total+item_total %}
+                                            {% endwith %}
+                                            {% endwith %}
+                                            {% endif %}
+                                            {% endfor %}
+                                            {% endwith %}
+                                        <input type="text" name="total" class="align-middle" pattern="[0-9]+\.[0-9]+" style="border: 0; overflow: hidden;" value="{{ total }}">
+                                        </td>
+
                                     </tr>
                                 </tbody>
                             </table>

@@ -20,7 +20,7 @@
     <table class="table table-css table-bordered table-hover"> 
             
         <thead class="thead-dark align-middle">
-            <tr><!-- Log on to codeastro.com for more projects -->
+            <tr>
                 <th width="10%">Bill No.</th>
                 <th width="15%">Customer</th>
                 <th width="15%">Stocks Sold</th>
@@ -35,7 +35,7 @@
 
         <tbody>
             {% for sale in bills %}
-            <tr><!-- Log on to codeastro.com for more projects -->
+            <tr>
                 <td class="align-middle"> <p>{{ sale.billno }}</p> </td>
                 <td class=""> {{ sale.name }} <br> <small style="color: #909494">Ph No : {{ sale.phone }}</small> </td>
                 <td class="align-middle">{% for item in sale.get_items_list %} {{ item.stock.name }} <br> {% endfor %}</td>
@@ -49,7 +49,7 @@
 
     </table>
 
-    <div class="align-middle"><!-- Log on to codeastro.com for more projects -->
+    <div class="align-middle">
         {% if is_paginated %}
 
             {% if page_obj.has_previous %}
@@ -75,7 +75,7 @@
 
 {% else %}
 
-        <tbody></tbody>  <!-- Log on to codeastro.com for more projects --> 
+        <tbody></tbody>   
     </table>
 
     <br><br><br><br><br><br><br><br>

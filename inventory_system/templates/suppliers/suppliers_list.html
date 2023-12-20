@@ -10,7 +10,7 @@
     
     <div class="row" style="color: #575757; font-style: bold; font-size: 3rem;">
         <div class="col-md-8">Suppliers List</div>
-        <div class="col-md-4">       <!-- Log on to codeastro.com for more projects -->        
+        <div class="col-md-4">       
             <div style="float:right;"> <a class="btn btn-success" href="{% url 'new-supplier' %}">Add New Supplier</a> </div>
         </div>
     </div>
@@ -33,7 +33,7 @@
         <tbody>
             {% for supplier in object_list %}
             <tr>
-                <td><!-- Log on to codeastro.com for more projects -->
+                <td>
                     <p> <a href="{% url 'supplier' supplier.name %}">{{ supplier.name }}</a> </p>
                 </td>
                 <td class="align-middle"> {{ supplier.phone }} </td>
@@ -50,7 +50,7 @@
 
     </table>
 
-    <div class="align-middle"><!-- Log on to codeastro.com for more projects -->
+    <div class="align-middle">
         {% if is_paginated %}
 
             {% if page_obj.has_previous %}
@@ -77,7 +77,7 @@
 {% else %}
 
         <tbody></tbody>   
-    </table><!-- Log on to codeastro.com for more projects -->
+    </table>
 
     <br><br><br><br><br><br><br><br>
     <div style="color: #575757; font-style: bold; font-size: 1.5rem; text-align: center;">The records are empty. Please try adding some.</div>

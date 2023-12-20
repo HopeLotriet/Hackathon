@@ -16,7 +16,7 @@ from .models import (
     PurchaseBillDetails,
     SaleBill,  
     SaleItem,
-    SaleBillDetails
+    SaleBillDetails,
 )
 from .forms import (
     SelectSupplierForm, 
@@ -137,50 +137,48 @@ class SelectSupplierView(View):
         return render(request, self.template_name, {'form': form})
 
 
-# used to generate a bill object and save items
 class PurchaseCreateView(View):                                                 
     template_name = 'purchases/new_purchase.html'
 
     def get(self, request, pk):
-        formset = PurchaseItemFormset(request.GET or None)                      # renders an empty formset
-        supplierobj = get_object_or_404(Supplier, pk=pk)                        # gets the supplier object
+        formset = PurchaseItemFormset(request.GET or None)
+        supplierobj = get_object_or_404(Supplier, pk=pk)
         context = {
-            'formset'   : formset,
-            'supplier'  : supplierobj,
-        }                                                                       # sends the supplier and formset as context
+            'formset': formset,
+            'supplier': supplierobj,
+        }
         return render(request, self.template_name, context)
 
     def post(self, request, pk):
-        formset = PurchaseItemFormset(request.POST)                             # recieves a post method for the formset
-        supplierobj = get_object_or_404(Supplier, pk=pk)                        # gets the supplier object
+        formset = PurchaseItemFormset(request.POST)
+        supplierobj = get_object_or_404(Supplier, pk=pk)
+        
         if formset.is_valid():
-            # saves bill
-            billobj = PurchaseBill(supplier=supplierobj)                        # a new object of class 'PurchaseBill' is created with supplier field set to 'supplierobj'
-            billobj.save()                                                      # saves object into the db
-            # create bill details object
+            billobj = PurchaseBill.objects.create(supplier=supplierobj)
             billdetailsobj = PurchaseBillDetails(billno=billobj)
             billdetailsobj.save()
-            for form in formset:                                                # for loop to save each individual form as its own object
-                # false saves the item and links bill to the item
+
+            for form in formset:
                 billitem = form.save(commit=False)
-                billitem.billno = billobj                                       # links the bill object to the items
-                # gets the stock item
-                stock = get_object_or_404(Stock, name=billitem.stock.name)       # gets the item
-                # calculates the total price
+                billitem.billno = billobj
+                stock = get_object_or_404(Inventory, name=billitem.stock.name)
                 billitem.totalprice = billitem.perprice * billitem.quantity
-                # updates quantity in stock db
-                stock.quantity += billitem.quantity                              # updates quantity
-                # saves bill item and stock
+                stock.quantity_in_stock += billitem.quantity
                 stock.save()
                 billitem.save()
+
             messages.success(request, "Purchased items have been registered successfully")
             return redirect('purchase-bill', billno=billobj.billno)
+        
+        
         formset = PurchaseItemFormset(request.GET or None)
+        
         context = {
-            'formset'   : formset,
-            'supplier'  : supplierobj
-        }
+            'formset': formset,
+            'supplier': supplierobj
+            }
         return render(request, self.template_name, context)
+
 
 
 # used to delete a bill object
@@ -218,46 +216,43 @@ class SaleCreateView(View):
 
     def get(self, request):
         form = SaleForm(request.GET or None)
-        formset = SaleItemFormset(request.GET or None)                          # renders an empty formset
+        formset = SaleItemFormset(request.GET or None)
         stocks = Inventory.objects.filter(is_deleted=False)
         context = {
-            'form'      : form,
-            'formset'   : formset,
-            'stocks'    : stocks
-        }
+            'form': form,
+            'formset': formset,
+            'stocks': stocks
+            }
+        print("SaleCreateView GET Context:", context)
         return render(request, self.template_name, context)
 
     def post(self, request):
         form = SaleForm(request.POST)
-        formset = SaleItemFormset(request.POST)                                 # recieves a post method for the formset
+        formset = SaleItemFormset(request.POST)
         if form.is_valid() and formset.is_valid():
-            # saves bill
             billobj = form.save(commit=False)
-            billobj.save()     
-            # create bill details object
+            billobj.save()
             billdetailsobj = SaleBillDetails(billno=billobj)
             billdetailsobj.save()
-            for form in formset:                                                # for loop to save each individual form as its own object
-                # false saves the item and links bill to the item
+            
+            for form in formset:
                 billitem = form.save(commit=False)
-                billitem.billno = billobj                                       # links the bill object to the items
-                # gets the stock item
-                stock = get_object_or_404(Stock, name=billitem.stock.name)      
-                # calculates the total price
+                billitem.billno = billobj
+                stock = get_object_or_404(Inventory, name=billitem.stock.name)
                 billitem.totalprice = billitem.perprice * billitem.quantity
-                # updates quantity in stock db
-                stock.quantity -= billitem.quantity   
-                # saves bill item and stock
+                stock.quantity_in_stock -= billitem.quantity
                 stock.save()
                 billitem.save()
-            messages.success(request, "Sold items have been registered successfully")
-            return redirect('sale-bill', billno=billobj.billno)
-        form = SaleForm(request.GET or None)
-        formset = SaleItemFormset(request.GET or None)
+
+        messages.success(request, "Sold items have been registered successfully")
+        return redirect('sale-bill', billno=billobj.billno)
+
         context = {
-            'form'      : form,
-            'formset'   : formset,
-        }
+            'form': form,
+            'formset': formset,
+            'stocks': Inventory.objects.filter(is_deleted=False)
+            }
+        print("SaleCreateView POST Context:", context)
         return render(request, self.template_name, context)
 
 
@@ -288,13 +283,22 @@ class PurchaseBillView(View):
     bill_base = "bill/bill_base.html"
 
     def get(self, request, billno):
+        purchase_bill = PurchaseBill.objects.get(billno=billno)
+        purchase_items = PurchaseItem.objects.filter(billno=billno)
+        purchase_details = PurchaseBillDetails.objects.get(billno=billno)
+        
+        print("Purchase Bill:", purchase_bill)
+        print("Purchase Items:", purchase_items)
+        print("Purchase Details:", purchase_details)
+
         context = {
-            'bill'          : PurchaseBill.objects.get(billno=billno),
-            'items'         : PurchaseItem.objects.filter(billno=billno),
-            'billdetails'   : PurchaseBillDetails.objects.get(billno=billno),
-            'bill_base'     : self.bill_base,
-        }
+            'bill': purchase_bill,
+            'items': purchase_items,
+            'billdetails': purchase_details,
+            'bill_base': self.bill_base,
+            }
         return render(request, self.template_name, context)
+
 
     def post(self, request, billno):
         form = PurchaseDetailsForm(request.POST)
