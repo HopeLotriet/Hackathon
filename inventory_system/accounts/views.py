@@ -550,14 +550,14 @@ def create_invoice(request):
         form = InvoiceForm(request.POST)
         if form.is_valid():
             invoice = form.save()
-            return redirect('order_details')
+            return redirect('order_detail')
     else:
         form = InvoiceForm()
 
     context = {'form': form}
     return render(request, 'accounts/create_invoice.html', context)
 
-def order_details(request):
+def order_detail(request):
     # Get the last created invoice
     invoice = Invoice.objects.all().last()
 
