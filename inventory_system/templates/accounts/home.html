@@ -98,7 +98,7 @@
                         <li class="nav-item"><a href="{% url 'products' %}"
                                 class="nav-link custom-text-size">Products</a></li>
                         <li class="nav-item"><a href="{% url 'view_cart' %}" class="nav-link custom-text-size">Cart</a></li>
-
+                        <li class="nav-item"><a href="{% url 'order_history'%}"" class="nav-link custom-text-size">Order history</a></li>
                       
                         
                         <li class="nav-item dropdown">
@@ -119,23 +119,11 @@
                                 Management</a>
                             <div class="dropdown-menu" aria-labelledby="orderDropdown">
                                 <a href="{% url 'order_list' %}" class="dropdown-item">Order List</a>
-                                <a href="{% url 'create_order' %}" class="dropdown-item">Create Order</a>
-                                <a href="{% url 'order_history'%}" class="dropdown-item">Order History</a>
                             </div>
                         </li>
 
                         <li class="nav-item"><a href="{% url 'marketing' %}"
                                 class="nav-link custom-text-size">Marketing</a></li>
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle custom-text-size" href="#" id="orderDropdown"
-                                role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                aria-expanded="false">Invoicing</a>
-                            <div class="dropdown-menu" aria-labelledby="orderDropdown">
-                                <a href="{% url 'invoicing' %}" class="dropdown-item">Invoice</a>
-                                <a href="{% url 'create_invoice' %}" class="dropdown-item">Create Invoice</a>
-                            </div>
-                        </li>
-
                     
                         <li class="nav-item dropdown">
                             <a class="nav-link dropdown-toggle custom-text-size" href="#" id="orderDropdown"
