@@ -27,18 +27,10 @@
             <p><strong>Status:</strong> {{ invoice.status }}</p>
         </div>
     
-        <!-- Back to Invoicing link -->
-        <p class="mt-3"><a href="{% url 'invoicing' %}" class="btn btn-secondary">Back to Invoicing</a></p>
-    <!-- 
-        Link to generate invoice pdf -->
-        <p><a href="{% url 'generate_pdf' invoice.pk %}" class="btn btn-primary">Generate PDF</a></p>
-    </div>
-    </div>
-
-    <!-- Confirm order to generate pdf and send email to customer -->
-    <p class="mt-3"><a class="btn btn-secondary">Confirm order</a></p>
-    <p class="mt-3"><a class="btn btn-secondary">Edit invoice</a></p>
-    <p class="mt-3"><a class="btn btn-secondary">Cancel order</a></p>
+     <!-- Confirm order to generate pdf and send email to customer -->
+     <p class="mt-3"><a class="btn btn-secondary"  href="{% url 'confirm_order' invoice.id %}">Confirm order</a></p>
+     <p class="mt-3"><a class="btn btn-secondary" href="{% url 'edit_invoice' invoice.id %}">Edit invoice</a></p>
+     <p class="mt-3"><a class="btn btn-secondary" href="{% url 'delete_invoice' invoice.id %}">Cancel order</a></p>
 </div>
 
 {% endblock %}

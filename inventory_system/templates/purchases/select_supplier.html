@@ -1,32 +1,38 @@
-{% extends "accounts/home.html" %}
+{% extends 'accounts/home.html' %}
+{% load static %}
 
 
 {% block title %} New Purchase {% endblock title %}
 
-
 {% block content %}
 
-    <div style="color:#575757; font-style: bold; font-size: 3rem; border-bottom: 1px solid white;">New Purchase</div> 
-    
-    <br>
-    
-    <form method="post">
+<div class="content-wrapper">
+    <div class="container mt-5">
+        <div style="color:#575757; font-style: bold; font-size: 3rem; border-bottom: 1px solid white;">New Purchase
+        </div>
 
-        {% csrf_token %}
-        
-        {% for field in form.visible_fields %}
+        <br>
+
+        <form method="post">
+
+            {% csrf_token %}
+
+            {% for field in form.visible_fields %}
             <div class="form-group">
                 {{ field.label_tag }}
                 {{ field }}
             </div>
-        {% endfor %}
+            {% endfor %}
 
-        <br>
-        <div class="align-middle">
-            <button type="submit" class="btn btn-success">Next</button>
-            <a href="{% url 'purchases-list' %}" class="btn btn-secondary">Cancel</a>
-        </div>
-        
-    </form>
+            <br>
+            <div class="align-middle">
+                <button type="submit" class="btn btn-success">Next</button>
+                <a href="{% url 'purchases-list' %}" class="btn btn-secondary">Cancel</a>
+            </div>
 
-{% endblock content %}
+        </form>
+
+    </div>
+</div>
+
+{% endblock %}

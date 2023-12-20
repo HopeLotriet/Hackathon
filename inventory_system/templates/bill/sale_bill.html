@@ -134,20 +134,7 @@
                                     </tr>
                                     <tr>
                                         <td class="inner-box" style="font-weight: bold;">&nbsp;TOTAL</td>
-                                        <td class="inner-box align-middle">
-                                            {% with total=0 %}
-                                            {% for item in formset %}
-                                            {% if item.quantity and item.perprice %}
-                                            {% with item_total=item.quantity * item.perprice %}
-                                            {% with total=total+item_total %}
-                                            {% endwith %}
-                                            {% endwith %}
-                                            {% endif %}
-                                            {% endfor %}
-                                            {% endwith %}
-                                        <input type="text" name="total" class="align-middle" pattern="[0-9]+\.[0-9]+" style="border: 0; overflow: hidden;" value="{{ total }}">
-                                        </td>
-
+                                        <td class="inner-box align-middle">&nbsp; <input type="text" name="total" class="align-middle" pattern="[0-9]+\.[0-9]+" style="border: 0; overflow: hidden;" value="{% if billdetails.total %}{{ billdetails.total }}{% endif %}"> </td>
                                     </tr>
                                 </tbody>
                             </table>

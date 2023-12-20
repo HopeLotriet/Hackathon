@@ -1,0 +1,33 @@
+{% extends 'accounts/home.html' %}
+{% load static %}
+
+{% block title %}Search{% endblock %}
+
+{% block content %}
+
+<div class="content-wrapper">
+    <div class="container mt-5">
+
+        {% if searched %}
+        <h1 class="mb-4">Search Results For: {{ searched }}</h1>
+
+        <ul class="list-group">
+            {% for inventory in inventories %}
+            <li class="list-group-item">
+                <a href="{% url 'stock' %}">{{ inventory }}</a>
+            </li>
+            {% endfor %}
+        </ul>
+
+        {% else %}
+
+        <div class="alert alert-warning" role="alert">
+            <h1>Hey! You Forgot To Search For A Product 😜</h1>
+        </div>
+
+        {% endif %}
+
+    </div>
+</div>
+
+{% endblock %}

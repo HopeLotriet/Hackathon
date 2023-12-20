@@ -15,7 +15,7 @@ urlpatterns = [
     path('marketing/', views.marketing, name='marketing'),
     path('invoicing/', views.invoicing, name='invoicing'),
     path('create_invoice/', views.create_invoice, name='create_invoice'),
-    path('invoice/<int:pk>/', views.invoice_detail, name='invoice_detail'),
+    path('invoice', views.invoice_detail, name='invoice_detail'),
     path('edit_invoice/<int:pk>/', views.edit_invoice, name='edit_invoice'),
     path('delete_invoice/<int:pk>/', views.delete_invoice, name='delete_invoice'),
     path('mark_as_paid/<int:pk>/', views.mark_invoice_as_paid, name='mark_invoice_as_paid'),
@@ -36,4 +36,7 @@ urlpatterns = [
     path('decrease_cart_quantity/<int:item_id>/', views.decrease_cart_quantity, name="decrease_cart_quantity"),
     path('add_to_cart/<int:item_id>/', views.add_to_cart, name="add_to_cart"),
     path('delete_cart', views.delete_cart, name='delete_cart'),
+    path('order_details', views.order_details, name='order_details'),
+    path('confirm_order/<int:pk>/', views.confirm_order, name='confirm_order'),
+    path('search/', views.search, name='search'),
 ]
