@@ -6,7 +6,7 @@ from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse
 from django.contrib.auth import get_user_model
 from django.contrib import messages
-from .models import Inventory, Order, Invoice , cart, OrderAmount
+from .models import Inventory, Order, Invoice , cart, OrderAmount, customerOrderHistory, cart_records
 from django.shortcuts import get_object_or_404
 from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm, InvoiceForm, CreateUserForm
 from django.contrib import messages
@@ -36,6 +36,7 @@ from reportlab.lib.pagesizes import letter
 import uuid
 from django.utils import timezone
 from datetime import datetime, timedelta
+from django.db.models import Count, Sum
 
 def home(request):
     return render(request, 'accounts/home.html')
@@ -349,6 +350,9 @@ def delete_cart(request):
 
     cart_amount = OrderAmount.objects.all()
     cart_amount.delete()
+
+    logged_user = request.user
+    print(logged_user.last_name)
     messages.success(request, "Cart cleared!")
     return redirect("view_cart")
 
@@ -359,6 +363,7 @@ def order_list(request):
     order_lists = Order.objects.all()
     print(order_lists)
     return render(request, 'accounts/order_list.html', {'orders': order_lists})
+
 
 @login_required()
 def create_order(request):
@@ -422,19 +427,30 @@ def create_order(request):
 
 @login_required()
 def update_order_status(request, order_id):
-    order = Order.objects.get(id=order_id)
-    name = order.customer
+    order = get_object_or_404(Order, id=order_id)
+    name = request.user.username
+    customer_order = get_object_or_404(customerOrderHistory, id=order_id)
     
+
     if request.method == 'POST':
         form = UpdateStatusForm(request.POST)
                 
         if form.is_valid():
             current_status = order.order_status
-            
+           
             if current_status != 'Order canceled':
+                #update orderlist status
                 new_status = form.cleaned_data['new_status']
                 order.order_status = new_status
                 order.save()
+
+                #update customer order status 
+                if new_status == 'shipped':
+                    customer_order.customer_order_status = 'shipped'
+                elif new_status == 'delivered':
+                    customer_order.customer_order_status = 'delivered'
+                
+                customer_order.save()
 
                 # Generate update emails
                 status = ""
@@ -474,18 +490,8 @@ def update_order_status(request, order_id):
 
 @login_required()
 def order_history(request):
-    previous_orders = []
-    if request.method == 'POST':
-        form = UserInputForm(request.POST)
-        if form.is_valid():
-            # Do something with the user input, for example, save it to the database
-            user_name = form.cleaned_data['user_input']
-            previous_orders = Order.objects.filter(customer=user_name)
-    else:
-        form = UserInputForm()
-
-    return render(request, 'accounts/order_history.html', {'form':form ,'orders': previous_orders})
-
+    previous_orders = customerOrderHistory.objects.all()
+    return render(request, 'accounts/order_history.html', {'orders': previous_orders})
 
 @login_required()
 def return_order(request, order_id):
@@ -598,6 +604,13 @@ def invoice_detail(request):
     return render(request, 'accounts/invoice_detail.html', context)
 
 
+
+@login_required()
+def invoice_detail(request):
+    invoice = Invoice.objects.all().last()
+    context = {'invoice': invoice}
+    return render(request, 'accounts/invoice_detail.html', context)
+
 @login_required()
 def edit_invoice(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
@@ -606,7 +619,7 @@ def edit_invoice(request, pk):
         form = InvoiceForm(request.POST, instance=invoice)
         if form.is_valid():
             form.save()
-            return redirect('invoice_detail', pk=pk)
+            return redirect('invoice_detail')
     else:
         form = InvoiceForm(instance=invoice)
 
@@ -617,7 +630,14 @@ def edit_invoice(request, pk):
 def delete_invoice(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     invoice.delete()
-    return redirect('invoicing')
+
+    cart_entry = cart.objects.all()
+    cart_entry.delete()
+
+    order_amount = OrderAmount.objects.all()
+    order_amount.delete()
+    messages.success(request, "Order canceled")
+    return redirect('products')
 
 @login_required()
 def mark_invoice_as_paid(request, pk):
@@ -626,6 +646,7 @@ def mark_invoice_as_paid(request, pk):
     invoice.save()
     return redirect('invoice_detail', pk=pk)
 
+#generate pdf of invoice
 def invoice_pdf(request, pk):
     #get the invoice
     invoice = get_object_or_404(Invoice, pk=pk)
@@ -676,5 +697,73 @@ def invoice_pdf(request, pk):
     # Return the PDF as a response
     return FileResponse(buf, as_attachment=True, filename=f'invoice_{invoice.pk}_pdf.pdf')
 
+#finialise order
+def confirm_order(request, pk):
+    message = "checkout successful"
+
+    #adjust inventory table
+    cart_items = cart.objects.all()
+
+    for item in cart_items:
+        product_name = item.item
+        inventory = Inventory.objects.get(name=product_name)
+        ordered_quantity = item.quantity
+        quantity_in_stock = inventory.quantity_in_stock
+        inventory.quantity_in_stock = max(0, quantity_in_stock - ordered_quantity)
+        print(f"Product: {product_name}, Ordered Quantity: {ordered_quantity}") 
+        inventory.save()
+
+    ##generate email and pdf
+
+    ##add order to order list :-
+    #order_id
+    invoice = get_object_or_404(Invoice, pk=pk)
+    order = invoice.order
+    print(order)
+
+    #customer name
+    customer_name =invoice.billing_name
+
+    # list of products ordered
+    grouped_cart_items = cart.objects.values('item').annotate(item_count=Count('id'))
+    item_list = [f"{group['item_count']}-{group['item']}" for group in grouped_cart_items]
+    all_items = ', '.join(item_list)
+    print(all_items)
+
+    #total quatities ordered
+    total_quantity = cart.objects.aggregate(total_quantity=Sum('quantity'))['total_quantity']
+    print(total_quantity)
+
+    #total amount spent
+    amount = invoice.total_amount
+    print(amount)
+
+    #save order history
+    order_entry = Order(
+        order_id=order, 
+        customer=customer_name,
+        product=all_items,
+        quantity_ordered=total_quantity,
+        amount_spent=amount
+        )
+    
+    order_entry.save()
+    
+    customer_order_entry = customerOrderHistory(
+        order_id=order, 
+        product=all_items,
+        quantity_ordered=total_quantity,
+        amount_spent=amount
+    )
+
+    customer_order_entry.save()
 
 
+    #clear cart
+    cart_table = cart.objects.all()
+    cart_table.delete()
+
+    order_amount = OrderAmount.objects.all().first()
+    order_amount.delete()
+
+    return render(request, 'accounts/confirm_order.html', {'message': message})
