@@ -1,8 +1,12 @@
 asgiref==3.7.2
+chardet==5.2.0
 crispy-bootstrap4==2023.1
+Cython==3.0.7
 Django==5.0
 django-crispy-forms==2.1
+django-filter==23.5
 django-pandas==0.6.6
+django-widget-tweaks==1.5.0
 fontawesomefree==6.5.1
 numpy==1.26.2
 packaging==23.2
