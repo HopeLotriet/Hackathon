@@ -2,6 +2,7 @@
 
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -18,20 +19,21 @@
         integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
         crossorigin="anonymous"></script>
     <script src="{% static 'fontawesomefree/js/all.min.js' %}"></script>
-    
+
     <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/bootstrap.min.css' %}">
 
-<!-- Bootstrap CSS -->
-<link rel="stylesheet" type="text/css" href="{% static 'bootstrap/bootstrap.min.css' %}">
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/bootstrap.min.css' %}">
 
-<!-- font awesome cdn -->
-<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css" integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
+    <!-- font awesome cdn -->
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.0/css/all.css"
+        integrity="sha384-lZN37f5QGtY3VHgisS14W3ExzMWZxybE1SJSEsQp9S+oqd12jhcu+A56Ebc1zFSJ" crossorigin="anonymous">
 
-<!-- Main CSS, then Sidebar CSS, Bill CSS-->
-<link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">    
-<link rel="stylesheet" type="text/css" href="{% static 'css/bill.css' %}">
+    <!-- Main CSS, then Sidebar CSS, Bill CSS-->
+    <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+    <link rel="stylesheet" type="text/css" href="{% static 'css/bill.css' %}">
 
-<title>{% block title %}Title Missing{% endblock title %}</title>
+    <title>{% block title %}Title Missing{% endblock title %}</title>
 </head>
 <style>
     body {
@@ -39,10 +41,6 @@
         display: flex;
         flex-direction: column;
         min-height: 100vh;
-    }
-
-    .custom-text-size {
-        font-size: 18px;
     }
 
     .header-content {
@@ -68,138 +66,117 @@
     }
 
     .search-bar form {
-        margin-left: auto; /* Push the search bar to the right */
+        margin-left: auto;
+        /* Push the search bar to the right */
     }
 </style>
-<body class="bg">
-    <main id="wrapper">
-        <header class="bg-success text-white">
-            <div class="header-content">
-                <div class="d-flex align-items-center">
-                    <img src="{% static 'images/logo.jpeg' %}" alt="FarmFresh Logo" style="max-width: 150px;">
-                    <h1 class="mb-0">FarmFresh</h1>
-                    <p class="mb-0">Your Fresh Produce Marketplace</p>
-                </div>
-    
-                <div class="search-bar">
-                    <form class="form-inline my-2 my-lg-0">
-                        <div class="input-group">
-                            <input class="form-control" type="search" placeholder="Search" aria-label="Search">
-                            <div class="input-group-append">
-                                <button class="btn btn-outline-light" type="submit"><i
-                                        class="fa-solid fa-magnifying-glass"></i></button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-    
-           
-    
-            <div class="container d-flex justify-content-end">
-    
-                <nav class="navbar navbar-expand-lg navbar-light bg-transparent">
-                    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
-                        aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
-                        <span class="navbar-toggler-icon"></span>
-                    </button>
-                    <div class="collapse navbar-collapse" id="navbarNav">
-                        <ul class="navbar-nav ml-auto">
-                            <li class="nav-item"><a href="{% url 'home' %}" class="nav-link custom-text-size">Home</a></li>
-                            <li class="nav-item"><a href="{% url 'products' %}"
-                                    class="nav-link custom-text-size">Products</a></li>
-                            <li class="nav-item"><a href="{% url 'view_cart' %}" class="nav-link custom-text-size">Cart</a></li>
-    
-                          
-                            
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle custom-text-size" href="#" id="inventoryDropdown"
-                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                    aria-expanded="false">Inventory</a>
-                                <div class="dropdown-menu" aria-labelledby="inventoryDropdown">
-                                    <a href="{% url 'stock' %}" class="dropdown-item">Stock List</a>
-                                    <a href="{% url 'dashboard' %}" class="dropdown-item">Reports</a>
-                                </div>
+
+<body>
+    <nav class="navbar navbar-expand-lg navbar-success bg-success">
+        <div class="container-fluid py-3">
+            <a class="navbar-brand fs-1 text-white" href="#"><img src="{% static 'images/logo.jpeg' %}" alt="FarmFresh Logo"
+                    width="75" class="d-inline-block align-text-top">FarmFresh</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
+                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
+                aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" aria-current="page" href="{% url 'home' %}">Home</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="{% url 'products' %}">Products</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="{% url 'view_cart' %}">Cart</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="{% url 'order_history' %}">Order History</a>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active text-white" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Inventory
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="{% url 'stock' %}">Stock List</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
                             </li>
-    
-    
-    
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle custom-text-size" href="#" id="orderDropdown"
-                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Order
-                                    Management</a>
-                                <div class="dropdown-menu" aria-labelledby="orderDropdown">
-                                    <a href="{% url 'order_list' %}" class="dropdown-item">Order List</a>
-                                    <a href="{% url 'create_order' %}" class="dropdown-item">Create Order</a>
-                                    <a href="{% url 'order_history'%}" class="dropdown-item">Order History</a>
-                                </div>
-                            </li>
-    
-                            <li class="nav-item"><a href="{% url 'marketing' %}"
-                                    class="nav-link custom-text-size">Marketing</a></li>
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle custom-text-size" href="#" id="orderDropdown"
-                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true"
-                                    aria-expanded="false">Invoicing</a>
-                                <div class="dropdown-menu" aria-labelledby="orderDropdown">
-                                    <a href="{% url 'invoicing' %}" class="dropdown-item">Invoice</a>
-                                    <a href="{% url 'create_invoice' %}" class="dropdown-item">Create Invoice</a>
-                                </div>
-                            </li>
-    
-                        
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle custom-text-size" href="#" id="orderDropdown"
-                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false">Transactions</a>
-                                <div class="dropdown-menu" aria-labelledby="orderDropdown">
-                                    <a href="{% url 'suppliers-list' %}" class="dropdown-item">Suppliers</a>
-                                    <a href="{% url 'purchases-list' %}" class="dropdown-item">Purchases</a>
-                                    <a href="{% url 'sales-list' %}" class="dropdown-item">Sales</a>
-                                  
-                                </div>
-                            </li>
-    
-                            <li class="nav-item"><a href="{% url 'profile' %}" class="nav-link custom-text-size">Profile</a>
-                            </li>
-    
-                            <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle custom-text-size" href="#" id="orderDropdown"
-                                    role="button" data-bs-toggle="dropdown" aria-haspopup="true" aria-expanded="false"><i
-                                        class="fa fa-user fa-2x" aria-hidden="true"></i></a>
-                                <div class="dropdown-menu" aria-labelledby="orderDropdown">
-                                    <a href="{% url 'logout' %}" class="dropdown-item">Logout</a>
-    
-                                </div>
-                            </li>
-                            
+                            <li><a class="dropdown-item" href="{% url 'dashboard' %}">Reports</a></li>
                         </ul>
-                    </div>
-                </nav>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active text-white" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Order Management
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="{% url 'order_list' %}">Order List</a></li>
+
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active text-white" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Transactions
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="{% url 'suppliers-list' %}">Suppliers</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'purchases-list' %}">Purchases</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'sales-list' %}">Sales</a></li>
+                        </ul>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle active text-white" href="#" id="navbarDropdown" role="button"
+                            data-bs-toggle="dropdown" aria-expanded="false">
+                            Profile
+                        </a>
+
+                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
+                            <li><a class="dropdown-item" href="{% url 'marketing' %}">Marketing</a></li>
+                            <li>
+                                <hr class="dropdown-divider">
+                            </li>
+                            <li><a class="dropdown-item" href="{% url 'profile' %}">About Us</a></li>
+                        </ul>
+                    </li>
+                </ul>
+
+
+                <form class="d-flex" method="POST" action="{% url 'search' %}">
+                    {% csrf_token %}
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"
+                        name="searched">
+                    <button class="btn btn-outline-success" type="submit">Search</button>
+                </form>
             </div>
-        </header>
-        <div id="content" class="bg-white">
-
-            <div class="row">
-                <div class="col-md-12">
-                            
-                    
-                    <div class="container">
-                        {% block content %}{% endblock content %}
-                    </div>
-                </div>
-                <br>
-
-            </div>
-
         </div>
-    
-    </main>    
+    </nav>
+    {% block content %}{% endblock content %}
+
 
     <!-- jQuery first, then Popper.js, then Bootstrap JS -->
     <script src="{% static 'bootstrap/jquery-3.3.1.slim.min.js' %}"></script>
     <script src="{% static 'bootstrap/popper.min.js' %}"></script>
     <script src="{% static 'bootstrap/bootstrap.min.js' %}"></script>
 
-    
+
 </body>
+
 </html>

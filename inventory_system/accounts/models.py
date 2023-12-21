@@ -9,6 +9,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 
 
+
 class CustomUser(AbstractUser):
     user_types = [
         ('accountant', 'Accountant'),
@@ -170,3 +171,4 @@ class cart_records(models.Model):
      
     def __str__(self) -> str:
         return str(self.item)
+    

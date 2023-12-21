@@ -5,32 +5,34 @@
 
 {% block content %}
 
-<div class="container mt-5 mb-5">
-    <h1 class="text-center mb-4">Invoice Details</h1>
-
-    <div class="row">
-        <div class="col-md-6">
-            <p><strong>Invoice Number:</strong> {{ invoice.pk }}</p>
-            <p><strong>Order ID:</strong> {{ invoice.order }}</p>
-            <p><strong>Date:</strong> {{ invoice.date_created }}</p>
-            <p><strong>Total Amount:</strong> {{ invoice.total_amount }}</p>
-            <p><strong>Billing Name:</strong> {{ invoice.billing_name }}</p>
-            <p><strong>Billing Address:</strong> {{ invoice.billing_address }}</p>
-            <p><strong>Billing Email:</strong> {{ invoice.billing_email }}</p>
-        </div>
-
-        <div class="col-md-6">
-            <p><strong>Payment Status:</strong> {{ invoice.payment_status }}</p>
-            <p><strong>Payment Method:</strong> {{ invoice.payment_method }}</p>
-            <p><strong>Payment Due Date:</strong> {{ invoice.payment_due_date }}</p>
-            <p><strong>Notes:</strong> {{ invoice.notes }}</p>
-            <p><strong>Status:</strong> {{ invoice.status }}</p>
-        </div>
+<div class="content-wrapper">
+    <div class="container mt-5 mb-5">
+        <h1 class="text-center mb-4">Invoice Details</h1>
     
-     <!-- Confirm order to generate pdf and send email to customer -->
-     <p class="mt-3"><a class="btn btn-secondary"  href="{% url 'confirm_order' invoice.id %}">Confirm order</a></p>
-     <p class="mt-3"><a class="btn btn-secondary" href="{% url 'edit_invoice' invoice.id %}">Edit invoice</a></p>
-     <p class="mt-3"><a class="btn btn-secondary" href="{% url 'delete_invoice' invoice.id %}">Cancel order</a></p>
+        <div class="row">
+            <div class="col-md-6">
+                <p><strong>Invoice Number:</strong> {{ invoice.pk }}</p>
+                <p><strong>Order ID:</strong> {{ invoice.order }}</p>
+                <p><strong>Date:</strong> {{ invoice.date_created }}</p>
+                <p><strong>Total Amount:</strong> {{ invoice.total_amount }}</p>
+                <p><strong>Billing Name:</strong> {{ invoice.billing_name }}</p>
+                <p><strong>Billing Address:</strong> {{ invoice.billing_address }}</p>
+                <p><strong>Billing Email:</strong> {{ invoice.billing_email }}</p>
+            </div>
+    
+            <div class="col-md-6">
+                <p><strong>Payment Status:</strong> {{ invoice.payment_status }}</p>
+                <p><strong>Payment Method:</strong> {{ invoice.payment_method }}</p>
+                <p><strong>Payment Due Date:</strong> {{ invoice.payment_due_date }}</p>
+                <p><strong>Notes:</strong> {{ invoice.notes }}</p>
+                <p><strong>Status:</strong> {{ invoice.status }}</p>
+            </div>
+        
+         <!-- Confirm order to generate pdf and send email to customer -->
+         <p class="mt-3"><a class="btn btn-secondary"  href="{% url 'confirm_order' invoice.id %}">Confirm order</a></p>
+         <p class="mt-3"><a class="btn btn-secondary" href="{% url 'edit_invoice' invoice.id %}">Edit invoice</a></p>
+         <p class="mt-3"><a class="btn btn-secondary" href="{% url 'delete_invoice' invoice.id %}">Cancel order</a></p>
+    </div>
+    
 </div>
-
 {% endblock %}
