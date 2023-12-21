@@ -72,13 +72,6 @@ class Order(models.Model):
     def __str__(self):
         return f"Order #{self.id}- {self.order_id} - {self.product} - {self.customer} - {self.quantity_ordered} units - Status: {self.order_status}"
     
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        # After saving the order, update the corresponding inventory's sales
-        inventory = Inventory.objects.get(name=self.product)
-        inventory.sales += self.quantity_ordered * inventory.cost_per_item
-        inventory.save()
-    
 class Invoice(models.Model):
     ORDER_STATUS_CHOICES = [
         ('pending', 'Pending'),
@@ -206,10 +199,4 @@ class SalesData(models.Model):
     quantity_sold = models.IntegerField()
 
 
-@receiver(post_save, sender=Order)
-def update_inventory_sales(sender, instance, **kwargs):
-    inventory = Inventory.objects.get(name=instance.product)
-    inventory.sales += instance.quantity_ordered * inventory.cost_per_item
-    inventory.save()
 
-post_save.connect(update_inventory_sales, sender=Order) 
