@@ -85,7 +85,7 @@ class Invoice(models.Model):
 
     notes = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
-    
+    pdf_file = models.FileField(upload_to='pdfs/', null=True, blank=True)
 
 
     def __str__(self):
@@ -167,6 +167,7 @@ class cart_records(models.Model):
     item = models.CharField(max_length=100, null=False, blank=False)
     cost_per_item = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
     quantity = models.IntegerField(null=False, blank=False)
+    total_amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=False)
      
     def __str__(self) -> str:
         return str(self.item)

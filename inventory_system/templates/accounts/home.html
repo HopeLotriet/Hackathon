@@ -59,7 +59,15 @@
                     </li>
 
                     <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'products' %}">Products</a>
+                    </li>
+
+                    <li class="nav-item">
                         <a class="nav-link active" href="{% url 'view_cart' %}">Cart</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link active" href="{% url 'order_history' %}">Order history</a>
                     </li>
 
                     <li class="nav-item dropdown">
@@ -83,28 +91,6 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="{% url 'order_list' %}">Order List</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="{% url 'create_order' %}">Create Order</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="{% url 'order_history' %}">Order History</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle active" href="#" id="navbarDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Invoicing
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{% url 'invoicing' %}">Invoice</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="{% url 'create_invoice' %}">Create Invoice</a></li>
                         </ul>
                     </li>
 
