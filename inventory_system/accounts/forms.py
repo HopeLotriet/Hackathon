@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm, ChoiceField, Select, Form
-from .models import Inventory, Order, Invoice
+from .models import Inventory, Order, Invoice, SalesData
 from django.contrib.auth.forms import UserCreationForm
 from .models import CustomUser
 from django.contrib.auth import get_user_model
@@ -70,3 +70,6 @@ class CreateUserForm(UserCreationForm):
     class Meta:
         model = CustomUser
         fields = ['username','first_name','last_name','email', 'role', 'password1', 'password2']
+
+class SalesDataUploadForm(forms.Form):
+    sales_file = forms.FileField()
