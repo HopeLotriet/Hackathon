@@ -441,6 +441,7 @@ def update_order_status(request, order_id):
 
     #block order status once it is changed to delivered
     order = get_object_or_404(Order, id=order_id)
+
     customer_order = get_object_or_404(customerOrderHistory, id=order_id)
     completion_status = order.order_status 
 
@@ -511,8 +512,13 @@ def update_order_status(request, order_id):
     
 @login_required()
 def order_history(request):
-    previous_orders = customerOrderHistory.objects.all()
-    return render(request, 'accounts/order_history.html', {'orders': previous_orders})
+    logged_user = request.user
+    has_data = customerOrderHistory.objects.exists()
+    if logged_user.is_authenticated and has_data:
+        previous_orders = customerOrderHistory.objects.all()
+    else:
+        previous_orders = customerOrderHistory.objects.all()
+    return render(request, 'accounts/order_history.html', {'orders': previous_orders, "user": logged_user})
 
 @login_required()
 def return_order(request, order_id):
@@ -584,10 +590,15 @@ def invoicing(request):
 def create_invoice(request):
 
     #block placement of order if another one is progress
-    previous_order = Order.objects.all().last()
-    previous_order_status = previous_order.order_status
+    has_data = Order.objects.exists()
+    if has_data:
+        previous_order = Order.objects.all().last()
+        previous_order_status = previous_order.order_status
+    else:
+        previous_order_status = "delivered"
+
     context={}
-    if previous_order_status == "delivered":
+    if previous_order_status == "delivered" or previous_order_status == "Order canceled":
         #add details for invoice fields
         if request.method == 'POST':
             form = InvoiceForm(request.POST)
@@ -822,7 +833,8 @@ def confirm_order(request, pk):
         order_id=order, 
         product=all_items,
         quantity_ordered=total_quantity,
-        amount_spent=amount
+        amount_spent=amount,
+        customer=request.user
     )
     customer_order_entry.save()
 
@@ -884,7 +896,7 @@ def confirmation_email(request, pk):
 
     return render(request, 'accounts/confirm_order.html', {'message': message, "pdf_message":pdf_success_message})
 
-# for cleaning trial runs of invoice
+# for cleaning trial runs of database
 def invoice_history(request):
     invoice_history = Invoice.objects.all()
     invoice_history.delete()

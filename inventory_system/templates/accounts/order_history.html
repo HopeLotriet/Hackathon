@@ -10,7 +10,7 @@
     
     <div class="container mt-5">
         <h1 class="text-center mb-4">Order history</h1>
-    
+        <h2>Previous orders submitted by {{user}}</h2>
         <table class="table table-striped table-bordered table-hover">
             <thead class="thead-dark">
             <tr>
@@ -32,7 +32,7 @@
                 <td scope="row">{{ order.order_date}}</td>
                 <td scope="row">{{ order.product }}</td>
                 <td scope="row">{{ order.quantity_ordered }} units</td>
-                <th scope="row">{{order.amount_spent}}</th>
+                <th scope="row">R{{order.amount_spent}}</th>
                 <td scope="row">{{order.customer_order_status}}</td>
                 <td scope="row">
                     <a href="{% url 'return_order' order.id %}" class="btn btn-danger btn-sm mb-2">Return order</a>
