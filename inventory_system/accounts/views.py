@@ -6,9 +6,9 @@ from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse
 from django.contrib.auth import get_user_model
 from django.contrib import messages
-from .models import Inventory, Order, Invoice , cart, OrderAmount, customerOrderHistory, cart_records
+from .models import Inventory, Order, Invoice , cart, OrderAmount, customerOrderHistory, cart_records, SalesData
 from django.shortcuts import get_object_or_404
-from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm, InvoiceForm, CreateUserForm
+from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm, InvoiceForm, CreateUserForm, SalesDataUploadForm
 from django.contrib import messages
 import io
 from django_pandas.io import read_frame
@@ -17,7 +17,7 @@ import plotly
 import plotly.express as px
 import json
 from django.conf import settings
-from django.core.mail import send_mail,EmailMessage
+from django.core.mail import send_mail, EmailMessage
 from django.template.loader import render_to_string
 import barcode
 from barcode.writer import ImageWriter
@@ -38,6 +38,11 @@ import os
 from django.utils import timezone
 from datetime import datetime, timedelta
 from django.db.models import Count, Sum
+from django.http import JsonResponse
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
+import csv
+from .utils import perform_forecasting_analysis
+from django.http import HttpResponseRedirect
 
 def home(request):
     return render(request, 'accounts/home.html')
@@ -907,3 +912,108 @@ def search(request):
                                                         'inventories': inventories})
     else:
         return render(request, 'accounts/search.html', {})
+
+def generate_sales_report(request):
+    # Get all inventory items
+    inventories = Inventory.objects.all()
+
+    # Create a response object with CSV content
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="sales_report.csv"'
+
+    # Create a CSV writer
+    writer = csv.writer(response)
+    
+    # Write header row
+    writer.writerow(['Product', 'Total Sales', 'Quantity Sold', 'Last Sale Date'])
+
+    # Loop through each inventory item and write sales data
+    for inventory in inventories:
+        writer.writerow([inventory.name, inventory.sales, inventory.quantity_sold, inventory.last_sales_date])
+
+     # Update or create SalesData entries
+        SalesData.objects.update_or_create(
+            product=inventory,
+            date=inventory.last_sales_date,
+            defaults={'quantity_sold': inventory.quantity_sold}
+        )
+
+    return response
+
+def generate_forecast(request, inventory_id):
+    # Fetch historical sales data from the SalesData model
+    sales_data = SalesData.objects.values('last_sales_date', 'quantity_sold').order_by('last_sales_date')
+
+    # Create a DataFrame from the sales data
+    df = pd.DataFrame(sales_data)
+
+    # Perform forecasting using statsmodels
+    model = ExponentialSmoothing(df['quantity_sold'], trend='add', seasonal='add', seasonal_periods=7)
+    fit_model = model.fit()
+
+    # Generate forecast values
+    forecast_values = fit_model.forecast(steps=7)
+
+    # Pass the forecast values to the template
+    context = {
+        'forecast_values': forecast_values,
+    }
+
+    return render(request, 'forecast_result.html', context)
+
+
+def perform_forecasting_analysis(sales_data):
+    # Assuming sales_data is a DataFrame with columns like 'date' and 'quantity_sold'
+    
+    # Your forecasting logic here...
+    # For example, using Holt-Winters Exponential Smoothing
+    model = ExponentialSmoothing(sales_data['quantity_sold'], seasonal='add', seasonal_periods=7)
+    result = model.fit()
+
+    # Forecast future values
+    forecast_horizon = 30  # You can adjust the forecast horizon as needed
+    forecast = result.forecast(steps=forecast_horizon)
+
+    # Return the forecast data or any relevant information
+    return forecast
+
+def sales_data(request):
+    forecast_data = None  # Initialize forecast_data
+
+    if request.method == 'POST':
+        form = SalesDataUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Handle the uploaded file
+            sales_file = request.FILES['sales_file']
+            # Example: Use pandas to read the CSV file
+            sales_data = pd.read_csv(sales_file)
+            
+            # Perform forecasting analysis using the sales_data
+            # Your forecasting logic here...
+            forecast_data = perform_forecasting_analysis(sales_data)
+
+    else:
+        form = SalesDataUploadForm()
+
+    return render(request, 'accounts/sales_data.html', {'form': form, 'forecast_data': forecast_data})
+
+def subscription(request):
+    if request.method == 'POST':
+        email = request.POST.get('emailInput', '')
+        # Add validation for the email if needed
+
+        # Send confirmation email
+        send_mail(
+            'Subscription Confirmation',
+            'Thank you for subscribing to FarmFresh! You will receive updates and promotions.',
+            'from@example.com',
+            [email],
+            fail_silently=False,
+        )
+
+        # You can also store the email in the database if you want to manage subscribers
+
+        return HttpResponseRedirect(reverse('subscription'))
+
+    return render(request, 'accounts/subscription.html')
+

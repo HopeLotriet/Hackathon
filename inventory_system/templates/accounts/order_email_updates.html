@@ -1,26 +1,21 @@
 {% extends 'accounts/home.html' %}
 {% load static %}
 
-
 {% block title %}Order updates{% endblock %}
 
 {% block content %}
 
 <div class="content-wrapper">
-
     <div class="container mt-5">
-        Hey {{name}}
-
-        Thank you placing your order for fresh farm products with us.
-
-        Please note that your order {{status}}.
-
-        Click <a href="#">here</a> to track your order.
-
-
-
-        Kind regards
-        FarmFresh
+        <div class="alert alert-info">
+            <p class="lead">Hey {{ name }},</p>
+            <p>Thank you for placing your order for fresh farm products with us.</p>
+            <p>Please note that your order is {{ status }}.</p>
+            <p>Click <a href="#">here</a> to track your order.</p>
+            <br>
+            <p>Kind regards,</p>
+            <p>FarmFresh</p>
+        </div>
     </div>
 </div>
 

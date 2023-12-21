@@ -1,0 +1,33 @@
+<!-- accounts/templates/accounts/sales_data.html -->
+
+{% extends 'accounts/home.html' %}
+{% load static %}
+
+{% block title %}Sales Data Analysis{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container mt-5">
+        <h1>Sales Data Analysis</h1>
+
+        <!-- Display form for uploading sales data -->
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            <div class="mb-3">
+                {{ form }}
+            </div>
+            <button type="submit" class="btn btn-primary">Analyze</button>
+        </form>
+
+        {% if forecast_data %}
+        <!-- Display forecast results if available -->
+        <h2>Forecast Results</h2>
+        <ul>
+            {% for value in forecast_data.values %}
+                <li>{{ value }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

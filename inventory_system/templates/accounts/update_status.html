@@ -3,16 +3,23 @@
 
 {% block title %}Order management{% endblock %}
 
-
 {% block content %}
 <div class="content-wrapper">
 
     <div class="container mt-5">
-        <form method="post" action="{% url 'update_order_status' order.id %}">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary">Update Status</button>
-        </form>
+        <div class="card">
+            <div class="card-body">
+                <h5 class="card-title">Order Management</h5>
+                <form method="post" action="{% url 'update_order_status' order.id %}">
+                    {% csrf_token %}
+                    <div class="mb-3">
+                        <label for="status" class="form-label">Update Order Status</label>
+                        {{ form.status }}
+                    </div>
+                    <button type="submit" class="btn btn-primary">Update Status</button>
+                </form>
+            </div>
+        </div>
     </div>
 </div>
 {% endblock %}

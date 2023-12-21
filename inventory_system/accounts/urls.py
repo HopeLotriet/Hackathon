@@ -41,5 +41,10 @@ urlpatterns = [
     path('search/', views.search, name='search'),
     path('confirmation_email/<int:pk>/', views.confirmation_email, name='confirmation_email'),
     path('invoice_history', views.invoice_history, name='invoice_history'),
+    path('sales_data/', views.sales_data, name='sales_data'),
+    path('generate_sales_report/', views.generate_sales_report, name='generate_sales_report'),
+    path('generate_forecast/', views.generate_forecast, name='generate_forecast'),
+    path('subscription/', views.subscription, name='subscription'),
+    
 ]
 

@@ -7,6 +7,9 @@ from django.dispatch import receiver
 from django.core.mail import send_mail
 from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
+from django.utils import timezone
+import json
+
 
 
 class CustomUser(AbstractUser):
@@ -31,6 +34,23 @@ class Inventory(models.Model):
     is_deleted = models.BooleanField(default=False)
     barcode = models.ImageField(upload_to='barcodes/', blank=True, null=True)
 
+     # New field to store historical sales data
+    sales_data = models.JSONField(null=True, blank=True)
+
+    def update_sales_data(self):
+        # Fetch historical sales records for this inventory item
+        historical_sales = Order.objects.filter(product=self).exclude(order_status='pending').order_by('order_date')
+
+        # Update the sales_data dictionary
+        sales_data = {
+            'date': [record.order_date.strftime('%Y-%m-%d') for record in historical_sales],
+            'quantity_sold': [record.quantity_ordered for record in historical_sales],
+        }
+
+        # Save the updated sales_data
+        self.sales_data = sales_data
+        self.save()
+
     def __str__(self) -> str:
         return self.name
 
@@ -51,6 +71,13 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order #{self.id}- {self.order_id} - {self.product} - {self.customer} - {self.quantity_ordered} units - Status: {self.order_status}"
+    
+    def save(self, *args, **kwargs):
+        super().save(*args, **kwargs)
+        # After saving the order, update the corresponding inventory's sales
+        inventory = Inventory.objects.get(name=self.product)
+        inventory.sales += self.quantity_ordered * inventory.cost_per_item
+        inventory.save()
     
 class Invoice(models.Model):
     ORDER_STATUS_CHOICES = [
@@ -172,3 +199,18 @@ class cart_records(models.Model):
      
     def __str__(self) -> str:
         return str(self.item)
+    
+
+class SalesData(models.Model):
+    product = models.ForeignKey(Inventory, on_delete=models.CASCADE, default=None)
+    date = models.DateField()
+    quantity_sold = models.IntegerField()
+
+
+@receiver(post_save, sender=Order)
+def update_inventory_sales(sender, instance, **kwargs):
+    inventory = Inventory.objects.get(name=instance.product)
+    inventory.sales += instance.quantity_ordered * inventory.cost_per_item
+    inventory.save()
+
+post_save.connect(update_inventory_sales, sender=Order) 
