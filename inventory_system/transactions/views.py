@@ -241,6 +241,7 @@ class SaleCreateView(View):
                 stock = get_object_or_404(Inventory, name=billitem.stock.name)
                 billitem.totalprice = billitem.perprice * billitem.quantity
                 stock.quantity_in_stock -= billitem.quantity
+                stock.quantity_sold += billitem.quantity
                 stock.save()
                 billitem.save()
 
