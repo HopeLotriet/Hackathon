@@ -17,7 +17,7 @@ import plotly
 import plotly.express as px
 import json
 from django.conf import settings
-from django.core.mail import send_mail
+from django.core.mail import send_mail,EmailMessage
 from django.template.loader import render_to_string
 import barcode
 from barcode.writer import ImageWriter
@@ -34,6 +34,7 @@ from reportlab.pdfgen import canvas
 from reportlab.lib.units import inch
 from reportlab.lib.pagesizes import letter
 import uuid
+import os
 from django.utils import timezone
 from datetime import datetime, timedelta
 from django.db.models import Count, Sum
@@ -244,6 +245,11 @@ def view_cart(request):
     return render(request, 'accounts/cart.html', {'items': cart_items, 'amount': amount})
 
 def add_to_cart(request, item_id):
+    
+    #before placing another order, clear the temporary hold of cart_record
+    cart_record = cart_records.objects.all()
+    cart_record.delete()
+    
     #add items to cart
     item = get_object_or_404(Inventory, id=item_id)
     item_name = item.name
@@ -427,67 +433,77 @@ def create_order(request):
 
 @login_required()
 def update_order_status(request, order_id):
+
+    #block order status once it is changed to delivered
     order = get_object_or_404(Order, id=order_id)
-    name = request.user.username
     customer_order = get_object_or_404(customerOrderHistory, id=order_id)
-    
+    completion_status = order.order_status 
 
-    if request.method == 'POST':
-        form = UpdateStatusForm(request.POST)
-                
-        if form.is_valid():
-            current_status = order.order_status
-           
-            if current_status != 'Order canceled':
-                #update orderlist status
-                new_status = form.cleaned_data['new_status']
-                order.order_status = new_status
-                order.save()
-
-                #update customer order status 
-                if new_status == 'shipped':
-                    customer_order.customer_order_status = 'shipped'
-                elif new_status == 'delivered':
-                    customer_order.customer_order_status = 'delivered'
-                
-                customer_order.save()
-
-                # Generate update emails
-                status = ""
-                if new_status == "pending":
-                    status = ' is currently being processed'
-                elif new_status == "shipped":
-                    status = ' has been shipped'
-                else:
-                    status = "is delivered"
-
-                email_body = f"""
-                Hello, {name}!
-
-                Thank you for placing your order with FarmFresh.
-
-                Please note that your order {status}.
-
-                Best regards,
-                FarmFresh
-                """
+    if completion_status == "delivered" or completion_status =="Order canceled":
+        return redirect("order_list")
+    else:
+        if request.method == 'POST':
+            form = UpdateStatusForm(request.POST)
                     
-                email = send_mail(
+            if form.is_valid():
+                current_status = order.order_status
+            
+                if current_status != 'Order canceled':
+                    #update orderlist status
+                    new_status = form.cleaned_data['new_status']
+                    order.order_status = new_status
+                    order.save()
+
+                    #update customer order status 
+                    if new_status == 'shipped':
+                        customer_order.customer_order_status = 'shipped'
+                    elif new_status == 'delivered':
+                        customer_order.customer_order_status = 'delivered'
+                    
+                    customer_order.save()
+
+                    # Generate update emails
+                    status = ""
+                    if new_status == "pending":
+                        status = ' is currently being processed'
+                    elif new_status == "shipped":
+                        status = ' has been shipped'
+                    else:
+                        status = "is delivered"
+
+                    name = request.user.username
+                    email_address = request.user.email
+                    sender_email = settings.EMAIL_HOST_USER
+                    email_body = f"""
+                    Hello, {name}!
+
+                    Thank you for placing your order with FarmFresh.
+
+                    Please note that your order {status}.
+                    
+
+                    Best regards,
+                    FarmFresh
+                    """
+                    # Create an EmailMessage object
+                    email = EmailMessage(
                     'Order status update',
                     email_body,
-                    'from@example.com',
-                    # Make it dynamic once registration is complete
-                    ['amogelangmonnanyana@gmail.com']
-                )
+                    sender_email,
+                    [email_address],
+                    )
 
-            # Redirect in both cases
-            return redirect('order_list')
-            
-    else:
-        form = UpdateStatusForm()
+                    # Send the email
+                    email.send()
 
-    return render(request, 'accounts/update_status.html', {'form': form, 'order': order})
+                # Redirect in both cases
+                return redirect('order_list')
+                
+        else:
+            form = UpdateStatusForm()
 
+        return render(request, 'accounts/update_status.html', {'form': form, 'order': order})
+    
 @login_required()
 def order_history(request):
     previous_orders = customerOrderHistory.objects.all()
@@ -499,23 +515,33 @@ def return_order(request, order_id):
     if current_order.order_status != "Order canceled":
 
         if order_history:
-            returning_order = get_object_or_404(Order, id=order_id)
+            
+            # Sum up items by name
+            item_quantities = cart_records.objects.values('item').annotate(each_item_quantity=Sum('quantity'))
+            print(item_quantities)
 
-            product_name = returning_order.product
-            inventory = get_object_or_404(Inventory, name=product_name)
+            #add each product back into the inventory
+            for item in item_quantities:
+                item_name = item['item']
+                returning_quantity = item['each_item_quantity']
+                inventory_product = get_object_or_404(Inventory, name=item_name)
+                ajusted_quantity = inventory_product.quantity_in_stock + returning_quantity
+                inventory_product.quantity_in_stock = ajusted_quantity
+                inventory_product.save()
 
-            quantity_in_stock = inventory.quantity_in_stock
-            returning_quantity = returning_order.quantity_ordered
-            inventory.quantity_in_stock = max(0, quantity_in_stock + returning_quantity)
-            inventory.save()  # Save the updated inventory
+            #fetch product from order history and inventory and update their statuses
+            returning_order = get_object_or_404(customerOrderHistory, id=order_id)
+            returning_orderlist = get_object_or_404(Order, id=order_id)
 
-            returning_order.order_status = "Order canceled"
+            returning_orderlist.order_status = "Order canceled"
+            returning_orderlist.save()
+    
+            returning_order.customer_order_status = "Order canceled"
             returning_order.save()
     else:
         pass
 
     return redirect('order_history')
-
 
 def marketing(request):
     context = {}
@@ -532,7 +558,7 @@ def about(request):
 def is_farmer(user):
     return user.groups.filter(name='Farmers').exists()
 
-@login_required
+@login_required()
 @user_passes_test(is_farmer, login_url='/accounts/login/')
 def farmer_dashboard(request):
     # Your farmer-specific view logic
@@ -548,20 +574,47 @@ def invoicing(request):
 
     return render(request, 'accounts/invoicing.html', context)
 
-@login_required()
 
 @login_required()
 def create_invoice(request):
-    if request.method == 'POST':
-        form = InvoiceForm(request.POST)
-        if form.is_valid():
-            invoice = form.save()
-            return redirect('order_details')
-    else:
-        form = InvoiceForm()
 
-    context = {'form': form}
-    return render(request, 'accounts/create_invoice.html', context)
+    #block placement of order if another one is progress
+    previous_order = Order.objects.all().last()
+    previous_order_status = previous_order.order_status
+    context={}
+    if previous_order_status == "delivered":
+        #add details for invoice fields
+        if request.method == 'POST':
+            form = InvoiceForm(request.POST)
+            if form.is_valid():
+                form.save()
+                return redirect('order_details')
+        else:
+            form = InvoiceForm()
+
+        context = {'form': form}
+
+        #save cart entries before clearing
+        existing_cart = cart.objects.all()
+
+        for item in existing_cart:
+            item_name = item.item
+            item_cost = item.cost_per_item
+            item_quantity = item.quantity
+            price = item.total_amount
+
+            cart_record = cart_records(
+                item = item_name,
+                cost_per_item =item_cost,
+                quantity=item_quantity,
+                total_amount=price
+            )
+            cart_record.save()
+        return render(request, 'accounts/create_invoice.html', context)
+    else:
+        pass
+        messages.warning(request, "Placing new order while one is in progress is not allowed!")
+        return redirect("products")
 
 def order_details(request):
     # Get the last created invoice
@@ -597,19 +650,13 @@ def order_details(request):
     invoice.save()
     return redirect('invoice_detail')
 
-@login_required()
-def invoice_detail(request):
-    invoice = Invoice.objects.all().last()
-    context = {'invoice': invoice}
-    return render(request, 'accounts/invoice_detail.html', context)
-
-
 
 @login_required()
 def invoice_detail(request):
     invoice = Invoice.objects.all().last()
     context = {'invoice': invoice}
     return render(request, 'accounts/invoice_detail.html', context)
+
 
 @login_required()
 def edit_invoice(request, pk):
@@ -647,59 +694,83 @@ def mark_invoice_as_paid(request, pk):
     return redirect('invoice_detail', pk=pk)
 
 #generate pdf of invoice
+@login_required()
 def invoice_pdf(request, pk):
-    #get the invoice
-    invoice = get_object_or_404(Invoice, pk=pk)
-    # Create Bytestream buffer
-    buf = io.BytesIO()
-    # Create a canvas
-    c = canvas.Canvas(buf, pagesize=letter, bottomup=0)
-    # Create a text object
-    textob = c.beginText()
-    textob.setTextOrigin(inch, inch)
-    textob.setFont("Helvetica", 14)
+    try:
+        # Get the invoice
+        invoice = get_object_or_404(Invoice, pk=pk)
 
-    # Add invoice details to the PDF
-    textob.textLine(f"Invoice Number: {invoice.pk}")
-    textob.textLine(f"Total Amount: {invoice.total_amount}")
-    textob.textLine(f"Billing Name: {invoice.billing_name}")
-    textob.textLine(f"Billing Address: {invoice.billing_address}")
-    textob.textLine(f"Billing Email: {invoice.billing_email}")
-    textob.textLine(f"Payment Status: {invoice.payment_status}")
-    textob.textLine(f"Payment Method: {invoice.payment_method}")
-    textob.textLine(f"Payment Due Date: {invoice.payment_due_date}")
-    textob.textLine(f"Notes: {invoice.notes}")
-    textob.textLine(f"Status: {invoice.status}")
+        # Create Bytestream buffer
+        buf = io.BytesIO()
+        # Create a canvas
+        c = canvas.Canvas(buf, pagesize=letter, bottomup=0)
 
-    # Get the related order details
-    order = invoice.order
-    textob.textLine(f"Order ID: {order.id}")
-    textob.textLine(f"Order Date: {order.order_date}")
-    textob.textLine(f"Product: {order.product}")
-    textob.textLine(f"Customer: {order.customer}")
-    textob.textLine(f"Quantity Ordered: {order.quantity_ordered}")
-    textob.textLine(f"Order Status: {order.order_status}")
+        # Create a text object
+        inch = 72.0
+        textob = c.beginText()
+        textob.setTextOrigin(inch, inch)
+        textob.setFont("Helvetica", 14)
 
-    orderitems = order.orderitem_set.all()
-    for item in orderitems:
-        textob.textLine(f"Item: {item.name}")
-        textob.textLine(f"Quantity: {item.quantity}")
-        textob.textLine(f"Cost Per Item: {item.cost_per_item}")
+        # Add invoice details to the PDF
+        textob.textLine(f"Invoice Number: {invoice.pk}")
+        textob.textLine(f"Total Amount: {invoice.total_amount}")
+        textob.textLine(f"Payment due: {invoice.payment_due_date}")
 
+        textob.textLine(f"Billing name: {invoice.billing_name}")
+        textob.textLine(f"Billing address: {invoice.billing_address}")
+        textob.textLine(f"Billing email: {invoice.billing_email}")
+        textob.textLine(f"Date: {invoice.date_created}")
+        textob.textLine(f"Payment method: {invoice.payment_method}")
 
-    # Finish Up
+        # ... (other invoice details)
+
+        # Get the related order details
+        order_id = invoice.order
+        order_details = get_object_or_404(customerOrderHistory, order_id=order_id)
+        textob.textLine(f"Order ID: {order_id}")
+        textob.textLine(f"Order status: {order_details.customer_order_status}")
+
+        # ... (other order details)
+
+        orderitems = cart_records.objects.all() 
+        textob.textLine(f"Total order quantity: {order_details.quantity_ordered}")
+        for item in orderitems:
+            textob.textLine(f"Item: {item.quantity} {item.item} {item.cost_per_item} {item.total_amount}")
+            # ... (other order item details)
+
+        textob.textLine(f"Delivery instructions: {invoice.notes}")
+        # Finish Up
         c.drawText(textob)
         c.showPage()
         c.save()
         buf.seek(0)
 
+        # Save the PDF to the server's filesystem
+        file_name = f'invoice_{invoice.pk}_pdf.pdf'
+        file_path = os.path.join('pdfs', file_name).replace('\\', '/')
 
-    # Return the PDF as a response
-    return FileResponse(buf, as_attachment=True, filename=f'invoice_{invoice.pk}_pdf.pdf')
+        with open(file_path, 'wb') as pdf_file:
+            pdf_file.write(buf.getvalue())
+
+        # Associate the PDF file path with the Invoice model
+        invoice.pdf_file = file_path
+        invoice.save()
+
+        # Clean up: close the buffer
+        buf.close()
+
+        # Return a success response
+        return HttpResponse(status=200)
+
+    except Invoice.DoesNotExist:
+        # Handle the case when the invoice is not found
+        return HttpResponse("Invoice not found.", status=404)
+    except Exception as e:
+        # Log and handle other exceptions
+        return HttpResponse("An error occurred.", status=500)
 
 #finialise order
 def confirm_order(request, pk):
-    message = "checkout successful"
 
     #adjust inventory table
     cart_items = cart.objects.all()
@@ -710,16 +781,13 @@ def confirm_order(request, pk):
         ordered_quantity = item.quantity
         quantity_in_stock = inventory.quantity_in_stock
         inventory.quantity_in_stock = max(0, quantity_in_stock - ordered_quantity)
-        print(f"Product: {product_name}, Ordered Quantity: {ordered_quantity}") 
         inventory.save()
-
-    ##generate email and pdf
 
     ##add order to order list :-
     #order_id
     invoice = get_object_or_404(Invoice, pk=pk)
     order = invoice.order
-    print(order)
+   
 
     #customer name
     customer_name =invoice.billing_name
@@ -728,15 +796,12 @@ def confirm_order(request, pk):
     grouped_cart_items = cart.objects.values('item').annotate(item_count=Count('id'))
     item_list = [f"{group['item_count']}-{group['item']}" for group in grouped_cart_items]
     all_items = ', '.join(item_list)
-    print(all_items)
-
+    
     #total quatities ordered
     total_quantity = cart.objects.aggregate(total_quantity=Sum('quantity'))['total_quantity']
-    print(total_quantity)
 
     #total amount spent
     amount = invoice.total_amount
-    print(amount)
 
     #save order history
     order_entry = Order(
@@ -746,7 +811,6 @@ def confirm_order(request, pk):
         quantity_ordered=total_quantity,
         amount_spent=amount
         )
-    
     order_entry.save()
     
     customer_order_entry = customerOrderHistory(
@@ -755,9 +819,14 @@ def confirm_order(request, pk):
         quantity_ordered=total_quantity,
         amount_spent=amount
     )
-
     customer_order_entry.save()
 
+    #Generate invoice pdf
+    pdf_response = invoice_pdf(request, pk)
+
+    if pdf_response.status_code == 200:
+        pdf_success_message = "Order confirmed successfully."
+        request.session['success_message'] = pdf_success_message
 
     #clear cart
     cart_table = cart.objects.all()
@@ -766,7 +835,55 @@ def confirm_order(request, pk):
     order_amount = OrderAmount.objects.all().first()
     order_amount.delete()
 
-    return render(request, 'accounts/confirm_order.html', {'message': message})
+    return redirect("confirmation_email", pk=pk)
+
+#send confirmation email with invoice attached to the customer
+def confirmation_email(request, pk):
+    message = "checkout successful"
+
+    #Fetch the invoice from database
+    invoice = get_object_or_404(Invoice, pk=pk)
+    generated_pdf = invoice.pdf_file.path
+
+    #Automated mail update
+    name = request.user.username
+    email_address = request.user.email
+    status = ' is currently being processed'
+    sender_email = settings.EMAIL_HOST_USER
+    email_body = f"""
+    Hello, {name}!
+
+    Thank you for placing your order with FarmFresh.
+
+    Please note that your order {status}.
+    Attached is the invoice concerning your order. Please note the payment due date. 
+
+    Best regards,
+    FarmFresh
+    """
+    # Create an EmailMessage object
+    email = EmailMessage(
+    'Order status update',
+    email_body,
+    sender_email,
+    [email_address],
+    )
+
+    # Attach the PDF to the email
+    email.attach_file(generated_pdf)
+
+    # Send the email
+    email.send()
+
+    pdf_success_message = request.session.pop('success_message', None)
+
+    return render(request, 'accounts/confirm_order.html', {'message': message, "pdf_message":pdf_success_message})
+
+# for cleaning trial runs of invoice
+def invoice_history(request):
+    invoice_history = Invoice.objects.all()
+    invoice_history.delete()
+    return redirect("order_list")
 
 #Search for something
 def search(request):
