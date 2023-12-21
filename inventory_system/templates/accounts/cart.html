@@ -25,20 +25,20 @@
                 <tr>
                     <td scope="row">{{item.id}}</td>
                     <td scope="row">{{item.item}}</td>
-                    <td scope="row">{{item.cost_per_item}}</td>
+                    <td scope="row">R{{item.cost_per_item}}</td>
                     <td scope="row">
                         <button><a href="{% url 'decrease_cart_quantity' item.id %}">-</a></button>
                         {{item.quantity}} units
                         <button><a href="{% url 'increase_cart_quantity' item.id %}">+</a></button>
                     </td>
-                    <td scope="row">{{item.total_amount}}</td>
+                    <td scope="row">R{{item.total_amount}}</td>
                     <td scope="row"><a href="{% url 'delete_from_cart' item.id %}">Remove from cart</a></td>
                 </tr>
                 {% endfor %}
                 {% for price in amount %}
                 <tr>
                     <td>
-                        {{price.amount_due}}
+                        R{{price.amount_due}}
                     </td>
                 </tr>
                 {% endfor %}

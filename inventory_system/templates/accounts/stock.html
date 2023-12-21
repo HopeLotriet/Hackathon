@@ -43,14 +43,14 @@
                         <tr style="cursor: pointer; cursor:hand;" onclick="window.location = `{% url 'per_product' inventory.id %}`">
                             <th scope="row">{{ forloop.counter }}</th>
                             <td>{{ inventory.name }}</td>
-                            <td>{{ inventory.cost_per_item }}</td>
+                            <td>R{{ inventory.cost_per_item }}</td>
                             {% if inventory.quantity_in_stock <= 5 %}
                                 <td class="text-danger">{{ inventory.quantity_in_stock }}</td>
                             {% else %}
                                 <td class="text-success">{{ inventory.quantity_in_stock }}</td>
                             {% endif %}
                             <td>{{ inventory.quantity_sold }}</td>
-                            <td>{{ inventory.sales }}</td>
+                            <td>R{{ inventory.sales }}</td>
                             <td>{{ inventory.stock_date }}</td>
                             <td>{{ inventory.last_sales_date }}</td>
                             <td>{{ inventory.barcode_data }}</td>

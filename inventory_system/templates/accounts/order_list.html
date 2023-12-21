@@ -32,7 +32,7 @@
                 <td scope="col">{{order.customer}}</td>
                 <td scope="row">{{ order.product }}</td>
                 <td scope="row">{{ order.quantity_ordered }} units</td>
-                <th scope="row">{{order.amount_spent}}</th>
+                <th scope="row">R{{order.amount_spent}}</th>
                 <td scope="row">{{order.order_status}}</td>
                 <td scope="row">
                     <a href="{% url 'update_order_status' order.id %}">Update Status</a>
