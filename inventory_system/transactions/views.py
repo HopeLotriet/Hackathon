@@ -242,6 +242,7 @@ class SaleCreateView(View):
                 billitem.totalprice = billitem.perprice * billitem.quantity
                 stock.quantity_in_stock -= billitem.quantity
                 stock.quantity_sold += billitem.quantity
+                stock.sales = billitem.quantity * billitem.perprice
                 stock.save()
                 billitem.save()
 
