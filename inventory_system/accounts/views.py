@@ -43,6 +43,8 @@ from statsmodels.tsa.holtwinters import ExponentialSmoothing
 import csv
 from .utils import perform_forecasting_analysis
 from django.http import HttpResponseRedirect
+from xhtml2pdf import pisa
+from django.template.loader import get_template
 
 def home(request):
     return render(request, 'accounts/home.html')
@@ -441,6 +443,7 @@ def update_order_status(request, order_id):
 
     #block order status once it is changed to delivered
     order = get_object_or_404(Order, id=order_id)
+
     customer_order = get_object_or_404(customerOrderHistory, id=order_id)
     completion_status = order.order_status 
 
@@ -511,8 +514,13 @@ def update_order_status(request, order_id):
     
 @login_required()
 def order_history(request):
-    previous_orders = customerOrderHistory.objects.all()
-    return render(request, 'accounts/order_history.html', {'orders': previous_orders})
+    logged_user = request.user
+    has_data = customerOrderHistory.objects.exists()
+    if logged_user.is_authenticated and has_data:
+        previous_orders = customerOrderHistory.objects.all()
+    else:
+        previous_orders = customerOrderHistory.objects.all()
+    return render(request, 'accounts/order_history.html', {'orders': previous_orders, "user": logged_user})
 
 @login_required()
 def return_order(request, order_id):
@@ -584,10 +592,15 @@ def invoicing(request):
 def create_invoice(request):
 
     #block placement of order if another one is progress
-    previous_order = Order.objects.all().last()
-    previous_order_status = previous_order.order_status
+    has_data = Order.objects.exists()
+    if has_data:
+        previous_order = Order.objects.all().last()
+        previous_order_status = previous_order.order_status
+    else:
+        previous_order_status = "delivered"
+
     context={}
-    if previous_order_status == "delivered":
+    if previous_order_status == "delivered" or previous_order_status == "Order canceled":
         #add details for invoice fields
         if request.method == 'POST':
             form = InvoiceForm(request.POST)
@@ -701,78 +714,59 @@ def mark_invoice_as_paid(request, pk):
 #generate pdf of invoice
 @login_required()
 def invoice_pdf(request, pk):
-    try:
-        # Get the invoice
-        invoice = get_object_or_404(Invoice, pk=pk)
+     # Your data to be passed to the template
+    invoice = get_object_or_404(Invoice, pk=pk)
+    cart_items = cart_records.objects.all()
+    orderHistory = customerOrderHistory.objects.all().last()
+    context = {
+    'invoice_number': invoice.id,
+    'order_id': invoice.order,
+    'total_amount': f"R{invoice.total_amount}",
+    'date': invoice.date_created,
+    'billing_name': invoice.billing_name,
+    'billing_address': invoice.billing_address,
+    'billing_email': invoice.billing_email,
+    'payment_status': invoice.payment_status,
+    'payment_method': invoice.payment_method,
+    'due_date': invoice.payment_due_date,
+    'notes': invoice.notes,
+    'total_quantities': orderHistory.quantity_ordered,
+    'order_items': [
+        {
+            'No': cart_item.id,
+            'item': cart_item.item,
+            'item_quantity': cart_item.quantity,
+            'item_cost': cart_item.cost_per_item,
+            'price': cart_item.total_amount
+        }
+        for cart_item in cart_items  # Assuming cart_records is a queryset or list of items
+    ]
+    # Add other data as needed
+}
+    #render the template
+    template_path = 'accounts/invoice_pdf.html'
+    template = get_template(template_path)
+    html = template.render(context)
 
-        # Create Bytestream buffer
-        buf = io.BytesIO()
-        # Create a canvas
-        c = canvas.Canvas(buf, pagesize=letter, bottomup=0)
+     # Create the PDF
+    response = HttpResponse(content_type='application/pdf')
 
-        # Create a text object
-        inch = 72.0
-        textob = c.beginText()
-        textob.setTextOrigin(inch, inch)
-        textob.setFont("Helvetica", 14)
+    # Generate the PDF content using xhtml2pdf
+    pisa_status = pisa.CreatePDF(html, dest=response)
 
-        # Add invoice details to the PDF
-        textob.textLine(f"Invoice Number: {invoice.pk}")
-        textob.textLine(f"Total Amount: {invoice.total_amount}")
-        textob.textLine(f"Payment due: {invoice.payment_due_date}")
+    if pisa_status.err:
+        return HttpResponse("Could not generate PDF")
 
-        textob.textLine(f"Billing name: {invoice.billing_name}")
-        textob.textLine(f"Billing address: {invoice.billing_address}")
-        textob.textLine(f"Billing email: {invoice.billing_email}")
-        textob.textLine(f"Date: {invoice.date_created}")
-        textob.textLine(f"Payment method: {invoice.payment_method}")
+    # Save the PDF in the 'pdfs' folder
+    pdf_path = "pdfs/invoice_pdf.pdf"
+    with open(pdf_path, 'wb') as pdf_file:
+        pdf_file.write(response.content)
 
-        # ... (other invoice details)
-
-        # Get the related order details
-        order_id = invoice.order
-        order_details = get_object_or_404(customerOrderHistory, order_id=order_id)
-        textob.textLine(f"Order ID: {order_id}")
-        textob.textLine(f"Order status: {order_details.customer_order_status}")
-
-        # ... (other order details)
-
-        orderitems = cart_records.objects.all() 
-        textob.textLine(f"Total order quantity: {order_details.quantity_ordered}")
-        for item in orderitems:
-            textob.textLine(f"Item: {item.quantity} {item.item} {item.cost_per_item} {item.total_amount}")
-            # ... (other order item details)
-
-        textob.textLine(f"Delivery instructions: {invoice.notes}")
-        # Finish Up
-        c.drawText(textob)
-        c.showPage()
-        c.save()
-        buf.seek(0)
-
-        # Save the PDF to the server's filesystem
-        file_name = f'invoice_{invoice.pk}_pdf.pdf'
-        file_path = os.path.join('pdfs', file_name).replace('\\', '/')
-
-        with open(file_path, 'wb') as pdf_file:
-            pdf_file.write(buf.getvalue())
-
-        # Associate the PDF file path with the Invoice model
-        invoice.pdf_file = file_path
-        invoice.save()
-
-        # Clean up: close the buffer
-        buf.close()
-
-        # Return a success response
-        return HttpResponse(status=200)
-
-    except Invoice.DoesNotExist:
-        # Handle the case when the invoice is not found
-        return HttpResponse("Invoice not found.", status=404)
-    except Exception as e:
-        # Log and handle other exceptions
-        return HttpResponse("An error occurred.", status=500)
+    # Update the pdf_file attribute for the invoice object
+    invoice.pdf_file = pdf_path
+    invoice.save()
+    
+    return HttpResponse("PDF saved successfully at {}".format(pdf_path))
 
 #finialise order
 def confirm_order(request, pk):
@@ -822,7 +816,8 @@ def confirm_order(request, pk):
         order_id=order, 
         product=all_items,
         quantity_ordered=total_quantity,
-        amount_spent=amount
+        amount_spent=amount,
+        customer=request.user
     )
     customer_order_entry.save()
 
@@ -884,7 +879,7 @@ def confirmation_email(request, pk):
 
     return render(request, 'accounts/confirm_order.html', {'message': message, "pdf_message":pdf_success_message})
 
-# for cleaning trial runs of invoice
+# for cleaning trial runs of database
 def invoice_history(request):
     invoice_history = Invoice.objects.all()
     invoice_history.delete()
@@ -994,7 +989,7 @@ def subscription(request):
         send_mail(
             'Subscription Confirmation',
             'Thank you for subscribing to FarmFresh! You will receive updates and promotions.',
-            'from@example.com',
+            settings.EMAIL_HOST_USER,
             [email],
             fail_silently=False,
         )
@@ -1005,3 +1000,8 @@ def subscription(request):
 
     return render(request, 'accounts/subscription.html')
 
+from django.contrib.auth import logout
+
+@login_required()
+def logout(request):
+    return render(request, 'system/login.html')

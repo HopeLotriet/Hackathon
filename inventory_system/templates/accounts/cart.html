@@ -26,7 +26,7 @@
                 <tr>
                     <td scope="row">{{item.id}}</td>
                     <td scope="row">{{item.item}}</td>
-                    <td scope="row">{{item.cost_per_item}}</td>
+                    <td scope="row">R{{item.cost_per_item}}</td>
                     <td scope="row">
                         <div class="input-group">
                             <div class="input-group-prepend">
@@ -42,16 +42,14 @@
                             </div>
                         </div>
                     </td>
-                    <td scope="row">{{item.total_amount}}</td>
-                    <td scope="row">
-                        <a href="{% url 'delete_from_cart' item.id %}" class="btn btn-danger">Remove</a>
-                    </td>
+                    <td scope="row">R{{item.total_amount}}</td>
+                    <td scope="row"><a href="{% url 'delete_from_cart' item.id %}">Remove from cart</a></td>
                 </tr>
                 {% endfor %}
                 {% for price in amount %}
                 <tr>
                     <td colspan="4" class="text-right">
-                        Total Amount Due: {{ price.amount_due }}
+                        Total Amount Due: R{{ price.amount_due }}
                     </td>
                     <td scope="row" colspan="2">
                         <a href="{% url 'delete_cart' %}" class="btn btn-danger">Clear cart</a>

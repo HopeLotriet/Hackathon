@@ -35,7 +35,7 @@
                     <th scope="col">Sales or Revenue</th>
                     <th scope="col">Stock Date</th>
                     <th scope="col">Last Sales Date</th>
-                    <th scope="col">Sales Data</th>
+                    
 
                 </tr>
             </thead>
@@ -45,34 +45,17 @@
                     onclick="window.location = `{% url 'per_product' inventory.id %}`">
                     <th scope="row">{{ forloop.counter }}</th>
                     <td>{{ inventory.name }}</td>
-                    <td>{{ inventory.cost_per_item }}</td>
+                    <td>R{{ inventory.cost_per_item }}</td>
                     {% if inventory.quantity_in_stock <= 5 %} <td class="text-danger">{{ inventory.quantity_in_stock }}
                         </td>
                         {% else %}
                         <td class="text-success">{{ inventory.quantity_in_stock }}</td>
                         {% endif %}
                         <td>{{ inventory.quantity_sold }}</td>
-                        <td>{{ inventory.sales }}</td>
+                        <td>R{{ inventory.sales }}</td>
                         <td>{{ inventory.stock_date }}</td>
                         <td>{{ inventory.last_sales_date }}</td>
-                        <td>
-                            {% if inventory.sales_data %}
-                            <table>
-                                <tr>
-                                    <th>Date</th>
-                                    <th>Quantity Sold</th>
-                                </tr>
-                                {% for date, quantity_sold in inventory.sales_data.items %}
-                                <tr>
-                                    <td>{{ date }}</td>
-                                    <td>{{ quantity_sold }}</td>
-                                </tr>
-                                {% endfor %}
-                            </table>
-                            {% else %}
-                            No sales data available
-                            {% endif %}
-                        </td>
+                    
                 </tr>
                 {% endfor %}
             </tbody>

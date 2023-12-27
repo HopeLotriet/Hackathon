@@ -14,7 +14,7 @@
                     {% csrf_token %}
                     <div class="mb-3">
                         <label for="status" class="form-label">Update Order Status</label>
-                        {{ form.status }}
+                        {{ form.as_p }}
                     </div>
                     <button type="submit" class="btn btn-primary">Update Status</button>
                 </form>

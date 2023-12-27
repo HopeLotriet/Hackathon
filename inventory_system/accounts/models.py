@@ -9,6 +9,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 import json
+from django.db.models import F
 
 
 
@@ -71,13 +72,6 @@ class Order(models.Model):
 
     def __str__(self):
         return f"Order #{self.id}- {self.order_id} - {self.product} - {self.customer} - {self.quantity_ordered} units - Status: {self.order_status}"
-    
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        # After saving the order, update the corresponding inventory's sales
-        inventory = Inventory.objects.get(name=self.product)
-        inventory.sales += self.quantity_ordered * inventory.cost_per_item
-        inventory.save()
     
 class Invoice(models.Model):
     ORDER_STATUS_CHOICES = [
@@ -181,6 +175,7 @@ class customerOrderHistory(models.Model):
 
     order_id = models.CharField(max_length=100, default="")
     order_date = models.DateTimeField(auto_now_add=True)
+    customer = models.CharField(max_length=100, default="")
     product = models.CharField(max_length=100, default="")
     quantity_ordered = models.PositiveIntegerField(null=True)
     amount_spent = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
@@ -206,10 +201,4 @@ class SalesData(models.Model):
     quantity_sold = models.IntegerField()
 
 
-@receiver(post_save, sender=Order)
-def update_inventory_sales(sender, instance, **kwargs):
-    inventory = Inventory.objects.get(name=instance.product)
-    inventory.sales += instance.quantity_ordered * inventory.cost_per_item
-    inventory.save()
 
-post_save.connect(update_inventory_sales, sender=Order) 
