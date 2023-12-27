@@ -84,6 +84,29 @@
     .btn a {
     text-decoration: none;
   }
+
+  .custom-search-btn {
+            background-color: transparent; 
+            color: white; 
+            border: 2px solid white; 
+            border-radius: 0; 
+            margin-left: 10px; 
+        }
+
+        .custom-search-btn:hover {
+            background-color: white; 
+            color: dark; 
+        }
+
+        .custom-logout-btn {
+            color: white; 
+            border: none; 
+            margin-left: 10px; 
+        }
+
+        .custom-logout-btn:hover {
+            text-decoration: underline; 
+        }
 </style>
 
 <body>
@@ -180,10 +203,15 @@
 
                 <form class="d-flex" method="POST" action="{% url 'search' %}">
                     {% csrf_token %}
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search"
-                        name="searched">
-                    <button class="btn btn-outline-dark" type="submit">Search</button>
+                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="searched">
+                    <button class="btn custom-search-btn" type="submit">Search</button>
                 </form>
+            
+                <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                    {% csrf_token %}
+                    <button type="submit" class="btn custom-logout-btn">Logout</button>
+                </form>
+                  
             </div>
         </div>
     </nav>
