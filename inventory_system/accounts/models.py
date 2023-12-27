@@ -34,6 +34,8 @@ class Inventory(models.Model):
     last_sales_date = models.DateField(auto_now=True)
     is_deleted = models.BooleanField(default=False)
     barcode = models.ImageField(upload_to='barcodes/', blank=True, null=True)
+    image = models.ImageField(upload_to='images/', null=True, blank=True)
+
 
      # New field to store historical sales data
     sales_data = models.JSONField(null=True, blank=True)
