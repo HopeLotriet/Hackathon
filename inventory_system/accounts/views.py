@@ -159,7 +159,7 @@ def delete(request, pk):
 @login_required()
 def add_product(request):
     if request.method == "POST":
-        updateForm = AddInventoryForm(data=request.POST)
+        updateForm = AddInventoryForm(request.POST, request.FILES)
         if updateForm.is_valid():
             new_inventory = updateForm.save(commit=False)
             new_inventory.sales = float(updateForm.data['cost_per_item']) * float(updateForm.data['quantity_sold'])
@@ -279,6 +279,14 @@ def add_to_cart(request, item_id):
         new_price = OrderAmount(amount_due=item_cost)
         new_price.save()
 
+
+     #count items in cart
+   #update cart count in session
+    if 'cart_count' in request.session:
+        request.session['cart_count'] += 1
+    else:
+        request.session['cart_count'] = 1
+
     messages.success(request, "Item added to cart")
     return redirect("products")
 
@@ -321,7 +329,13 @@ def increase_cart_quantity(request, item_id):
     existing_amount.amount_due += price
     existing_amount.save()
     
-    
+     #count items in cart
+   #update cart count in session
+    if 'cart_count' in request.session:
+        request.session['cart_count'] += 1
+    else:
+        request.session['cart_count'] = 1
+
     return redirect("view_cart")
 
 def decrease_cart_quantity(request, item_id):
@@ -347,6 +361,14 @@ def decrease_cart_quantity(request, item_id):
         item.save()
         existing_amount.save()
 
+
+        #count items in cart
+        #update cart count in session
+        if 'cart_count' in request.session:
+            request.session['cart_count'] -= 1
+        else:
+            request.session['cart_count'] = 1
+
     elif new_quantity <=0 and new_amount <= 0:
         item.delete()
 
@@ -364,8 +386,10 @@ def delete_cart(request):
     cart_amount = OrderAmount.objects.all()
     cart_amount.delete()
 
-    logged_user = request.user
-    print(logged_user.last_name)
+    #reset badge to 0
+    if 'cart_count' in request.session:
+        del request.session['cart_count']
+
     messages.success(request, "Cart cleared!")
     return redirect("view_cart")
 
@@ -834,6 +858,9 @@ def confirm_order(request, pk):
 
     order_amount = OrderAmount.objects.all().first()
     order_amount.delete()
+
+    if 'cart_count' in request.session:
+        del request.session['cart_count']
 
     return redirect("confirmation_email", pk=pk)
 
