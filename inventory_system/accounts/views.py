@@ -45,6 +45,7 @@ from .utils import perform_forecasting_analysis
 from django.http import HttpResponseRedirect
 from xhtml2pdf import pisa
 from django.template.loader import get_template
+from matplotlib import pyplot as plt
 
 def home(request):
     return render(request, 'accounts/home.html')
@@ -197,6 +198,8 @@ def dashboard(request):
     sales_graph_df = df.groupby(by="last_sales_date", as_index=False, sort=False)['sales'].sum()
     print(sales_graph_df.sales)
     print(sales_graph_df.columns)
+    plt.ylim(0,)
+    plt.xlim(0,)
     sales_graph = px.line(sales_graph_df, x = sales_graph_df.last_sales_date, y = sales_graph_df.sales, title="Sales Trend")
     sales_graph = json.dumps(sales_graph, cls=plotly.utils.PlotlyJSONEncoder)
 

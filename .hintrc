@@ -37,6 +37,12 @@
         "link-name": "off",
         "button-name": "off"
       }
+    ],
+    "axe/keyboard": [
+      "default",
+      {
+        "nested-interactive": "off"
+      }
     ]
   }
 }
