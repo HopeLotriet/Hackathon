@@ -552,7 +552,7 @@ def order_history(request):
     logged_user = request.user
     has_data = customerOrderHistory.objects.exists()
     if logged_user.is_authenticated and has_data:
-        previous_orders = customerOrderHistory.objects.all()
+        previous_orders = customerOrderHistory.objects.filter(customer=logged_user)
     else:
         previous_orders = customerOrderHistory.objects.all()
     return render(request, 'accounts/order_history.html', {'orders': previous_orders, "user": logged_user})
@@ -746,7 +746,7 @@ def delete_invoice(request, pk):
 
     if 'cart_count' in request.session:
         del request.session['cart_count']
-        
+
     messages.success(request, "Order canceled")
     return redirect('products')
 
