@@ -743,6 +743,10 @@ def delete_invoice(request, pk):
 
     order_amount = OrderAmount.objects.all()
     order_amount.delete()
+
+    if 'cart_count' in request.session:
+        del request.session['cart_count']
+        
     messages.success(request, "Order canceled")
     return redirect('products')
 
