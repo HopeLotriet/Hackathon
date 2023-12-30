@@ -135,7 +135,7 @@ def per_product(request, pk):
 def update(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
     if request.method == "POST":
-        updateForm = InventoryUpdateForm(data=request.POST)
+        updateForm = InventoryUpdateForm(request.POST, request.FILES, instance=inventory)
         if updateForm.is_valid():
             inventory.name = updateForm.data['name']
             inventory.quantity_in_stock = updateForm.data['quantity_in_stock']
@@ -143,6 +143,7 @@ def update(request, pk):
             inventory.cost_per_item = updateForm.data['cost_per_item']
             inventory.sales = float(inventory.cost_per_item) * float(inventory.quantity_sold)
             inventory.save()
+            inventory.image = updateForm['image']
             messages.success(request, "Update Successful")
             return redirect(reverse('per_product', kwargs={'pk': pk}))
     else:
@@ -297,15 +298,22 @@ def delete_from_cart(request, item_id):
     #remove from cart
     item = get_object_or_404(cart, id=item_id)
     item_cost = item.total_amount
+    item_quantity = item.quantity
     
     #decrease total price
     existing_amount = OrderAmount.objects.all().first()
     existing_amount.amount_due -= item_cost
     
-    
+    #count items in cart
+    #update cart count in session
+    if 'cart_count' in request.session:
+        request.session['cart_count'] -= item_quantity
+    else:
+        request.session['cart_count'] = 1
+
     item.delete()
     existing_amount.save() 
-    
+
     messages.success(request, "Item removed from cart")
 
   
@@ -544,7 +552,7 @@ def order_history(request):
     logged_user = request.user
     has_data = customerOrderHistory.objects.exists()
     if logged_user.is_authenticated and has_data:
-        previous_orders = customerOrderHistory.objects.all()
+        previous_orders = customerOrderHistory.objects.filter(customer=logged_user)
     else:
         previous_orders = customerOrderHistory.objects.all()
     return render(request, 'accounts/order_history.html', {'orders': previous_orders, "user": logged_user})
@@ -552,35 +560,42 @@ def order_history(request):
 @login_required()
 def return_order(request, order_id):
     current_order = get_object_or_404(Order, id=order_id)
-    if current_order.order_status != "Order canceled":
+    last_order = Order.objects.all().last()
+    if current_order == last_order:
+        if current_order.order_status != "Order canceled":
 
-        if order_history:
-            
-            # Sum up items by name
-            item_quantities = cart_records.objects.values('item').annotate(each_item_quantity=Sum('quantity'))
-            print(item_quantities)
+            if order_history:
+                
+                # Sum up items by name
+                item_quantities = cart_records.objects.values('item').annotate(each_item_quantity=Sum('quantity'))
+                print(item_quantities)
 
-            #add each product back into the inventory
-            for item in item_quantities:
-                item_name = item['item']
-                returning_quantity = item['each_item_quantity']
-                inventory_product = get_object_or_404(Inventory, name=item_name)
-                ajusted_quantity = inventory_product.quantity_in_stock + returning_quantity
-                inventory_product.quantity_in_stock = ajusted_quantity
-                inventory_product.save()
+                #add each product back into the inventory
+                for item in item_quantities:
+                    item_name = item['item']
+                    returning_quantity = item['each_item_quantity']
+                    inventory_product = get_object_or_404(Inventory, name=item_name)
+                    ajusted_quantity = inventory_product.quantity_in_stock + returning_quantity
+                    inventory_product.quantity_in_stock = ajusted_quantity
 
-            #fetch product from order history and inventory and update their statuses
-            returning_order = get_object_or_404(customerOrderHistory, id=order_id)
-            returning_orderlist = get_object_or_404(Order, id=order_id)
+                    quantity_sold = inventory_product.quantity_sold
+                    inventory_product.quantity_sold = max(0, quantity_sold - returning_quantity)
+                    inventory_product.sales = float(inventory_product.cost_per_item) * float(inventory_product.quantity_sold)
+                    inventory_product.save()
 
-            returning_orderlist.order_status = "Order canceled"
-            returning_orderlist.save()
-    
-            returning_order.customer_order_status = "Order canceled"
-            returning_order.save()
+                #fetch product from order history and inventory and update their statuses
+                returning_order = get_object_or_404(customerOrderHistory, id=order_id)
+                returning_orderlist = get_object_or_404(Order, id=order_id)
+
+                returning_orderlist.order_status = "Order canceled"
+                returning_orderlist.save()
+        
+                returning_order.customer_order_status = "Order canceled"
+                returning_order.save()
+        else:
+            pass
     else:
         pass
-
     return redirect('order_history')
 
 def marketing(request):
@@ -728,6 +743,10 @@ def delete_invoice(request, pk):
 
     order_amount = OrderAmount.objects.all()
     order_amount.delete()
+
+    if 'cart_count' in request.session:
+        del request.session['cart_count']
+
     messages.success(request, "Order canceled")
     return redirect('products')
 
@@ -807,6 +826,9 @@ def confirm_order(request, pk):
         ordered_quantity = item.quantity
         quantity_in_stock = inventory.quantity_in_stock
         inventory.quantity_in_stock = max(0, quantity_in_stock - ordered_quantity)
+        quantity_sold = inventory.quantity_sold
+        inventory.quantity_sold = max(0, quantity_sold + ordered_quantity)
+        inventory.sales = float(inventory.cost_per_item) * float(inventory.quantity_sold)
         inventory.save()
 
     ##add order to order list :-
@@ -819,7 +841,7 @@ def confirm_order(request, pk):
     customer_name =invoice.billing_name
 
     # list of products ordered
-    grouped_cart_items = cart.objects.values('item').annotate(item_count=Count('id'))
+    grouped_cart_items = cart.objects.values('item').annotate(item_count=Sum('quantity'))
     item_list = [f"{group['item_count']}-{group['item']}" for group in grouped_cart_items]
     all_items = ', '.join(item_list)
     
@@ -873,7 +895,7 @@ def confirmation_email(request, pk):
 
     #Fetch the invoice from database
     invoice = get_object_or_404(Invoice, pk=pk)
-    generated_pdf = invoice.pdf_file.path
+    generated_pdf = "pdfs/invoice_pdf.pdf"
 
     #Automated mail update
     name = request.user.username
