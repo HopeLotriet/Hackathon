@@ -14,18 +14,12 @@ from .models import (
     Supplier, 
     PurchaseItem,
     PurchaseBillDetails,
-    SaleBill,  
-    SaleItem,
-    SaleBillDetails,
 )
 from .forms import (
     SelectSupplierForm, 
     PurchaseItemFormset,
     PurchaseDetailsForm, 
     SupplierForm, 
-    SaleForm,
-    SaleItemFormset,
-    SaleDetailsForm
 )
 from accounts.models import Inventory
 
@@ -199,85 +193,6 @@ class PurchaseDeleteView(SuccessMessageMixin, DeleteView):
         return super(PurchaseDeleteView, self).delete(*args, **kwargs)
 
 
-
-
-# shows the list of bills of all sales 
-class SaleView(ListView):
-    model = SaleBill
-    template_name = "sales/sales_list.html"
-    context_object_name = 'bills'
-    ordering = ['-time']
-    paginate_by = 10
-
-
-# used to generate a bill object and save items
-class SaleCreateView(View):                                                      
-    template_name = 'sales/new_sale.html'
-
-    def get(self, request):
-        form = SaleForm(request.GET or None)
-        formset = SaleItemFormset(request.GET or None)
-        stocks = Inventory.objects.filter(is_deleted=False)
-        context = {
-            'form': form,
-            'formset': formset,
-            'stocks': stocks
-            }
-        print("SaleCreateView GET Context:", context)
-        return render(request, self.template_name, context)
-
-    def post(self, request):
-        form = SaleForm(request.POST)
-        formset = SaleItemFormset(request.POST)
-        if form.is_valid() and formset.is_valid():
-            billobj = form.save(commit=False)
-            billobj.save()
-            billdetailsobj = SaleBillDetails(billno=billobj)
-            billdetailsobj.save()
-            
-            for form in formset:
-                billitem = form.save(commit=False)
-                billitem.billno = billobj
-                stock = get_object_or_404(Inventory, name=billitem.stock.name)
-                billitem.totalprice = billitem.perprice * billitem.quantity
-                stock.quantity_in_stock -= billitem.quantity
-                stock.quantity_sold += billitem.quantity
-                stock.sales = billitem.quantity * billitem.perprice
-                stock.save()
-                billitem.save()
-
-        messages.success(request, "Sold items have been registered successfully")
-        return redirect('sale-bill', billno=billobj.billno)
-
-        context = {
-            'form': form,
-            'formset': formset,
-            'stocks': Inventory.objects.filter(is_deleted=False)
-            }
-        print("SaleCreateView POST Context:", context)
-        return render(request, self.template_name, context)
-
-
-# used to delete a bill object
-class SaleDeleteView(SuccessMessageMixin, DeleteView):
-    model = SaleBill
-    template_name = "sales/delete_sale.html"
-    success_url = '/transactions/sales'
-    
-    def delete(self, *args, **kwargs):
-        self.object = self.get_object()
-        items = SaleItem.objects.filter(billno=self.object.billno)
-        for item in items:
-            stock = get_object_or_404(Stock, name=item.stock.name)
-            if stock.is_deleted == False:
-                stock.quantity += item.quantity
-                stock.save()
-        messages.success(self.request, "Sale bill has been deleted successfully")
-        return super(SaleDeleteView, self).delete(*args, **kwargs)
-
-
-
-
 # used to display the purchase bill object
 class PurchaseBillView(View):
     model = PurchaseBill
@@ -324,48 +239,6 @@ class PurchaseBillView(View):
             'bill'          : PurchaseBill.objects.get(billno=billno),
             'items'         : PurchaseItem.objects.filter(billno=billno),
             'billdetails'   : PurchaseBillDetails.objects.get(billno=billno),
-            'bill_base'     : self.bill_base,
-        }
-        return render(request, self.template_name, context)
-
-
-# used to display the sale bill object
-class SaleBillView(View):
-    model = SaleBill
-    template_name = "bill/sale_bill.html"
-    bill_base = "bill/bill_base.html"
-    
-    def get(self, request, billno):
-        context = {
-            'bill'          : SaleBill.objects.get(billno=billno),
-            'items'         : SaleItem.objects.filter(billno=billno),
-            'billdetails'   : SaleBillDetails.objects.get(billno=billno),
-            'bill_base'     : self.bill_base,
-        }
-        return render(request, self.template_name, context)
-
-    def post(self, request, billno):
-        form = SaleDetailsForm(request.POST)
-        if form.is_valid():
-            billdetailsobj = SaleBillDetails.objects.get(billno=billno)
-            
-            billdetailsobj.eway = request.POST.get("eway")    
-            billdetailsobj.veh = request.POST.get("veh")
-            billdetailsobj.destination = request.POST.get("destination")
-            billdetailsobj.po = request.POST.get("po")
-            billdetailsobj.cgst = request.POST.get("cgst")
-            billdetailsobj.sgst = request.POST.get("sgst")
-            billdetailsobj.igst = request.POST.get("igst")
-            billdetailsobj.cess = request.POST.get("cess")
-            billdetailsobj.tcs = request.POST.get("tcs")
-            billdetailsobj.total = request.POST.get("total")
-
-            billdetailsobj.save()
-            messages.success(request, "Bill details have been modified successfully")
-        context = {
-            'bill'          : SaleBill.objects.get(billno=billno),
-            'items'         : SaleItem.objects.filter(billno=billno),
-            'billdetails'   : SaleBillDetails.objects.get(billno=billno),
             'bill_base'     : self.bill_base,
         }
         return render(request, self.template_name, context)
