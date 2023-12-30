@@ -14,7 +14,7 @@
     <div class="row gy-5">
         {% for inventory in inventories %}
       <div class="col-3">
-        <img src="{{ inventory.image.url }}" alt="Inventory Image" style="max-width: 150px;">
+        <img src="{{ inventory.image.url }}" alt="Inventory Image" width="100px" height="90px">
         <div>
         <span class="p-2">{{inventory.name}}</span>
         <span class="p-2">Each: R{{ inventory.cost_per_item }}</span></div>
