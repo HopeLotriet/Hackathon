@@ -25,6 +25,12 @@
         body {
             padding-top: 80px;
             padding-bottom: 70px;
+            background-image: url('static/images/veges.jpg');
+            background-repeat: no-repeat;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.95
+            
         }
     
         .header-content {
@@ -70,24 +76,24 @@
     
         <header class="bg-success text-white fixed-top">
             <div class="d-flex align-items-center header-content">
-                <img src="{% static 'images/logo.jpeg' %}" alt="FarmFresh Logo" style="max-width: 100px;">
                 <h1 class="mb-0">FarmFresh</h1>
                 <p class="mb-0">Your Fresh Produce Marketplace</p>
             </div>
         </header>
     
         <div class="content-section mt-5">
-            <div class="container">
+            <div class="container bg-light rounded">
                 <div class="row align-items-center">
                     <div class="col-md-6">
                         <div class="image-container">
-                            <img src="{% static 'images/onion.jpeg' %}" alt="background picture" class="img-fluid mb-4">
+                            <img src="{% static 'images/logo.jpeg' %}" alt="background picture" class="img-fluid mb-4">
                         </div>
                     </div>
+                    
                     <div class="col-md-6">
                         {{ form.media }}
     
-                        <form method="POST" class="login-form">
+                        <form method="POST" class="login-form bg-light">
                             <fieldset>
                                 <legend class="border-bottom pb-2 mb-4 text-center">Login Form</legend>
                                 {% csrf_token %}

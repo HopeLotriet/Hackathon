@@ -28,6 +28,7 @@
         display: flex;
         flex-direction: column;
         min-height: 100vh;
+        
     }
 
     .custom-text-size {
@@ -122,10 +123,11 @@
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                    
                     <li class="nav-item">
                         <a class="nav-link active text-white" aria-current="page" href="{% url 'home' %}">Home</a>
                     </li>
-
+                    {% if is_customer %}
                     <li class="nav-item">
                         <a class="nav-link active text-white" href="{% url 'products' %}">Products</a>
                     </li>
@@ -137,7 +139,7 @@
                     <li class="nav-item">
                         <a class="nav-link active text-white" href="{% url 'order_history' %}">Order History</a>
                     </li>
-
+                    {% else %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle active text-white" href="#" id="navbarDropdown" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
@@ -183,13 +185,13 @@
                             <li><a class="dropdown-item" href="{% url 'sales-list' %}">Sales</a></li>
                         </ul>
                     </li>
-
+                    {% endif %}
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle active text-white" href="#" id="navbarDropdown" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
                             Profile
                         </a>
-
+                        
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
                             <li><a class="dropdown-item" href="{% url 'marketing' %}">Marketing</a></li>
                             <li>
