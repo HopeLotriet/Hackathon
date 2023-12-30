@@ -162,12 +162,14 @@ class cart(models.Model):
     cost_per_item = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
     quantity = models.IntegerField(null=False, blank=False)
     total_amount = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
+    customer = models.CharField(max_length=100, default="")
 
     def __str__(self) -> str:
         return self.item
     
 class OrderAmount(models.Model):
     amount_due = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
+    customer = models.CharField(max_length=100, default="")
 
     def __str__(self) -> str:
         return str(self.amount_due)
@@ -192,6 +194,7 @@ class cart_records(models.Model):
     cost_per_item = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
     quantity = models.IntegerField(null=False, blank=False)
     total_amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=False)
+    customer = models.CharField(max_length=100, default="")
      
     def __str__(self) -> str:
         return str(self.item)

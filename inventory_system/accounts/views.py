@@ -251,8 +251,9 @@ def dashboard(request):
 
 #adding items to cart for customers
 def view_cart(request):
-    cart_items = cart.objects.all()
-    amount = OrderAmount.objects.all()
+    logged_user = request.user
+    cart_items = cart.objects.filter(customer=logged_user)
+    amount = OrderAmount.objects.filter(customer=logged_user)
     return render(request, 'accounts/cart.html', {'items': cart_items, 'amount': amount})
 
 def add_to_cart(request, item_id):
@@ -266,13 +267,13 @@ def add_to_cart(request, item_id):
     item_name = item.name
     item_cost = item.cost_per_item
     quantities = 1
-    
+    logged_user = request.user.username
 
-    new_entry = cart(item = item_name, cost_per_item = item_cost, quantity=quantities, total_amount=item_cost)
+    new_entry = cart(item = item_name, cost_per_item = item_cost, quantity=quantities, total_amount=item_cost, customer=logged_user)
     new_entry.save()
 
    # Retrieve all instances of OrderAmount
-    existing_amounts = OrderAmount.objects.all()
+    existing_amounts = OrderAmount.objects.filter(customer=logged_user)
 
     if existing_amounts.exists():
         existing_amount = existing_amounts.first()
@@ -280,7 +281,7 @@ def add_to_cart(request, item_id):
         existing_amount.save()
     else:
         # If no instances exist, create a new one
-        new_price = OrderAmount(amount_due=item_cost)
+        new_price = OrderAmount(amount_due=item_cost, customer=logged_user)
         new_price.save()
 
 
@@ -299,9 +300,9 @@ def delete_from_cart(request, item_id):
     item = get_object_or_404(cart, id=item_id)
     item_cost = item.total_amount
     item_quantity = item.quantity
-    
+    logged_user = request.user
     #decrease total price
-    existing_amount = OrderAmount.objects.all().first()
+    existing_amount =OrderAmount.objects.get(customer=logged_user)
     existing_amount.amount_due -= item_cost
     
     #count items in cart
@@ -336,7 +337,8 @@ def increase_cart_quantity(request, item_id):
     item.save()
 
     #increase total price
-    existing_amount = OrderAmount.objects.all().first()
+    logged_user = request.user.username
+    existing_amount = OrderAmount.objects.get(customer=logged_user)
     existing_amount.amount_due += price
     existing_amount.save()
     
@@ -351,7 +353,8 @@ def increase_cart_quantity(request, item_id):
 
 def decrease_cart_quantity(request, item_id):
     item = get_object_or_404(cart, id=item_id)
-    existing_amount = OrderAmount.objects.all().first()
+    logged_user = request.user.username
+    existing_amount = OrderAmount.objects.get(customer=logged_user)
     
     new_quantity=item.quantity
     new_amount = item.total_amount
@@ -385,16 +388,19 @@ def decrease_cart_quantity(request, item_id):
 
     elif existing_amount.amount_due <= 0:
         item.delete()
-        all_amounts = OrderAmount.objects.all()
+
+        all_amounts = OrderAmount.objects.get(customer=logged_user)
         all_amounts.delete()
 
     return redirect("view_cart")
 
 def delete_cart(request):
-    cart_entry = cart.objects.all()
+    logged_user = request.user
+    cart_entry = cart.objects.filter(customer=logged_user)
     cart_entry.delete()
 
-    cart_amount = OrderAmount.objects.all()
+    
+    cart_amount = OrderAmount.objects.filter(customer=logged_user)
     cart_amount.delete()
 
     #reset badge to 0
@@ -560,7 +566,8 @@ def order_history(request):
 @login_required()
 def return_order(request, order_id):
     current_order = get_object_or_404(Order, id=order_id)
-    last_order = Order.objects.all().last()
+    logged_user = f"{request.user.first_name} {request.user.last_name}"
+    last_order = Order.objects.filter(customer=logged_user).last()
     if current_order == last_order:
         if current_order.order_status != "Order canceled":
 
@@ -632,11 +639,12 @@ def invoicing(request):
 
 @login_required()
 def create_invoice(request):
-
+    logged_user = request.user
+    customer_name = f"{logged_user.first_name} {logged_user.last_name}"
     #block placement of order if another one is progress
     has_data = Order.objects.exists()
     if has_data:
-        previous_order = Order.objects.all().last()
+        previous_order = Order.objects.filter(customer=customer_name).last()
         previous_order_status = previous_order.order_status
     else:
         previous_order_status = "delivered"
@@ -655,7 +663,8 @@ def create_invoice(request):
         context = {'form': form}
 
         #save cart entries before clearing
-        existing_cart = cart.objects.all()
+        user_name = logged_user.username
+        existing_cart = cart.objects.filter(customer=user_name)
 
         for item in existing_cart:
             item_name = item.item
@@ -667,7 +676,8 @@ def create_invoice(request):
                 item = item_name,
                 cost_per_item =item_cost,
                 quantity=item_quantity,
-                total_amount=price
+                total_amount=price,
+                customer = user_name
             )
             cart_record.save()
         return render(request, 'accounts/create_invoice.html', context)
@@ -698,7 +708,7 @@ def order_details(request):
     due_date = datetime.now().date() + timedelta(days=7)
 
     #Amount due
-    order_amount = OrderAmount.objects.all().first()
+    order_amount = OrderAmount.objects.get(customer=logged_user)
     payment_amount = order_amount.amount_due
 
     # Update invoice entry
@@ -737,11 +747,11 @@ def edit_invoice(request, pk):
 def delete_invoice(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     invoice.delete()
-
-    cart_entry = cart.objects.all()
+    logged_user = request.user.username
+    cart_entry = cart.objects.filter(customer=logged_user)
     cart_entry.delete()
 
-    order_amount = OrderAmount.objects.all()
+    order_amount = OrderAmount.objects.filter(customer=logged_user)
     order_amount.delete()
 
     if 'cart_count' in request.session:
@@ -762,7 +772,8 @@ def mark_invoice_as_paid(request, pk):
 def invoice_pdf(request, pk):
      # Your data to be passed to the template
     invoice = get_object_or_404(Invoice, pk=pk)
-    cart_items = cart_records.objects.all()
+    logged_user = request.user
+    cart_items = cart_records.objects.filter(customer=logged_user)
     orderHistory = customerOrderHistory.objects.all().last()
     context = {
     'invoice_number': invoice.id,
@@ -818,7 +829,8 @@ def invoice_pdf(request, pk):
 def confirm_order(request, pk):
 
     #adjust inventory table
-    cart_items = cart.objects.all()
+    logged_user = request.user.username
+    cart_items = cart.objects.filter(customer=logged_user)
 
     for item in cart_items:
         product_name = item.item
@@ -841,7 +853,8 @@ def confirm_order(request, pk):
     customer_name =invoice.billing_name
 
     # list of products ordered
-    grouped_cart_items = cart.objects.values('item').annotate(item_count=Sum('quantity'))
+    cart_products = cart.objects.filter(customer=logged_user)
+    grouped_cart_items = cart_products.values('item').annotate(item_count=Sum('quantity'))
     item_list = [f"{group['item_count']}-{group['item']}" for group in grouped_cart_items]
     all_items = ', '.join(item_list)
     
@@ -878,10 +891,10 @@ def confirm_order(request, pk):
         request.session['success_message'] = pdf_success_message
 
     #clear cart
-    cart_table = cart.objects.all()
+    cart_table = cart.objects.filter(customer=logged_user)
     cart_table.delete()
 
-    order_amount = OrderAmount.objects.all().first()
+    order_amount = OrderAmount.objects.filter(customer=logged_user)
     order_amount.delete()
 
     if 'cart_count' in request.session:
