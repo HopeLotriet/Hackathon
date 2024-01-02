@@ -9,15 +9,16 @@ from django.contrib.auth import get_user_model
 class InventoryUpdateForm(ModelForm):
     class Meta:
         model = Inventory
-        fields = ["name", "cost_per_item", "quantity_in_stock", "quantity_sold"]
+        fields = ["name", "cost_per_item", "quantity_in_stock", "quantity_sold", "image"]
 
 
 class AddInventoryForm(ModelForm):
     barcode = forms.CharField(max_length=50, required=False, widget=forms.TextInput(attrs={'placeholder': 'Barcode'}))
+    image = forms.ImageField(required=False)
 
     class Meta:
         model = Inventory
-        fields = ["name", "cost_per_item", "quantity_in_stock", "quantity_sold", "barcode"]
+        fields = ["name", "cost_per_item", "quantity_in_stock", "quantity_sold", "barcode", "image"]
 
 class OrderForm(ModelForm):
     class Meta:

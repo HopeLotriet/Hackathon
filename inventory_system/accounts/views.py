@@ -43,6 +43,9 @@ from statsmodels.tsa.holtwinters import ExponentialSmoothing
 import csv
 from .utils import perform_forecasting_analysis
 from django.http import HttpResponseRedirect
+from xhtml2pdf import pisa
+from django.template.loader import get_template
+from matplotlib import pyplot as plt
 
 def home(request):
     return render(request, 'accounts/home.html')
@@ -135,7 +138,7 @@ def per_product(request, pk):
 def update(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
     if request.method == "POST":
-        updateForm = InventoryUpdateForm(data=request.POST)
+        updateForm = InventoryUpdateForm(request.POST, request.FILES, instance=inventory)
         if updateForm.is_valid():
             inventory.name = updateForm.data['name']
             inventory.quantity_in_stock = updateForm.data['quantity_in_stock']
@@ -143,6 +146,7 @@ def update(request, pk):
             inventory.cost_per_item = updateForm.data['cost_per_item']
             inventory.sales = float(inventory.cost_per_item) * float(inventory.quantity_sold)
             inventory.save()
+            inventory.image = updateForm['image']
             messages.success(request, "Update Successful")
             return redirect(reverse('per_product', kwargs={'pk': pk}))
     else:
@@ -160,7 +164,7 @@ def delete(request, pk):
 @login_required()
 def add_product(request):
     if request.method == "POST":
-        updateForm = AddInventoryForm(data=request.POST)
+        updateForm = AddInventoryForm(request.POST, request.FILES)
         if updateForm.is_valid():
             new_inventory = updateForm.save(commit=False)
             new_inventory.sales = float(updateForm.data['cost_per_item']) * float(updateForm.data['quantity_sold'])
@@ -198,6 +202,8 @@ def dashboard(request):
     sales_graph_df = df.groupby(by="last_sales_date", as_index=False, sort=False)['sales'].sum()
     print(sales_graph_df.sales)
     print(sales_graph_df.columns)
+    plt.ylim(0,)
+    plt.xlim(0,)
     sales_graph = px.line(sales_graph_df, x = sales_graph_df.last_sales_date, y = sales_graph_df.sales, title="Sales Trend")
     sales_graph = json.dumps(sales_graph, cls=plotly.utils.PlotlyJSONEncoder)
 
@@ -248,8 +254,9 @@ def dashboard(request):
 
 #adding items to cart for customers
 def view_cart(request):
-    cart_items = cart.objects.all()
-    amount = OrderAmount.objects.all()
+    logged_user = request.user
+    cart_items = cart.objects.filter(customer=logged_user)
+    amount = OrderAmount.objects.filter(customer=logged_user)
     return render(request, 'accounts/cart.html', {'items': cart_items, 'amount': amount})
 
 def add_to_cart(request, item_id):
@@ -263,13 +270,13 @@ def add_to_cart(request, item_id):
     item_name = item.name
     item_cost = item.cost_per_item
     quantities = 1
-    
+    logged_user = request.user.username
 
-    new_entry = cart(item = item_name, cost_per_item = item_cost, quantity=quantities, total_amount=item_cost)
+    new_entry = cart(item = item_name, cost_per_item = item_cost, quantity=quantities, total_amount=item_cost, customer=logged_user)
     new_entry.save()
 
    # Retrieve all instances of OrderAmount
-    existing_amounts = OrderAmount.objects.all()
+    existing_amounts = OrderAmount.objects.filter(customer=logged_user)
 
     if existing_amounts.exists():
         existing_amount = existing_amounts.first()
@@ -277,8 +284,16 @@ def add_to_cart(request, item_id):
         existing_amount.save()
     else:
         # If no instances exist, create a new one
-        new_price = OrderAmount(amount_due=item_cost)
+        new_price = OrderAmount(amount_due=item_cost, customer=logged_user)
         new_price.save()
+
+
+     #count items in cart
+   #update cart count in session
+    if 'cart_count' in request.session:
+        request.session['cart_count'] += 1
+    else:
+        request.session['cart_count'] = 1
 
     messages.success(request, "Item added to cart")
     return redirect("products")
@@ -287,15 +302,22 @@ def delete_from_cart(request, item_id):
     #remove from cart
     item = get_object_or_404(cart, id=item_id)
     item_cost = item.total_amount
-    
+    item_quantity = item.quantity
+    logged_user = request.user
     #decrease total price
-    existing_amount = OrderAmount.objects.all().first()
+    existing_amount =OrderAmount.objects.get(customer=logged_user)
     existing_amount.amount_due -= item_cost
     
-    
+    #count items in cart
+    #update cart count in session
+    if 'cart_count' in request.session:
+        request.session['cart_count'] -= item_quantity
+    else:
+        request.session['cart_count'] = 1
+
     item.delete()
     existing_amount.save() 
-    
+
     messages.success(request, "Item removed from cart")
 
   
@@ -318,16 +340,24 @@ def increase_cart_quantity(request, item_id):
     item.save()
 
     #increase total price
-    existing_amount = OrderAmount.objects.all().first()
+    logged_user = request.user.username
+    existing_amount = OrderAmount.objects.get(customer=logged_user)
     existing_amount.amount_due += price
     existing_amount.save()
     
-    
+     #count items in cart
+   #update cart count in session
+    if 'cart_count' in request.session:
+        request.session['cart_count'] += 1
+    else:
+        request.session['cart_count'] = 1
+
     return redirect("view_cart")
 
 def decrease_cart_quantity(request, item_id):
     item = get_object_or_404(cart, id=item_id)
-    existing_amount = OrderAmount.objects.all().first()
+    logged_user = request.user.username
+    existing_amount = OrderAmount.objects.get(customer=logged_user)
     
     new_quantity=item.quantity
     new_amount = item.total_amount
@@ -348,25 +378,38 @@ def decrease_cart_quantity(request, item_id):
         item.save()
         existing_amount.save()
 
+
+        #count items in cart
+        #update cart count in session
+        if 'cart_count' in request.session:
+            request.session['cart_count'] -= 1
+        else:
+            request.session['cart_count'] = 1
+
     elif new_quantity <=0 and new_amount <= 0:
         item.delete()
 
     elif existing_amount.amount_due <= 0:
         item.delete()
-        all_amounts = OrderAmount.objects.all()
+
+        all_amounts = OrderAmount.objects.get(customer=logged_user)
         all_amounts.delete()
 
     return redirect("view_cart")
 
 def delete_cart(request):
-    cart_entry = cart.objects.all()
+    logged_user = request.user
+    cart_entry = cart.objects.filter(customer=logged_user)
     cart_entry.delete()
 
-    cart_amount = OrderAmount.objects.all()
+    
+    cart_amount = OrderAmount.objects.filter(customer=logged_user)
     cart_amount.delete()
 
-    logged_user = request.user
-    print(logged_user.last_name)
+    #reset badge to 0
+    if 'cart_count' in request.session:
+        del request.session['cart_count']
+
     messages.success(request, "Cart cleared!")
     return redirect("view_cart")
 
@@ -518,7 +561,7 @@ def order_history(request):
     logged_user = request.user
     has_data = customerOrderHistory.objects.exists()
     if logged_user.is_authenticated and has_data:
-        previous_orders = customerOrderHistory.objects.all()
+        previous_orders = customerOrderHistory.objects.filter(customer=logged_user)
     else:
         previous_orders = customerOrderHistory.objects.all()
     return render(request, 'accounts/order_history.html', {'orders': previous_orders, "user": logged_user})
@@ -526,35 +569,43 @@ def order_history(request):
 @login_required()
 def return_order(request, order_id):
     current_order = get_object_or_404(Order, id=order_id)
-    if current_order.order_status != "Order canceled":
+    logged_user = f"{request.user.first_name} {request.user.last_name}"
+    last_order = Order.objects.filter(customer=logged_user).last()
+    if current_order == last_order:
+        if current_order.order_status != "Order canceled":
 
-        if order_history:
-            
-            # Sum up items by name
-            item_quantities = cart_records.objects.values('item').annotate(each_item_quantity=Sum('quantity'))
-            print(item_quantities)
+            if order_history:
+                
+                # Sum up items by name
+                item_quantities = cart_records.objects.values('item').annotate(each_item_quantity=Sum('quantity'))
+                print(item_quantities)
 
-            #add each product back into the inventory
-            for item in item_quantities:
-                item_name = item['item']
-                returning_quantity = item['each_item_quantity']
-                inventory_product = get_object_or_404(Inventory, name=item_name)
-                ajusted_quantity = inventory_product.quantity_in_stock + returning_quantity
-                inventory_product.quantity_in_stock = ajusted_quantity
-                inventory_product.save()
+                #add each product back into the inventory
+                for item in item_quantities:
+                    item_name = item['item']
+                    returning_quantity = item['each_item_quantity']
+                    inventory_product = get_object_or_404(Inventory, name=item_name)
+                    ajusted_quantity = inventory_product.quantity_in_stock + returning_quantity
+                    inventory_product.quantity_in_stock = ajusted_quantity
 
-            #fetch product from order history and inventory and update their statuses
-            returning_order = get_object_or_404(customerOrderHistory, id=order_id)
-            returning_orderlist = get_object_or_404(Order, id=order_id)
+                    quantity_sold = inventory_product.quantity_sold
+                    inventory_product.quantity_sold = max(0, quantity_sold - returning_quantity)
+                    inventory_product.sales = float(inventory_product.cost_per_item) * float(inventory_product.quantity_sold)
+                    inventory_product.save()
 
-            returning_orderlist.order_status = "Order canceled"
-            returning_orderlist.save()
-    
-            returning_order.customer_order_status = "Order canceled"
-            returning_order.save()
+                #fetch product from order history and inventory and update their statuses
+                returning_order = get_object_or_404(customerOrderHistory, id=order_id)
+                returning_orderlist = get_object_or_404(Order, id=order_id)
+
+                returning_orderlist.order_status = "Order canceled"
+                returning_orderlist.save()
+        
+                returning_order.customer_order_status = "Order canceled"
+                returning_order.save()
+        else:
+            pass
     else:
         pass
-
     return redirect('order_history')
 
 def marketing(request):
@@ -591,11 +642,12 @@ def invoicing(request):
 
 @login_required()
 def create_invoice(request):
-
+    logged_user = request.user
+    customer_name = f"{logged_user.first_name} {logged_user.last_name}"
     #block placement of order if another one is progress
     has_data = Order.objects.exists()
     if has_data:
-        previous_order = Order.objects.all().last()
+        previous_order = Order.objects.filter(customer=customer_name).last()
         previous_order_status = previous_order.order_status
     else:
         previous_order_status = "delivered"
@@ -614,7 +666,8 @@ def create_invoice(request):
         context = {'form': form}
 
         #save cart entries before clearing
-        existing_cart = cart.objects.all()
+        user_name = logged_user.username
+        existing_cart = cart.objects.filter(customer=user_name)
 
         for item in existing_cart:
             item_name = item.item
@@ -626,7 +679,8 @@ def create_invoice(request):
                 item = item_name,
                 cost_per_item =item_cost,
                 quantity=item_quantity,
-                total_amount=price
+                total_amount=price,
+                customer = user_name
             )
             cart_record.save()
         return render(request, 'accounts/create_invoice.html', context)
@@ -657,7 +711,7 @@ def order_details(request):
     due_date = datetime.now().date() + timedelta(days=7)
 
     #Amount due
-    order_amount = OrderAmount.objects.all().first()
+    order_amount = OrderAmount.objects.get(customer=logged_user)
     payment_amount = order_amount.amount_due
 
     # Update invoice entry
@@ -696,12 +750,16 @@ def edit_invoice(request, pk):
 def delete_invoice(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     invoice.delete()
-
-    cart_entry = cart.objects.all()
+    logged_user = request.user.username
+    cart_entry = cart.objects.filter(customer=logged_user)
     cart_entry.delete()
 
-    order_amount = OrderAmount.objects.all()
+    order_amount = OrderAmount.objects.filter(customer=logged_user)
     order_amount.delete()
+
+    if 'cart_count' in request.session:
+        del request.session['cart_count']
+
     messages.success(request, "Order canceled")
     return redirect('products')
 
@@ -715,84 +773,67 @@ def mark_invoice_as_paid(request, pk):
 #generate pdf of invoice
 @login_required()
 def invoice_pdf(request, pk):
-    try:
-        # Get the invoice
-        invoice = get_object_or_404(Invoice, pk=pk)
+     # Your data to be passed to the template
+    invoice = get_object_or_404(Invoice, pk=pk)
+    logged_user = request.user
+    cart_items = cart_records.objects.filter(customer=logged_user)
+    orderHistory = customerOrderHistory.objects.all().last()
+    context = {
+    'invoice_number': invoice.id,
+    'order_id': invoice.order,
+    'total_amount': f"R{invoice.total_amount}",
+    'date': invoice.date_created,
+    'billing_name': invoice.billing_name,
+    'billing_address': invoice.billing_address,
+    'billing_email': invoice.billing_email,
+    'payment_status': invoice.payment_status,
+    'payment_method': invoice.payment_method,
+    'due_date': invoice.payment_due_date,
+    'notes': invoice.notes,
+    'total_quantities': orderHistory.quantity_ordered,
+    'order_items': [
+        {
+            'No': cart_item.id,
+            'item': cart_item.item,
+            'item_quantity': cart_item.quantity,
+            'item_cost': cart_item.cost_per_item,
+            'price': cart_item.total_amount
+        }
+        for cart_item in cart_items  # Assuming cart_records is a queryset or list of items
+    ]
+    # Add other data as needed
+}
+    #render the template
+    template_path = 'accounts/invoice_pdf.html'
+    template = get_template(template_path)
+    html = template.render(context)
 
-        # Create Bytestream buffer
-        buf = io.BytesIO()
-        # Create a canvas
-        c = canvas.Canvas(buf, pagesize=letter, bottomup=0)
+     # Create the PDF
+    response = HttpResponse(content_type='application/pdf')
 
-        # Create a text object
-        inch = 72.0
-        textob = c.beginText()
-        textob.setTextOrigin(inch, inch)
-        textob.setFont("Helvetica", 14)
+    # Generate the PDF content using xhtml2pdf
+    pisa_status = pisa.CreatePDF(html, dest=response)
 
-        # Add invoice details to the PDF
-        textob.textLine(f"Invoice Number: {invoice.pk}")
-        textob.textLine(f"Total Amount: {invoice.total_amount}")
-        textob.textLine(f"Payment due: {invoice.payment_due_date}")
+    if pisa_status.err:
+        return HttpResponse("Could not generate PDF")
 
-        textob.textLine(f"Billing name: {invoice.billing_name}")
-        textob.textLine(f"Billing address: {invoice.billing_address}")
-        textob.textLine(f"Billing email: {invoice.billing_email}")
-        textob.textLine(f"Date: {invoice.date_created}")
-        textob.textLine(f"Payment method: {invoice.payment_method}")
+    # Save the PDF in the 'pdfs' folder
+    pdf_path = "pdfs/invoice_pdf.pdf"
+    with open(pdf_path, 'wb') as pdf_file:
+        pdf_file.write(response.content)
 
-        # ... (other invoice details)
-
-        # Get the related order details
-        order_id = invoice.order
-        order_details = get_object_or_404(customerOrderHistory, order_id=order_id)
-        textob.textLine(f"Order ID: {order_id}")
-        textob.textLine(f"Order status: {order_details.customer_order_status}")
-
-        # ... (other order details)
-
-        orderitems = cart_records.objects.all() 
-        textob.textLine(f"Total order quantity: {order_details.quantity_ordered}")
-        for item in orderitems:
-            textob.textLine(f"Item: {item.quantity} {item.item} {item.cost_per_item} {item.total_amount}")
-            # ... (other order item details)
-
-        textob.textLine(f"Delivery instructions: {invoice.notes}")
-        # Finish Up
-        c.drawText(textob)
-        c.showPage()
-        c.save()
-        buf.seek(0)
-
-        # Save the PDF to the server's filesystem
-        file_name = f'invoice_{invoice.pk}_pdf.pdf'
-        file_path = os.path.join('pdfs', file_name).replace('\\', '/')
-
-        with open(file_path, 'wb') as pdf_file:
-            pdf_file.write(buf.getvalue())
-
-        # Associate the PDF file path with the Invoice model
-        invoice.pdf_file = file_path
-        invoice.save()
-
-        # Clean up: close the buffer
-        buf.close()
-
-        # Return a success response
-        return HttpResponse(status=200)
-
-    except Invoice.DoesNotExist:
-        # Handle the case when the invoice is not found
-        return HttpResponse("Invoice not found.", status=404)
-    except Exception as e:
-        # Log and handle other exceptions
-        return HttpResponse("An error occurred.", status=500)
+    # Update the pdf_file attribute for the invoice object
+    invoice.pdf_file = pdf_path
+    invoice.save()
+    
+    return HttpResponse("PDF saved successfully at {}".format(pdf_path))
 
 #finialise order
 def confirm_order(request, pk):
 
     #adjust inventory table
-    cart_items = cart.objects.all()
+    logged_user = request.user.username
+    cart_items = cart.objects.filter(customer=logged_user)
 
     for item in cart_items:
         product_name = item.item
@@ -800,6 +841,9 @@ def confirm_order(request, pk):
         ordered_quantity = item.quantity
         quantity_in_stock = inventory.quantity_in_stock
         inventory.quantity_in_stock = max(0, quantity_in_stock - ordered_quantity)
+        quantity_sold = inventory.quantity_sold
+        inventory.quantity_sold = max(0, quantity_sold + ordered_quantity)
+        inventory.sales = float(inventory.cost_per_item) * float(inventory.quantity_sold)
         inventory.save()
 
     ##add order to order list :-
@@ -812,7 +856,8 @@ def confirm_order(request, pk):
     customer_name =invoice.billing_name
 
     # list of products ordered
-    grouped_cart_items = cart.objects.values('item').annotate(item_count=Count('id'))
+    cart_products = cart.objects.filter(customer=logged_user)
+    grouped_cart_items = cart_products.values('item').annotate(item_count=Sum('quantity'))
     item_list = [f"{group['item_count']}-{group['item']}" for group in grouped_cart_items]
     all_items = ', '.join(item_list)
     
@@ -849,11 +894,14 @@ def confirm_order(request, pk):
         request.session['success_message'] = pdf_success_message
 
     #clear cart
-    cart_table = cart.objects.all()
+    cart_table = cart.objects.filter(customer=logged_user)
     cart_table.delete()
 
-    order_amount = OrderAmount.objects.all().first()
+    order_amount = OrderAmount.objects.filter(customer=logged_user)
     order_amount.delete()
+
+    if 'cart_count' in request.session:
+        del request.session['cart_count']
 
     return redirect("confirmation_email", pk=pk)
 
@@ -863,7 +911,7 @@ def confirmation_email(request, pk):
 
     #Fetch the invoice from database
     invoice = get_object_or_404(Invoice, pk=pk)
-    generated_pdf = invoice.pdf_file.path
+    generated_pdf = "pdfs/invoice_pdf.pdf"
 
     #Automated mail update
     name = request.user.username
@@ -1009,7 +1057,7 @@ def subscription(request):
         send_mail(
             'Subscription Confirmation',
             'Thank you for subscribing to FarmFresh! You will receive updates and promotions.',
-            'from@example.com',
+            settings.EMAIL_HOST_USER,
             [email],
             fail_silently=False,
         )
@@ -1020,3 +1068,8 @@ def subscription(request):
 
     return render(request, 'accounts/subscription.html')
 
+from django.contrib.auth import logout
+
+@login_required()
+def logout(request):
+    return render(request, 'system/login.html')

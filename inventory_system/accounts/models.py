@@ -9,6 +9,7 @@ from django.conf import settings
 from django.contrib.contenttypes.models import ContentType
 from django.utils import timezone
 import json
+from django.db.models import F
 
 
 
@@ -33,6 +34,8 @@ class Inventory(models.Model):
     last_sales_date = models.DateField(auto_now=True)
     is_deleted = models.BooleanField(default=False)
     barcode = models.ImageField(upload_to='barcodes/', blank=True, null=True)
+    image = models.ImageField(upload_to='images/', null=True, blank=True)
+
 
      # New field to store historical sales data
     sales_data = models.JSONField(null=True, blank=True)
@@ -159,12 +162,14 @@ class cart(models.Model):
     cost_per_item = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
     quantity = models.IntegerField(null=False, blank=False)
     total_amount = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
+    customer = models.CharField(max_length=100, default="")
 
     def __str__(self) -> str:
         return self.item
     
 class OrderAmount(models.Model):
     amount_due = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
+    customer = models.CharField(max_length=100, default="")
 
     def __str__(self) -> str:
         return str(self.amount_due)
@@ -189,6 +194,7 @@ class cart_records(models.Model):
     cost_per_item = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
     quantity = models.IntegerField(null=False, blank=False)
     total_amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=False)
+    customer = models.CharField(max_length=100, default="")
      
     def __str__(self) -> str:
         return str(self.item)
