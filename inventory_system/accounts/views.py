@@ -47,6 +47,9 @@ from django.http import HttpResponseRedirect
 def home(request):
     return render(request, 'accounts/home.html')
 
+def logout(request):
+    return render(request, 'system/login.html')
+
 class StockListView(FilterView):
     filterset_class = StockFilter
     queryset = Inventory.objects.filter(is_deleted=False)
