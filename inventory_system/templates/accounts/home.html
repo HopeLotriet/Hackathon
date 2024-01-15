@@ -110,6 +110,21 @@
             text-decoration: underline; 
         }
 
+    @keyframes fadeInUp {
+      0% {
+        opacity: 0;
+        transform: translateY(20px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animated-text {
+      animation: fadeInUp 1.5s ease-out;
+    }
+
         .custom-badge {
         height: 20px; /* Adjust the height as needed */
         width: 20px;  /* Make sure width and height are equal for a perfect circle */
