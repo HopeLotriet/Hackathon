@@ -187,9 +187,9 @@
         
          <!-- Confirm order to generate pdf and send email to customer -->
          <div>
-          <span class="m-3"><a class="btn btn-secondary"  href="{% url 'confirm_order' invoice.id %}">Confirm order</a></span>
-         <span class="m-3"><a class="btn btn-secondary" href="{% url 'edit_invoice' invoice.id %}">Edit invoice</a></span>
-         <span class="m-3"><a class="btn btn-secondary" href="{% url 'delete_invoice' invoice.id %}">Cancel order</a></span>  
+          <span class="m-3"><a class="btn btn-success"  href="{% url 'confirm_order' invoice.id %}">Confirm order</a></span>
+         <span class="m-3"><a class="btn btn-warning" href="{% url 'edit_invoice' invoice.id %}">Edit invoice</a></span>
+         <span class="m-3"><a class="btn btn-danger" href="{% url 'delete_invoice' invoice.id %}">Cancel order</a></span>  
          </div>
          
     </div>

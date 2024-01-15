@@ -47,7 +47,7 @@ from xhtml2pdf import pisa
 from django.template.loader import get_template
 from matplotlib import pyplot as plt
 
-
+@login_required
 def home(request):
     
     return render(request, 'accounts/home.html')
@@ -99,7 +99,7 @@ def registration(request):
     }
     return render(request, 'system/registration.html', context)
 
-
+login_required
 def products(request):
     inventories = Inventory.objects.all()
     context = {
@@ -108,7 +108,7 @@ def products(request):
     }
     return render(request, 'accounts/products.html', context=context)
 
-@login_required()
+@login_required
 def stock(request):
     inventories = Inventory.objects.all()
 
@@ -128,7 +128,7 @@ def stock(request):
 
 LOW_QUANTITY = getattr(settings, 'LOW_QUANTITY', 5)
 
-@login_required()
+@login_required
 def per_product(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
     context = {
@@ -136,7 +136,7 @@ def per_product(request, pk):
     }
     return render(request, "accounts/per_product.html", context=context)
 
-@login_required()
+@login_required
 def update(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
     if request.method == "POST":
@@ -156,14 +156,14 @@ def update(request, pk):
 
     return render(request, 'accounts/inventory_update.html', {'form' : updateForm})
 
-@login_required()
+@login_required
 def delete(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
     inventory.delete()
     messages.success(request, "Inventory Deleted")
     return redirect('stock')
 
-@login_required()
+@login_required
 def add_product(request):
     if request.method == "POST":
         updateForm = AddInventoryForm(request.POST, request.FILES)
@@ -192,7 +192,7 @@ def add_product(request):
 
     return render(request, 'accounts/inventory_add.html', {'form': updateForm})
 
-@login_required()
+@login_required
 def dashboard(request):
     inventories = Inventory.objects.all()
     df = read_frame(inventories)
@@ -255,6 +255,7 @@ def dashboard(request):
     return render(request,"accounts/dashboard.html", context=context)
 
 #adding items to cart for customers
+@login_required
 def view_cart(request):
     logged_user = request.user
     cart_items = cart.objects.filter(customer=logged_user)
@@ -262,7 +263,7 @@ def view_cart(request):
 
     return render(request, 'accounts/cart.html', {'items': cart_items, 'amount': amount})
 
-
+@login_required
 def add_to_cart(request, item_id):
     
     #before placing another order, clear the temporary hold of cart_record
@@ -314,6 +315,7 @@ def add_to_cart(request, item_id):
     messages.success(request, "Item added to cart")
     return redirect("products")
 
+@login_required
 def delete_from_cart(request, item_id):
     #remove from cart
     item = get_object_or_404(cart, id=item_id)
@@ -335,6 +337,7 @@ def delete_from_cart(request, item_id):
   
     return redirect('view_cart')
 
+@login_required
 def increase_cart_quantity(request, item_id):
     item = get_object_or_404(cart, id=item_id)
     
@@ -363,6 +366,7 @@ def increase_cart_quantity(request, item_id):
 
     return redirect("view_cart")
 
+@login_required
 def decrease_cart_quantity(request, item_id):
     item = get_object_or_404(cart, id=item_id)
     logged_user = request.user.username
@@ -403,6 +407,7 @@ def decrease_cart_quantity(request, item_id):
 
     return redirect("view_cart")
 
+@login_required
 def delete_cart(request):
     logged_user = request.user
     cart_entry = cart.objects.filter(customer=logged_user)
@@ -420,7 +425,7 @@ def delete_cart(request):
 
 
 #Order management
-@login_required()
+@login_required
 def order_list(request):
     order_lists = Order.objects.all()
     print(order_lists)
@@ -487,7 +492,7 @@ def create_order(request):
     
     return render(request, 'accounts/create_order.html', {'form': order_form, 'messages': messages.get_messages(request)})
 
-@login_required()
+@login_required
 def update_order_status(request, order_id):
 
     #block order status once it is changed to delivered
@@ -561,7 +566,7 @@ def update_order_status(request, order_id):
 
         return render(request, 'accounts/update_status.html', {'form': form, 'order': order})
     
-@login_required()
+@login_required
 def order_history(request):
     logged_user = request.user
     has_data = customerOrderHistory.objects.exists()
@@ -571,7 +576,7 @@ def order_history(request):
         previous_orders = customerOrderHistory.objects.all()
     return render(request, 'accounts/order_history.html', {'orders': previous_orders, "user": logged_user})
 
-@login_required()
+@login_required
 def return_order(request, order_id):
     current_order = get_object_or_404(Order, id=order_id)
     logged_user = f"{request.user.first_name} {request.user.last_name}"
@@ -615,14 +620,17 @@ def return_order(request, order_id):
         pass
     return redirect('order_history')
 
+login_required
 def marketing(request):
     context = {}
     return render(request, 'accounts/marketing.html', context)
 
+login_required
 def profile(request):
     context = {}
     return render(request, 'accounts/profile.html', context)
 
+login_required
 def about(request):
     context = {}
     return render(request, 'accounts/about.html', context)
@@ -630,13 +638,13 @@ def about(request):
 def is_farmer(user):
     return user.groups.filter(name='Farmers').exists()
 
-@login_required()
+@login_required
 @user_passes_test(is_farmer, login_url='/accounts/login/')
 def farmer_dashboard(request):
     # Your farmer-specific view logic
     return render(request, 'accounts/farmer_dashboard.html')
 
-@login_required()
+@login_required
 def invoicing(request):
     invoices = Invoice.objects.all()
 
@@ -647,7 +655,7 @@ def invoicing(request):
     return render(request, 'accounts/invoicing.html', context)
 
 
-@login_required()
+@login_required
 def create_invoice(request):
     logged_user = request.user
     customer_name = f"{logged_user.first_name} {logged_user.last_name}"
@@ -696,6 +704,7 @@ def create_invoice(request):
         messages.warning(request, "Placing new order while one is in progress is not allowed!")
         return redirect("products")
 
+login_required
 def order_details(request):
     # Get the last created invoice
     invoice = Invoice.objects.all().last()
@@ -731,7 +740,7 @@ def order_details(request):
     return redirect('invoice_detail')
 
 
-@login_required()
+@login_required
 def invoice_detail(request):
     invoice = Invoice.objects.all().last()
     logged_user = request.user
@@ -745,7 +754,7 @@ def invoice_detail(request):
     return render(request, 'accounts/invoice_detail.html', context)
 
 
-@login_required()
+@login_required
 def edit_invoice(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
 
@@ -760,7 +769,7 @@ def edit_invoice(request, pk):
     context = {'form': form, 'invoice': invoice}
     return render(request, 'accounts/edit_invoice.html', context)
 
-@login_required()
+@login_required
 def delete_invoice(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     invoice.delete()
@@ -775,7 +784,7 @@ def delete_invoice(request, pk):
     messages.success(request, "Order canceled")
     return redirect('products')
 
-@login_required()
+@login_required
 def mark_invoice_as_paid(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     invoice.payment_status = 'paid'
@@ -783,7 +792,7 @@ def mark_invoice_as_paid(request, pk):
     return redirect('invoice_detail', pk=pk)
 
 #generate pdf of invoice
-@login_required()
+@login_required
 def invoice_pdf(request, pk):
      # Your data to be passed to the template
     invoice = get_object_or_404(Invoice, pk=pk)
@@ -841,6 +850,7 @@ def invoice_pdf(request, pk):
     return HttpResponse("PDF saved successfully at {}".format(pdf_path))
 
 #finialise order
+@login_required
 def confirm_order(request, pk):
 
     #adjust inventory table
@@ -916,6 +926,7 @@ def confirm_order(request, pk):
     return redirect("confirmation_email", pk=pk)
 
 #send confirmation email with invoice attached to the customer
+@login_required
 def confirmation_email(request, pk):
     instruction = "Return to Products"
 
@@ -959,12 +970,14 @@ def confirmation_email(request, pk):
     return render(request, 'accounts/confirm_order.html', {'instruction': instruction, "pdf_message":pdf_success_message})
 
 # for cleaning trial runs of database
+@login_required
 def invoice_history(request):
     invoice_history = Invoice.objects.all()
     invoice_history.delete()
     return redirect("order_list")
 
 #Search for something
+@login_required
 def search(request):
     if request.method == "POST":
         searched = request.POST['searched']
@@ -974,7 +987,7 @@ def search(request):
     else:
         return render(request, 'accounts/search.html', {})
 
-
+@login_required
 def generate_sales_report(request):
     # Get all inventory items
     inventories = Inventory.objects.all()
@@ -1002,6 +1015,7 @@ def generate_sales_report(request):
 
     return response
 
+@login_required
 def generate_forecast(request, inventory_id):
     # Fetch historical sales data from the SalesData model
     sales_data = SalesData.objects.values('last_sales_date', 'quantity_sold').order_by('last_sales_date')
@@ -1023,7 +1037,7 @@ def generate_forecast(request, inventory_id):
 
     return render(request, 'forecast_result.html', context)
 
-
+@login_required
 def perform_forecasting_analysis(sales_data):
     # Assuming sales_data is a DataFrame with columns like 'date' and 'quantity_sold'
     
@@ -1039,6 +1053,7 @@ def perform_forecasting_analysis(sales_data):
     # Return the forecast data or any relevant information
     return forecast
 
+@login_required
 def sales_data(request):
     forecast_data = None  # Initialize forecast_data
 
@@ -1059,6 +1074,7 @@ def sales_data(request):
 
     return render(request, 'accounts/sales_data.html', {'form': form, 'forecast_data': forecast_data})
 
+@login_required
 def subscription(request):
     if request.method == 'POST':
         email = request.POST.get('emailInput', '')
@@ -1081,6 +1097,6 @@ def subscription(request):
 
 from django.contrib.auth import logout
 
-@login_required()
+@login_required
 def logout(request):
     return render(request, 'system/login.html')

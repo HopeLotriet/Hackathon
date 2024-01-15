@@ -51,7 +51,7 @@
                 <th scope="row">R{{order.amount_spent}}</th>
                 <td scope="row">{{order.order_status}}</td>
                 <td scope="row">
-                    <a href="{% url 'update_order_status' order.id %}" class="btn btn-info">Update Status</a>
+                    <a href="{% url 'update_order_status' order.id %}" class="btn btn-primary">Update Status</a>
             </td>
             </tr>
             {% endfor %}
