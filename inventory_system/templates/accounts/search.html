@@ -14,7 +14,13 @@
         <ul class="list-group">
             {% for inventory in inventories %}
             <li class="list-group-item">
-                <a href="{% url 'stock' %}">{{ inventory }}</a>
+                <div>
+                    <img src="{{ inventory.image.url }}" alt="{{ inventory.name }}" style="max-width: 100px; max-height: 100px;">
+                    <h4>{{ inventory.name }}</h4>
+                    <p>Cost per item: R{{ inventory.cost_per_item }}</p>
+                    <p>Quantity in stock: {{ inventory.quantity_in_stock }}</p>
+                    <p><a href="{% url 'stock' %}">View Details</a></p>
+                </div>
             </li>
             {% endfor %}
         </ul>
@@ -22,7 +28,7 @@
         {% else %}
 
         <div class="alert alert-warning" role="alert">
-            <h1>Hey! You Forgot To Search For A Product 😜</h1>
+            <h1>Hey! You Forgot To Search For A Product</h1>
         </div>
 
         {% endif %}

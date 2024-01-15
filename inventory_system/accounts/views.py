@@ -959,10 +959,10 @@ def search(request):
         searched = request.POST['searched']
         inventories = Inventory.objects.filter(name__contains=searched)
 
-        return render(request, 'accounts/search.html', {'searched':searched,
-                                                        'inventories': inventories})
+        return render(request, 'accounts/search.html', {'searched': searched, 'inventories': inventories})
     else:
         return render(request, 'accounts/search.html', {})
+
 
 def generate_sales_report(request):
     # Get all inventory items
