@@ -66,6 +66,8 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
 ]
 
+MESSAGE_STORAGE = 'django.contrib.messages.storage.fallback.FallbackStorage'
+
 ROOT_URLCONF = 'inventory_system.urls'
 
 CRISPY_TEMPLATE_PACK = 'bootstrap4'  # Use 'bootstrap4' or another template pack of your choice

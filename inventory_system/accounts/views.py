@@ -552,7 +552,7 @@ def update_order_status(request, order_id):
 
                     # Send the email
                     email.send()
-
+                    messages.success(request, "Order status updated!")
                 # Redirect in both cases
                 return redirect('order_list')
                 
@@ -607,6 +607,8 @@ def return_order(request, order_id):
         
                 returning_order.customer_order_status = "Order canceled"
                 returning_order.save()
+                messages.success(request, "Order canceled!")
+                
         else:
             pass
     else:
@@ -732,7 +734,14 @@ def order_details(request):
 @login_required()
 def invoice_detail(request):
     invoice = Invoice.objects.all().last()
-    context = {'invoice': invoice}
+    logged_user = request.user
+    cart_items = cart_records.objects.filter(customer=logged_user)
+    orderHistory = customerOrderHistory.objects.all().last()
+    context = {'invoice': invoice,
+               'cart_items': cart_items,
+               'orderHistory': orderHistory
+               }
+    
     return render(request, 'accounts/invoice_detail.html', context)
 
 
@@ -908,7 +917,7 @@ def confirm_order(request, pk):
 
 #send confirmation email with invoice attached to the customer
 def confirmation_email(request, pk):
-    message = "checkout successful"
+    instruction = "Return to Products"
 
     #Fetch the invoice from database
     invoice = get_object_or_404(Invoice, pk=pk)
@@ -946,7 +955,8 @@ def confirmation_email(request, pk):
 
     pdf_success_message = request.session.pop('success_message', None)
 
-    return render(request, 'accounts/confirm_order.html', {'message': message, "pdf_message":pdf_success_message})
+    messages.success(request, "Check out successful")
+    return render(request, 'accounts/confirm_order.html', {'instruction': instruction, "pdf_message":pdf_success_message})
 
 # for cleaning trial runs of database
 def invoice_history(request):
