@@ -124,6 +124,10 @@
       animation: fadeInUp 1.5s ease-out;
     }
 
+        .custom-badge {
+        height: 20px; /* Adjust the height as needed */
+        width: 20px;  /* Make sure width and height are equal for a perfect circle */
+}
 </style>
 
 <body>
@@ -149,7 +153,8 @@
                     </li>
 
                     <li class="nav-item">
-                        <a class="nav-link active text-white" href="{% url 'view_cart' %}">Cart<span class="badge text-bg-warning">{{ request.session.cart_count|default:0 }}</span></a>
+                        <a class="nav-link active text-white" href="{% url 'view_cart' %}">Cart
+                            </a>
                     </li>
 
                     <li class="nav-item">
