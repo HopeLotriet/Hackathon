@@ -163,6 +163,7 @@ class cart(models.Model):
     quantity = models.IntegerField(null=False, blank=False)
     total_amount = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
     customer = models.CharField(max_length=100, default="")
+    cart_count = models.IntegerField(null=True, blank=False)
 
     def __str__(self) -> str:
         return self.item

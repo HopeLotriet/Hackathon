@@ -47,7 +47,9 @@ from xhtml2pdf import pisa
 from django.template.loader import get_template
 from matplotlib import pyplot as plt
 
+
 def home(request):
+    
     return render(request, 'accounts/home.html')
 
 def logout(request):
@@ -257,7 +259,9 @@ def view_cart(request):
     logged_user = request.user
     cart_items = cart.objects.filter(customer=logged_user)
     amount = OrderAmount.objects.filter(customer=logged_user)
+
     return render(request, 'accounts/cart.html', {'items': cart_items, 'amount': amount})
+
 
 def add_to_cart(request, item_id):
     
@@ -272,8 +276,25 @@ def add_to_cart(request, item_id):
     quantities = 1
     logged_user = request.user.username
 
-    new_entry = cart(item = item_name, cost_per_item = item_cost, quantity=quantities, total_amount=item_cost, customer=logged_user)
-    new_entry.save()
+    if cart.objects.filter(item = item_name).exists():
+        item = get_object_or_404(cart, item=item_name)
+    
+        #increase quantity
+        new_quantity=item.quantity
+        new_quantity = new_quantity + 1
+        item.quantity = new_quantity
+
+        #increase total_amount
+        price = item.cost_per_item
+        new_amount = item.total_amount
+        new_amount = new_amount + price
+        item.total_amount = new_amount
+
+        item.save()
+
+    else:
+        new_entry = cart(item = item_name, cost_per_item = item_cost, quantity=quantities, total_amount=item_cost, customer=logged_user)
+        new_entry.save()
 
    # Retrieve all instances of OrderAmount
     existing_amounts = OrderAmount.objects.filter(customer=logged_user)
@@ -289,12 +310,7 @@ def add_to_cart(request, item_id):
 
 
      #count items in cart
-   #update cart count in session
-    if 'cart_count' in request.session:
-        request.session['cart_count'] += 1
-    else:
-        request.session['cart_count'] = 1
-
+    
     messages.success(request, "Item added to cart")
     return redirect("products")
 
@@ -310,10 +326,6 @@ def delete_from_cart(request, item_id):
     
     #count items in cart
     #update cart count in session
-    if 'cart_count' in request.session:
-        request.session['cart_count'] -= item_quantity
-    else:
-        request.session['cart_count'] = 1
 
     item.delete()
     existing_amount.save() 
@@ -347,10 +359,7 @@ def increase_cart_quantity(request, item_id):
     
      #count items in cart
    #update cart count in session
-    if 'cart_count' in request.session:
-        request.session['cart_count'] += 1
-    else:
-        request.session['cart_count'] = 1
+
 
     return redirect("view_cart")
 
@@ -381,10 +390,7 @@ def decrease_cart_quantity(request, item_id):
 
         #count items in cart
         #update cart count in session
-        if 'cart_count' in request.session:
-            request.session['cart_count'] -= 1
-        else:
-            request.session['cart_count'] = 1
+        
 
     elif new_quantity <=0 and new_amount <= 0:
         item.delete()
@@ -407,8 +413,7 @@ def delete_cart(request):
     cart_amount.delete()
 
     #reset badge to 0
-    if 'cart_count' in request.session:
-        del request.session['cart_count']
+    
 
     messages.success(request, "Cart cleared!")
     return redirect("view_cart")
@@ -757,9 +762,7 @@ def delete_invoice(request, pk):
     order_amount = OrderAmount.objects.filter(customer=logged_user)
     order_amount.delete()
 
-    if 'cart_count' in request.session:
-        del request.session['cart_count']
-
+    
     messages.success(request, "Order canceled")
     return redirect('products')
 
@@ -900,9 +903,7 @@ def confirm_order(request, pk):
     order_amount = OrderAmount.objects.filter(customer=logged_user)
     order_amount.delete()
 
-    if 'cart_count' in request.session:
-        del request.session['cart_count']
-
+    
     return redirect("confirmation_email", pk=pk)
 
 #send confirmation email with invoice attached to the customer
