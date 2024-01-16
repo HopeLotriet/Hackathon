@@ -49,7 +49,7 @@ class SupplierForm(forms.ModelForm):
         self.fields['name'].widget.attrs.update({'class': 'textinput form-control', 'pattern' : '[a-zA-Z\s]{3,50}', 'title' : 'Name should be 3-50 characters long'})
         self.fields['phone'].widget.attrs.update({'class': 'textinput form-control', 'maxlength': '10', 'pattern' : '[0-9]{10}', 'title' : 'Phone Number should be 10 digits long'})
         self.fields['email'].widget.attrs.update({'class': 'textinput form-control'})
-        self.fields['vat'].widget.attrs.update({'class': 'textinput form-control', 'maxlength': '15', 'pattern' : '[A-Z0-9]{15}', 'title' : 'VAT Number should be 15 characters long'})
+        self.fields['vat'].widget.attrs.update({'class': 'textinput form-control', 'maxlength': '10', 'pattern' : '[A-Z0-9]{10}', 'title' : 'VAT Number should be 10 characters long'})
     class Meta:
         model = Supplier
         fields = ['name', 'phone', 'address', 'email', 'vat']
