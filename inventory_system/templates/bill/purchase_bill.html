@@ -41,64 +41,53 @@
                                 </td>
                             </tr>
 
-                            <tr>
-                                <td>
-                                    <table class="table outer-box mx-auto">
-                                        <tbody>
-                                            <tr>
-                                                <td class="inner-box text-center font-weight-bold" colspan="3">GSTIN NO
-                                                    - 123456789CASTR0</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="inner-box font-weight-bold" style="width: 50%;">NAME OF
-                                                    CONSIGNEE / BUYER</td>
-                                                <td class="inner-box font-weight-bold" style="width: 25%;">INVOICE NO
-                                                </td>
-                                                <td class="inner-box" style="width: 25%;">{{ bill.billno }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="inner-box" style="width: 50%;">{{ bill.supplier.name }}</td>
-                                                <td class="inner-box font-weight-bold" style="width: 25%;">DATE</td>
-                                                <td class="inner-box" style="width: 25%;">{{ bill.time.date }}</td>
-                                            </tr>
-                                            <tr>
-                                                <td class="inner-box" style="width: 50%;" rowspan="3">{{
-                                                    bill.supplier.address|linebreaks }}</td>
-                                                <td class="inner-box font-weight-bold" style="width: 25%;">EWAY NO</td>
-                                                <td class="inner-box align-middle" style="width: 25%;">
-                                                    <input type="text" name="eway" class="form-control"
-                                                        value="{% if billdetails.eway %}{{ billdetails.eway }}{% endif %}">
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="inner-box font-weight-bold" style="width: 25%;">VEH NO</td>
-                                                <td class="inner-box align-middle" style="width: 25%;">
-                                                    <input type="text" name="veh" class="form-control"
-                                                        value="{% if billdetails.veh %}{{ billdetails.veh }}{% endif %}">
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="inner-box font-weight-bold" style="width: 25%;">DESTINATION
-                                                </td>
-                                                <td class="inner-box align-middle" style="width: 25%;">
-                                                    <input type="text" name="destination" class="form-control"
-                                                        value="{% if billdetails.destination %}{{ billdetails.destination }}{% endif %}">
-                                                </td>
-                                            </tr>
-                                            <tr>
-                                                <td class="inner-box font-weight-bold">GSTIN No: {{ bill.supplier.gstin
-                                                    }}</td>
-                                                <td class="inner-box font-weight-bold" style="width: 25%;">PO NO & DATE
-                                                </td>
-                                                <td class="inner-box align-middle" style="width: 25%;">
-                                                    <input type="text" name="po" class="form-control"
-                                                        value="{% if billdetails.po %}{{ billdetails.po }}{% endif %}">
-                                                </td>
-                                            </tr>
-                                        </tbody>
-                                    </table>
-                                </td>
-                            </tr>
+                    <tr>
+                        <td>
+                            <table class="table outer-box mx-auto">
+                                <tbody>
+                                    <tr>
+                                        <td class="inner-box text-center font-weight-bold" colspan="3">VAT NO - 123456789CASTR0</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="inner-box font-weight-bold" style="width: 50%;">NAME OF CONSIGNEE / BUYER</td>
+                                        <td class="inner-box font-weight-bold" style="width: 25%;">INVOICE NO</td>
+                                        <td class="inner-box" style="width: 25%;">{{ bill.billno }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="inner-box" style="width: 50%;">{{ bill.supplier.name }}</td>
+                                        <td class="inner-box font-weight-bold" style="width: 25%;">DATE</td>
+                                        <td class="inner-box" style="width: 25%;">{{ bill.time.date }}</td>
+                                    </tr>
+                                    <tr>
+                                        <td class="inner-box" style="width: 50%;" rowspan="3">{{ bill.supplier.address|linebreaks }}</td>
+                                        <td class="inner-box font-weight-bold" style="width: 25%;">EWAY NO</td>
+                                        <td class="inner-box align-middle" style="width: 25%;">
+                                            <input type="text" name="eway" class="form-control" value="{% if billdetails.eway %}{{ billdetails.eway }}{% endif %}">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="inner-box font-weight-bold" style="width: 25%;">VEH NO</td>
+                                        <td class="inner-box align-middle" style="width: 25%;">
+                                            <input type="text" name="veh" class="form-control" value="{% if billdetails.veh %}{{ billdetails.veh }}{% endif %}">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="inner-box font-weight-bold" style="width: 25%;">DESTINATION</td>
+                                        <td class="inner-box align-middle" style="width: 25%;">
+                                            <input type="text" name="destination" class="form-control" value="{% if billdetails.destination %}{{ billdetails.destination }}{% endif %}">
+                                        </td>
+                                    </tr>
+                                    <tr>
+                                        <td class="inner-box font-weight-bold">VAT No: {{ bill.supplier.vat }}</td>
+                                        <td class="inner-box font-weight-bold" style="width: 25%;">PO NO & DATE</td>
+                                        <td class="inner-box align-middle" style="width: 25%;">
+                                            <input type="text" name="po" class="form-control" value="{% if billdetails.po %}{{ billdetails.po }}{% endif %}">
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </td>
+                    </tr>
 
                             <tr>
                                 <td>
@@ -214,14 +203,8 @@
                                 </td>
                             </tr>
 
-                            <tr>
-                                <td class="text-center">
-                                    <!-- FINAL TEXT -->
-                                </td>
-                            </tr>
-
-                        </tbody>
-                    </table>
+                </tbody>
+            </table>
 
                 </div>
 

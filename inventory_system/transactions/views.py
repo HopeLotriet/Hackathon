@@ -23,12 +23,13 @@ from .forms import (
     SupplierForm, 
 )
 from accounts.models import Inventory
+from django.contrib.auth.mixins import LoginRequiredMixin
 
 
 
 
 # shows a lists of all suppliers
-class SupplierListView(ListView):
+class SupplierListView(LoginRequiredMixin, ListView):
     model = Supplier
     template_name = "suppliers/suppliers_list.html"
     queryset = Supplier.objects.filter(is_deleted=False)
@@ -36,7 +37,7 @@ class SupplierListView(ListView):
 
 
 # used to add a new supplier
-class SupplierCreateView(SuccessMessageMixin, CreateView):
+class SupplierCreateView(LoginRequiredMixin, SuccessMessageMixin, CreateView):
     model = Supplier
     form_class = SupplierForm
     success_url = '/transactions/suppliers'
@@ -51,7 +52,7 @@ class SupplierCreateView(SuccessMessageMixin, CreateView):
 
 
 # used to update a supplier's info
-class SupplierUpdateView(SuccessMessageMixin, UpdateView):
+class SupplierUpdateView(LoginRequiredMixin, SuccessMessageMixin, UpdateView):
     model = Supplier
     form_class = SupplierForm
     success_url = '/transactions/suppliers'
@@ -67,7 +68,7 @@ class SupplierUpdateView(SuccessMessageMixin, UpdateView):
 
 
 # used to delete a supplier
-class SupplierDeleteView(View):
+class SupplierDeleteView(LoginRequiredMixin, View):
     template_name = "suppliers/delete_supplier.html"
     success_message = "Supplier has been deleted successfully"
 
@@ -84,7 +85,7 @@ class SupplierDeleteView(View):
 
 
 # used to view a supplier's profile
-class SupplierView(View):
+class SupplierView(LoginRequiredMixin, View):
     def get(self, request, name):
         supplierobj = get_object_or_404(Supplier, name=name)
         bill_list = PurchaseBill.objects.filter(supplier=supplierobj)
@@ -106,7 +107,7 @@ class SupplierView(View):
 
 
 # shows the list of bills of all purchases 
-class PurchaseView(ListView):
+class PurchaseView(LoginRequiredMixin, ListView):
     model = PurchaseBill
     template_name = "purchases/purchases_list.html"
     context_object_name = 'bills'
@@ -115,7 +116,7 @@ class PurchaseView(ListView):
 
 
 # used to select the supplier
-class SelectSupplierView(View):
+class SelectSupplierView(LoginRequiredMixin, View):
     form_class = SelectSupplierForm
     template_name = 'purchases/select_supplier.html'
 
@@ -132,7 +133,7 @@ class SelectSupplierView(View):
         return render(request, self.template_name, {'form': form})
 
 
-class PurchaseCreateView(View):                                                 
+class PurchaseCreateView(LoginRequiredMixin, View):                                                 
     template_name = 'purchases/new_purchase.html'
 
     def get(self, request, pk):
@@ -177,7 +178,7 @@ class PurchaseCreateView(View):
 
 
 # used to delete a bill object
-class PurchaseDeleteView(SuccessMessageMixin, DeleteView):
+class PurchaseDeleteView(LoginRequiredMixin, SuccessMessageMixin, DeleteView):
     model = PurchaseBill
     template_name = "purchases/delete_purchase.html"
     success_url = '/transactions/purchases'
@@ -195,7 +196,7 @@ class PurchaseDeleteView(SuccessMessageMixin, DeleteView):
 
 
 # used to display the purchase bill object
-class PurchaseBillView(View):
+class PurchaseBillView(LoginRequiredMixin, View):
     model = PurchaseBill
     template_name = "bill/purchase_bill.html"
     bill_base = "bill/bill_base.html"

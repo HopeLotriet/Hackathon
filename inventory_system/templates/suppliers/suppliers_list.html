@@ -46,7 +46,7 @@
                 <tr>
                     <th width="25%">Name</th>
                     <th width="20%">Contact</th>
-                    <th width="25%">GSTIN No</th>
+                    <th width="25%">VAT No</th>
                     <th width="30%">Actions</th>
                 </tr>
             </thead>
@@ -60,7 +60,7 @@
                         <p> <a href="{% url 'supplier' supplier.name %}">{{ supplier.name }}</a> </p>
                     </td>
                     <td class="align-middle"> {{ supplier.phone }} </td>
-                    <td class="align-middle"> {{ supplier.gstin }} </td>
+                    <td class="align-middle"> {{ supplier.vat }} </td>
                     <td class="align-middle">
                         <div class="align-middle">
                             <a href="{% url 'edit-supplier' supplier.pk %}" class="btn btn-info btn-sm">Edit Details</a>

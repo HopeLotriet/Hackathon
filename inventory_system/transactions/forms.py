@@ -46,13 +46,13 @@ class PurchaseDetailsForm(forms.ModelForm):
 class SupplierForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['name'].widget.attrs.update({'class': 'textinput form-control', 'pattern' : '[a-zA-Z\s]{1,50}', 'title' : 'Alphabets and Spaces only'})
-        self.fields['phone'].widget.attrs.update({'class': 'textinput form-control', 'maxlength': '10', 'pattern' : '[0-9]{10}', 'title' : 'Numbers only'})
+        self.fields['name'].widget.attrs.update({'class': 'textinput form-control', 'pattern' : '[a-zA-Z\s]{3,50}', 'title' : 'Name should be 3-50 characters long'})
+        self.fields['phone'].widget.attrs.update({'class': 'textinput form-control', 'maxlength': '10', 'pattern' : '[0-9]{10}', 'title' : 'Phone Number should be 10 digits long'})
         self.fields['email'].widget.attrs.update({'class': 'textinput form-control'})
-        self.fields['gstin'].widget.attrs.update({'class': 'textinput form-control', 'maxlength': '15', 'pattern' : '[A-Z0-9]{15}', 'title' : 'GSTIN Format Required'})
+        self.fields['vat'].widget.attrs.update({'class': 'textinput form-control', 'maxlength': '10', 'pattern' : '[A-Z0-9]{10}', 'title' : 'VAT Number should be 10 characters long'})
     class Meta:
         model = Supplier
-        fields = ['name', 'phone', 'address', 'email', 'gstin']
+        fields = ['name', 'phone', 'address', 'email', 'vat']
         widgets = {
             'address' : forms.Textarea(
                 attrs = {
