@@ -72,7 +72,7 @@
                                         </td>
                                     </tr>
                                     <tr>
-                                        <td class="inner-box font-weight-bold">VAT No: {{ bill.supplier.gstin }}</td>
+                                        <td class="inner-box font-weight-bold">VAT No: {{ bill.supplier.vat }}</td>
                                         <td class="inner-box font-weight-bold" style="width: 25%;">PO NO & DATE</td>
                                         <td class="inner-box align-middle" style="width: 25%;">
                                             <input type="text" name="po" class="form-control" value="{% if billdetails.po %}{{ billdetails.po }}{% endif %}">
@@ -166,12 +166,6 @@
                     <tr>
                         <td class="text-right">
                             <span style="font-weight: bold;">FOR COMPANY <br><br><br><br> Signature</span>
-                        </td>
-                    </tr>
-
-                    <tr>
-                        <td class="text-center">
-                            <!-- FINAL TEXT -->
                         </td>
                     </tr>
 
