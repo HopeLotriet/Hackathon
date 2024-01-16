@@ -52,7 +52,12 @@ from datetime import datetime
 
 @login_required
 def home(request):
-    
+    logged_user = request.user
+    if OrderAmount.objects.filter(customer=logged_user).exists():
+        cart_record = get_object_or_404(OrderAmount, customer=logged_user)
+        request.session['cart_count'] = cart_record.cart_count
+    else:
+        request.session['cart_count'] = 0
     return render(request, 'accounts/home.html')
 
 def logout(request):
@@ -280,8 +285,9 @@ def add_to_cart(request, item_id):
     quantities = 1
     logged_user = request.user.username
 
-    if cart.objects.filter(item = item_name).exists():
-        item = get_object_or_404(cart, item=item_name)
+    user_specific_items = cart.objects.filter(customer=logged_user, item=item_name)
+    if user_specific_items.exists():
+        item = user_specific_items.first()
     
         #increase quantity
         new_quantity=item.quantity
@@ -293,7 +299,6 @@ def add_to_cart(request, item_id):
         new_amount = item.total_amount
         new_amount = new_amount + price
         item.total_amount = new_amount
-
         item.save()
 
     else:
@@ -305,15 +310,19 @@ def add_to_cart(request, item_id):
 
     if existing_amounts.exists():
         existing_amount = existing_amounts.first()
-        existing_amount.amount_due += item_cost
+
+        existing_amount.amount_due += item_cost      # order amount
+        existing_amount.cart_count += 1              # cart count  
         existing_amount.save()
     else:
         # If no instances exist, create a new one
-        new_price = OrderAmount(amount_due=item_cost, customer=logged_user)
+        new_price = OrderAmount(amount_due=item_cost, customer=logged_user, cart_count=quantities)
         new_price.save()
 
-
-     #count items in cart
+    #badge cart count
+    cart_record = OrderAmount.objects.get(customer=logged_user)
+    request.session['cart_count'] = cart_record.cart_count
+    print(cart_record.cart_count)
     
     messages.success(request, "Item added to cart")
     return redirect("products")
@@ -325,16 +334,14 @@ def delete_from_cart(request, item_id):
     item_cost = item.total_amount
     item_quantity = item.quantity
     logged_user = request.user
-    #decrease total price
-    existing_amount =OrderAmount.objects.get(customer=logged_user)
-    existing_amount.amount_due -= item_cost
     
-    #count items in cart
-    #update cart count in session
-
+    existing_amount =OrderAmount.objects.get(customer=logged_user)
+    existing_amount.amount_due -= item_cost     #decrease total price
+    existing_amount.cart_count -= item_quantity #decrease cart count
+    
     item.delete()
     existing_amount.save() 
-
+    request.session['cart_count'] = existing_amount.cart_count
     messages.success(request, "Item removed from cart")
 
   
@@ -361,12 +368,10 @@ def increase_cart_quantity(request, item_id):
     logged_user = request.user.username
     existing_amount = OrderAmount.objects.get(customer=logged_user)
     existing_amount.amount_due += price
+    existing_amount.cart_count += 1
     existing_amount.save()
     
-     #count items in cart
-   #update cart count in session
-
-
+    request.session['cart_count'] = existing_amount.cart_count
     return redirect("view_cart")
 
 @login_required
@@ -390,14 +395,13 @@ def decrease_cart_quantity(request, item_id):
 
         #decrease total price
         existing_amount.amount_due -= price
-        
+        existing_amount.cart_count -= 1 
+
         item.save()
         existing_amount.save()
 
-
         #count items in cart
-        #update cart count in session
-        
+        request.session['cart_count'] = existing_amount.cart_count
 
     elif new_quantity <=0 and new_amount <= 0:
         item.delete()
@@ -420,10 +424,8 @@ def delete_cart(request):
     cart_amount = OrderAmount.objects.filter(customer=logged_user)
     cart_amount.delete()
 
-    #reset badge to 0
-    
-
     messages.success(request, "Cart cleared!")
+    request.session['cart_count'] = 0
     return redirect("view_cart")
 
 
@@ -748,10 +750,10 @@ def invoice_detail(request):
     invoice = Invoice.objects.all().last()
     logged_user = request.user
     cart_items = cart_records.objects.filter(customer=logged_user)
-    orderHistory = customerOrderHistory.objects.all().last()
+    orderCount = OrderAmount.objects.all().last()
     context = {'invoice': invoice,
                'cart_items': cart_items,
-               'orderHistory': orderHistory
+               'orderCount': orderCount
                }
     
     return render(request, 'accounts/invoice_detail.html', context)
@@ -782,7 +784,7 @@ def delete_invoice(request, pk):
 
     order_amount = OrderAmount.objects.filter(customer=logged_user)
     order_amount.delete()
-
+    request.session['cart_count'] = 0
     
     messages.success(request, "Order canceled")
     return redirect('products')
@@ -801,7 +803,7 @@ def invoice_pdf(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     logged_user = request.user
     cart_items = cart_records.objects.filter(customer=logged_user)
-    orderHistory = customerOrderHistory.objects.all().last()
+    orderCount = OrderAmount.objects.all().last()
     context = {
     'invoice_number': invoice.id,
     'order_id': invoice.order,
@@ -814,7 +816,7 @@ def invoice_pdf(request, pk):
     'payment_method': invoice.payment_method,
     'due_date': invoice.payment_due_date,
     'notes': invoice.notes,
-    'total_quantities': orderHistory.quantity_ordered,
+    'total_quantities': orderCount.cart_count,
     'order_items': [
         {
             'No': cart_item.id,
@@ -924,7 +926,7 @@ def confirm_order(request, pk):
 
     order_amount = OrderAmount.objects.filter(customer=logged_user)
     order_amount.delete()
-
+    request.session['cart_count'] = 0
     
     return redirect("confirmation_email", pk=pk)
 

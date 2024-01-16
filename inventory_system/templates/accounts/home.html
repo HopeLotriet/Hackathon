@@ -32,6 +32,12 @@
         
     }
 
+    .custom-border {
+            border: 1px solid black;
+            padding: 10px;
+            margin: 10px;
+        }
+
     .custom-text-size {
         font-size: 18px;
     }
@@ -162,11 +168,14 @@
                         <a class="nav-link active text-white" href="{% url 'products' %}">Products</a>
                     </li>
 
+                    
                     <li class="nav-item">
                         <a class="nav-link active text-white" href="{% url 'view_cart' %}">Cart
-                            </a>
+                            <span class="badge text-bg-warning">{{ request.session.cart_count|default:0 }}</span>  
+                        </a>
                     </li>
 
+                    
                     <li class="nav-item">
                         <a class="nav-link active text-white" href="{% url 'order_history' %}">Order History</a>
                     </li>

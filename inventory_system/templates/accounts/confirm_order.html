@@ -6,7 +6,7 @@
 
 {% block content %}
 
-<div class="content-wrapper text-center">
+<div class="content-wrapper container text-center bg-light">
 
     {% if messages %}
         <div class="row mt-3">
@@ -24,8 +24,13 @@
         </div>
         {% endif %}
 
-    <div class="container mt-5">
-        <div class="aler">
+        <div>
+
+        </div>
+            <h3>
+                An order confirmation email with an invoice attachment has been sent to you.
+            </h3>
+        <div>
             <a href="{% url 'products' %}" class="btn btn-primary">{{ instruction }}</a>
         </div>
 
