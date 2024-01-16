@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib import messages
 from .models import Inventory, Order, Invoice , cart, OrderAmount, customerOrderHistory, cart_records, SalesData
 from django.shortcuts import get_object_or_404
-from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm, InvoiceForm, CreateUserForm, SalesDataUploadForm
+from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm, InvoiceForm, CreateUserForm, SalesDataForm
 from django.contrib import messages
 import io
 from django_pandas.io import read_frame
@@ -46,6 +46,9 @@ from django.http import HttpResponseRedirect
 from xhtml2pdf import pisa
 from django.template.loader import get_template
 from matplotlib import pyplot as plt
+from prophet import Prophet
+import joblib
+from datetime import datetime
 
 @login_required
 def home(request):
@@ -1016,65 +1019,6 @@ def generate_sales_report(request):
     return response
 
 @login_required
-def generate_forecast(request, inventory_id):
-    # Fetch historical sales data from the SalesData model
-    sales_data = SalesData.objects.values('last_sales_date', 'quantity_sold').order_by('last_sales_date')
-
-    # Create a DataFrame from the sales data
-    df = pd.DataFrame(sales_data)
-
-    # Perform forecasting using statsmodels
-    model = ExponentialSmoothing(df['quantity_sold'], trend='add', seasonal='add', seasonal_periods=7)
-    fit_model = model.fit()
-
-    # Generate forecast values
-    forecast_values = fit_model.forecast(steps=7)
-
-    # Pass the forecast values to the template
-    context = {
-        'forecast_values': forecast_values,
-    }
-
-    return render(request, 'forecast_result.html', context)
-
-@login_required
-def perform_forecasting_analysis(sales_data):
-    # Assuming sales_data is a DataFrame with columns like 'date' and 'quantity_sold'
-    
-    # Your forecasting logic here...
-    # For example, using Holt-Winters Exponential Smoothing
-    model = ExponentialSmoothing(sales_data['quantity_sold'], seasonal='add', seasonal_periods=7)
-    result = model.fit()
-
-    # Forecast future values
-    forecast_horizon = 30  # You can adjust the forecast horizon as needed
-    forecast = result.forecast(steps=forecast_horizon)
-
-    # Return the forecast data or any relevant information
-    return forecast
-
-@login_required
-def sales_data(request):
-    forecast_data = None  # Initialize forecast_data
-
-    if request.method == 'POST':
-        form = SalesDataUploadForm(request.POST, request.FILES)
-        if form.is_valid():
-            # Handle the uploaded file
-            sales_file = request.FILES['sales_file']
-            # Example: Use pandas to read the CSV file
-            sales_data = pd.read_csv(sales_file)
-            
-            # Perform forecasting analysis using the sales_data
-            # Your forecasting logic here...
-            forecast_data = perform_forecasting_analysis(sales_data)
-
-    else:
-        form = SalesDataUploadForm()
-
-    return render(request, 'accounts/sales_data.html', {'form': form, 'forecast_data': forecast_data})
-
-@login_required
 def subscription(request):
     if request.method == 'POST':
         email = request.POST.get('emailInput', '')
@@ -1100,3 +1044,57 @@ from django.contrib.auth import logout
 @login_required
 def logout(request):
     return render(request, 'system/login.html')
+
+def sales_data(request):
+    forecast_data_12_months = None
+    form = SalesDataForm()
+
+    if request.method == 'POST':
+        form = SalesDataForm(request.POST, request.FILES)
+
+        if form.is_valid():
+            # Handle the uploaded file
+            sales_data = pd.read_csv(request.FILES['sales_data'])
+
+            # Load the saved Prophet model
+            model = joblib.load(r'C:\Users\hopel\projects\Hackathon\inventory_system\prophet_model.joblib')
+
+            # Rename columns to match the expected format by Prophet
+            df = sales_data.rename(columns={'Last Sale Date': 'ds', 'Quantity Sold': 'y'})
+
+            # Create and train the model if it hasn't been fitted yet
+            if not hasattr(model, 'history'):
+                model.fit(df)
+
+            # Make future dataframe for forecasting (next 12 months)
+            today = datetime.now()
+            start_date = today.replace(day=1, month=today.month, year=today.year)
+            next_12_months = pd.date_range(start=start_date, periods=12, freq='M')
+
+            # Ensure 'ds' column doesn't contain NaN values
+            if next_12_months.isnull().any():
+                # Handle NaN values, you can either fill or drop them
+                # For example, you can fill NaN with the next available date:
+
+                next_12_months = next_12_months.fillna(method='ffill')
+
+            future = model.make_future_dataframe(periods=len(next_12_months))
+            future['ds'] = next_12_months
+
+                # Forecast for the next 12 months
+            forecast = model.predict(future)
+
+                # Extract relevant forecast information
+            forecast_data_12_months = forecast[['ds', 'yhat']].tail(12).to_dict(orient='records')
+
+                # Convert the 'ds' column to datetime format
+            forecast_data_12_months = pd.DataFrame(forecast_data_12_months)
+            forecast_data_12_months['ds'] = pd.to_datetime(forecast_data_12_months['ds'])
+
+                # Ensure forecast_data has the same number of rows as sales_data
+            forecast_data_12_months = forecast_data_12_months.head(len(sales_data))
+
+                # Merge with the 'Product' column
+            forecast_data_12_months = pd.merge(forecast_data_12_months, sales_data[['Product']], left_index=True, right_index=True)
+
+    return render(request, 'accounts/sales_data.html', {'form': form, 'forecast_data_12_months': forecast_data_12_months})

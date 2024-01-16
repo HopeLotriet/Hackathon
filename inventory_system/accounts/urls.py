@@ -43,7 +43,7 @@ urlpatterns = [
     path('invoice_history', login_required(views.invoice_history), name='invoice_history'),
     path('sales_data/', login_required(views.sales_data), name='sales_data'),
     path('generate_sales_report/', login_required(views.generate_sales_report), name='generate_sales_report'),
-    path('generate_forecast/', login_required(views.generate_forecast), name='generate_forecast'),
+    # path('generate_forecast/', login_required(views.generate_forecast), name='generate_forecast'),
     path('subscription/', login_required(views.subscription), name='subscription'),
     
 ]

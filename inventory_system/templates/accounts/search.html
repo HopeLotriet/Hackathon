@@ -9,28 +9,41 @@
     <div class="container mt-5">
 
         {% if searched %}
-        <h1 class="mb-4">Search Results For: {{ searched }}</h1>
+            <h1 class="mb-4">Search Results For: {{ searched }}</h1>
 
-        <ul class="list-group">
-            {% for inventory in inventories %}
-            <li class="list-group-item">
-                <div>
-                    <img src="{{ inventory.image.url }}" alt="{{ inventory.name }}" style="max-width: 100px; max-height: 100px;">
-                    <h4>{{ inventory.name }}</h4>
-                    <p>Cost per item: R{{ inventory.cost_per_item }}</p>
-                    <p>Quantity in stock: {{ inventory.quantity_in_stock }}</p>
-                    <p><a href="{% url 'stock' %}">View Details</a></p>
+            {% if inventories %}
+                <ul class="list-group">
+                    {% for inventory in inventories %}
+                        {% if searched in inventory.name %}
+                            <li class="list-group-item">
+                                <div>
+                                    <img src="{{ inventory.image.url }}" alt="{{ inventory.name }}" style="max-width: 100px; max-height: 100px;">
+                                    <h4>{{ inventory.name }}</h4>
+                                    <p>Cost per item: R{{ inventory.cost_per_item }}</p>
+                                    <p>Quantity in stock: {{ inventory.quantity_in_stock }}</p>
+                                    <p><a href="{% url 'stock' %}">View Details</a></p>
+                                </div>
+                            </li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
+
+                {% if inventories|length == 0 %}
+                    <div class="alert alert-warning" role="alert">
+                        <h1>No results found for "{{ searched }}"</h1>
+                    </div>
+                {% endif %}
+
+            {% else %}
+                <div class="alert alert-warning" role="alert">
+                    <h1>No results found for "{{ searched }}"</h1>
                 </div>
-            </li>
-            {% endfor %}
-        </ul>
+            {% endif %}
 
         {% else %}
-
-        <div class="alert alert-warning" role="alert">
-            <h1>Hey! You Forgot To Search For A Product</h1>
-        </div>
-
+            <div class="alert alert-warning" role="alert">
+                <h1>Hey! You Forgot To Search For A Product</h1>
+            </div>
         {% endif %}
 
     </div>

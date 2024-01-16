@@ -19,14 +19,31 @@
             <button type="submit" class="btn btn-primary">Analyze</button>
         </form>
 
-        {% if forecast_data %}
-        <!-- Display forecast results if available -->
-        <h2>Forecast Results</h2>
-        <ul>
-            {% for value in forecast_data.values %}
-                <li>{{ value }}</li>
-            {% endfor %}
-        </ul>
+        {% if forecast_data_12_months %}
+            <!-- Display forecast results if available -->
+            <h2>Forecast Results</h2>
+            
+           
+            <!-- 12 Months Forecast -->
+            <h3>12 Months Forecast</h3>
+            <table class="table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Date</th>
+                        <th>Forecast</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for entry in forecast_data.12_months %}
+                        <tr>
+                            <td>{{ entry.product }}</td>
+                            <td>{{ entry.ds }}</td>
+                            <td>{{ entry.yhat }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
         {% endif %}
     </div>
 </div>
