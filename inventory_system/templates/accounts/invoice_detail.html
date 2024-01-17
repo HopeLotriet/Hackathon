@@ -10,7 +10,7 @@
         <h1 class="text-center mb-4">Invoice Details</h1>
     
         <div class="row">
-            <form class="table-bordered">
+            <form class="table-bordered custom-border">
     
 
                 <div class="container bg">
@@ -48,7 +48,7 @@
                                         <table class="table outer-box mx-auto">
                                             <tbody>
                                                 <tr>
-                                                    <td class="inner-box text-center font-weight-bold" colspan="3">INVOICE DETAILS</td>
+                                                    <td class="inner-box text-center font-weight-bold" colspan="3"><strong>INVOICE DETAILS</strong></td>
                                                 </tr>
                                                 <tr>
                                                     <td class="inner-box font-weight-bold" style="width: 50%;">CUSTOMER DETAILS</td>
@@ -101,6 +101,10 @@
                                                 <tr>
                                                     <td class="inner-box text-center font-weight-bold" colspan="3">ORDER ID: {{ invoice.order }}</td>
                                                 </tr>
+
+                                                <tr>
+                                                    <td class="inner-box text-center font-weight-bold" colspan="3">TOTAL ORDER QUANTITY: {{ orderCount.cart_count }}</td>
+                                                </tr>
                                                 
                                                 <tr>
                                                     <td class="inner-box" style="width: 5%; font-weight: bold; text-align: center;">SL</td>
@@ -121,7 +125,7 @@
                                                 {% endfor %}
                                                 <tr>
                                                     <td class="inner-box font-weight-bold" style="width: 12%; text-align: center;" colspan="4"><strong>TOTAL</strong></td>
-                                                    <td class="inner-box align-middle" style="width: 12%; text-align: center;"><strong>{{ invoice.total_amount }}</strong>
+                                                    <td class="inner-box align-middle" style="width: 12%; text-align: center;"><strong>R{{ invoice.total_amount }}</strong>
                                                        
                                                     </td>
                                                 </tr>
@@ -186,7 +190,7 @@
             </form>
         
          <!-- Confirm order to generate pdf and send email to customer -->
-         <div>
+         <div class="text-center">
           <span class="m-3"><a class="btn btn-success"  href="{% url 'confirm_order' invoice.id %}">Confirm order</a></span>
          <span class="m-3"><a class="btn btn-warning" href="{% url 'edit_invoice' invoice.id %}">Edit invoice</a></span>
          <span class="m-3"><a class="btn btn-danger" href="{% url 'delete_invoice' invoice.id %}">Cancel order</a></span>  
