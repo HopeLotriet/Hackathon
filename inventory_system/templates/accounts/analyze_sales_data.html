@@ -1,0 +1,69 @@
+{% extends 'accounts/home.html' %}
+{% load static %}
+
+{% block title %}Analyze Sales Data{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container mt-5">
+        <h1>Analyze Sales Data</h1>
+        <!-- Display the forecast graph -->
+        {% for product_forecast in product_forecasts %}
+        <div id="{{ product_forecast.name|slugify }}-graph" class="mt-5">
+            <h3>{{ product_forecast.name }} Forecast Graph</h3>
+            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+            <script type="text/javascript">
+                // JavaScript code for plotting the forecast graph using Chart.js
+                // Include Chart.js in your HTML file
+
+                var {{ product_forecast.name | slugify }}Data = {{ product_forecast.data | safe }};
+
+                var {{ product_forecast.name | slugify }}Labels = {{ product_forecast.data | safe }}.map(entry => new Date(entry.Date.replace('T', ' ')));
+                var {{ product_forecast.name | slugify }}Data = {{ product_forecast.data | safe }}.map(entry => entry.Forecast);
+
+                var {{ product_forecast.name | slugify }}Ctx = document.getElementById('{{ product_forecast.name | slugify }}-graph').getContext('2d');
+                var {{ product_forecast.name | slugify }}Chart = new Chart({{ product_forecast.name | slugify }}Ctx, {
+                    type: 'line',
+                    data: {
+                        labels: {{ product_forecast.name | slugify }}Labels,
+                        datasets: [{
+                            label: 'Forecast',
+                            data: {{ product_forecast.name | slugify }}Data,
+                            borderColor: 'orange',
+                            borderWidth: 2,
+                            fill: false
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            x: {
+                                type: 'time',
+                                time: {
+                                    unit: 'month',
+                                    displayFormats: {
+                                        month: 'MMM YYYY'
+                                    }
+                                },
+                                title: {
+                                    display: true,
+                                    text: 'Date'
+                                }
+                            },
+                            y: {
+                                title: {
+                                    display: true,
+                                    text: 'Forecast'
+                                }
+                            }
+                        }
+                    }
+                });
+            </script>
+        </div>
+        {% endfor %}
+
+    </div>
+</div>
+{% endblock %}

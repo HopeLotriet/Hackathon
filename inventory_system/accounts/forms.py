@@ -72,5 +72,5 @@ class CreateUserForm(UserCreationForm):
         model = CustomUser
         fields = ['username','first_name','last_name','email', 'role', 'password1', 'password2']
 
-class SalesDataForm(forms.Form):
+class SalesDataUploadForm(forms.Form):
     sales_data = forms.FileField()
