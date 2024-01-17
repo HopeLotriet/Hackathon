@@ -6,64 +6,98 @@
 {% block content %}
 <div class="content-wrapper">
     <div class="container mt-5">
-        <h1>Analyze Sales Data</h1>
+        <h1>Forecast Data</h1>
+
         <!-- Display the forecast graph -->
-        {% for product_forecast in product_forecasts %}
-        <div id="{{ product_forecast.name|slugify }}-graph" class="mt-5">
-            <h3>{{ product_forecast.name }} Forecast Graph</h3>
-            <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-            <script type="text/javascript">
-                // JavaScript code for plotting the forecast graph using Chart.js
-                // Include Chart.js in your HTML file
+        <div id="forecast-graph" class="mt-5">
+            <canvas id="forecast-canvas" width="800" height="400"></canvas>
 
-                var {{ product_forecast.name | slugify }}Data = {{ product_forecast.data | safe }};
 
-                var {{ product_forecast.name | slugify }}Labels = {{ product_forecast.data | safe }}.map(entry => new Date(entry.Date.replace('T', ' ')));
-                var {{ product_forecast.name | slugify }}Data = {{ product_forecast.data | safe }}.map(entry => entry.Forecast);
-
-                var {{ product_forecast.name | slugify }}Ctx = document.getElementById('{{ product_forecast.name | slugify }}-graph').getContext('2d');
-                var {{ product_forecast.name | slugify }}Chart = new Chart({{ product_forecast.name | slugify }}Ctx, {
-                    type: 'line',
-                    data: {
-                        labels: {{ product_forecast.name | slugify }}Labels,
-                        datasets: [{
-                            label: 'Forecast',
-                            data: {{ product_forecast.name | slugify }}Data,
-                            borderColor: 'orange',
-                            borderWidth: 2,
-                            fill: false
-                        }]
-                    },
-                    options: {
-                        responsive: true,
-                        maintainAspectRatio: false,
-                        scales: {
-                            x: {
-                                type: 'time',
-                                time: {
-                                    unit: 'month',
-                                    displayFormats: {
-                                        month: 'MMM YYYY'
-                                    }
-                                },
-                                title: {
-                                    display: true,
-                                    text: 'Date'
-                                }
-                            },
-                            y: {
-                                title: {
-                                    display: true,
-                                    text: 'Forecast'
-                                }
-                            }
-                        }
-                    }
-                });
-            </script>
         </div>
-        {% endfor %}
 
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/moment"></script>
+
+<script>
+    var productForecasts = [
+        {% for product_forecast in product_forecasts %}
+    {
+        name: "{{ product_forecast.name }}",
+            data: [
+                {% for entry in product_forecast.data %}
+    { Date: "{{ entry.Date }}", Forecast: {{ entry.Forecast }} } {% if not forloop.last %},{% endif %}
+    {% endfor %}
+                             ]
+                        }{% if not forloop.last %}, {% endif %}
+    {% endfor %}
+                ];
+
+
+
+    productForecasts.forEach(function (product) {
+        product.data.forEach(function (entry) {
+            // Log the converted dates to the console
+            entry.Date = moment.unix(entry.Date).format('YYYY-MM-DD');
+        });
+    });
+
+    var forecastCtx = document.getElementById('forecast-graph').getContext('2d');
+    var forecastChart = new Chart(forecastCtx, {
+        type: 'line',
+        data: {
+            datasets: productForecasts.map(function (product) {
+                return {
+                    label: product.name + ' Forecast',
+                    data: product.data.map(function (entry) {
+                        return { x: entry.Date, y: entry.Forecast };
+                    }),
+                    borderColor: getRandomColor(),
+                    borderWidth: 2,
+                    fill: false,
+                };
+            }),
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                x: {
+                    type: 'time',
+                    time: {
+                        unit: 'month',
+                        displayFormats: {
+                            month: 'MMM YYYY', // Display format for months
+                        },
+                    },
+                    title: {
+                        display: true,
+                        text: 'Date',
+                    },
+                },
+                y: {
+                    title: {
+                        display: true,
+                        text: 'Forecast',
+                    },
+                },
+            },
+        },
+    });
+
+    // Function to generate a random color
+    function getRandomColor() {
+        var letters = '0123456789ABCDEF';
+        var color = '#';
+        for (var i = 0; i < 6; i++) {
+            color += letters[Math.floor(Math.random() * 16)];
+        }
+        return color;
+    }
+
+    // Log that the chart is initialized
+    console.log('Chart initialized');
+</script>
 {% endblock %}
