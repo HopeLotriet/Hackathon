@@ -10,7 +10,8 @@
 
         <!-- Display the forecast graph -->
         <div id="forecast-graph" class="mt-5">
-            <canvas id="forecast-canvas" width="800" height="400"></canvas>
+            <!-- <canvas id="forecast-canvas" width="800" height="400"></canvas> -->
+            <canvas id="forecast-graph" width="800" height="400"></canvas>
 
 
         </div>
@@ -18,77 +19,13 @@
     </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/moment"></script>
 
 <script>
-    var productForecasts = [
-        {% for product_forecast in product_forecasts %}
-    {
-        name: "{{ product_forecast.name }}",
-            data: [
-                {% for entry in product_forecast.data %}
-    { Date: "{{ entry.Date }}", Forecast: {{ entry.Forecast }} } {% if not forloop.last %},{% endif %}
-    {% endfor %}
-                             ]
-                        }{% if not forloop.last %}, {% endif %}
-    {% endfor %}
-                ];
 
-
-
-    productForecasts.forEach(function (product) {
-        product.data.forEach(function (entry) {
-            // Log the converted dates to the console
-            entry.Date = moment.unix(entry.Date).format('YYYY-MM-DD');
-        });
-    });
-
-    var forecastCtx = document.getElementById('forecast-graph').getContext('2d');
-    var forecastChart = new Chart(forecastCtx, {
-        type: 'line',
-        data: {
-            datasets: productForecasts.map(function (product) {
-                return {
-                    label: product.name + ' Forecast',
-                    data: product.data.map(function (entry) {
-                        return { x: entry.Date, y: entry.Forecast };
-                    }),
-                    borderColor: getRandomColor(),
-                    borderWidth: 2,
-                    fill: false,
-                };
-            }),
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            scales: {
-                x: {
-                    type: 'time',
-                    time: {
-                        unit: 'month',
-                        displayFormats: {
-                            month: 'MMM YYYY', // Display format for months
-                        },
-                    },
-                    title: {
-                        display: true,
-                        text: 'Date',
-                    },
-                },
-                y: {
-                    title: {
-                        display: true,
-                        text: 'Forecast',
-                    },
-                },
-            },
-        },
-    });
-
-    // Function to generate a random color
-    function getRandomColor() {
+function getRandomColor() {
         var letters = '0123456789ABCDEF';
         var color = '#';
         for (var i = 0; i < 6; i++) {
@@ -96,8 +33,52 @@
         }
         return color;
     }
+    
+    var productForecasts = [
+        {% for product_forecast in product_forecasts %}
+            {
+                name: "{{ product_forecast.name }}",
+                dates: [
+                    {% for entry in product_forecast.data %}
+                        "{{ entry.Date|date:'Y-M-d H:i:s' }}"{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ],
+                forecasts: [
+                    {% for entry in product_forecast.data %}
+                        {{ entry.Forecast }}{% if not forloop.last %},{% endif %}
+                    {% endfor %}
+                ]
+            }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+    ];
 
-    // Log that the chart is initialized
-    console.log('Chart initialized');
+    productForecasts.forEach(function(product) {
+        product.dates = product.dates.map(function(date) {
+            return new Date(date);
+        });
+    });
+
+    var traces = productForecasts.map(function(product) {
+        return {
+            x: product.dates,
+            y: product.forecasts,
+            mode: 'lines',
+            name: product.name + ' Forecast',
+            line: {color: getRandomColor()}
+        };
+    });
+
+    var layout = {
+        title: 'Forecast Graph',
+        xaxis: {
+            title: 'Date',
+            type: 'date',
+        },
+        yaxis: {
+            title: 'Forecast',
+        }
+    };
+
+    Plotly.newPlot('forecast-graph', traces, layout);
 </script>
 {% endblock %}
