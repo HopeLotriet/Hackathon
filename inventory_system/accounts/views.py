@@ -634,7 +634,15 @@ def marketing(request):
 
 login_required
 def profile(request):
-    context = {}
+    user_info = request.user
+    user_group =  Group.objects.all()
+    context = {
+        'username': user_info.username,
+        'first_name': user_info.first_name,
+        'last_name': user_info.last_name,
+        'email': user_info.email,
+    }
+    
     return render(request, 'accounts/profile.html', context)
 
 login_required
