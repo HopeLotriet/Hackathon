@@ -502,6 +502,7 @@ def update_order_status(request, order_id):
 
     #block order status once it is changed to delivered
     order = get_object_or_404(Order, id=order_id)
+    invoice = Invoice.objects.all().last()
 
     customer_order = get_object_or_404(customerOrderHistory, id=order_id)
     completion_status = order.order_status 
@@ -539,7 +540,7 @@ def update_order_status(request, order_id):
                         status = "is delivered"
 
                     name = request.user.username
-                    email_address = request.user.email
+                    email_address = invoice.billing_email
                     sender_email = settings.EMAIL_HOST_USER
                     email_body = f"""
                     Hello, {name}!
@@ -665,7 +666,7 @@ def create_invoice(request):
     logged_user = request.user
     customer_name = f"{logged_user.first_name} {logged_user.last_name}"
     #block placement of order if another one is progress
-    has_data = Order.objects.exists()
+    has_data = Order.objects.filter(customer=logged_user).exists()
     if has_data:
         previous_order = Order.objects.filter(customer=customer_name).last()
         previous_order_status = previous_order.order_status
@@ -941,7 +942,7 @@ def confirmation_email(request, pk):
 
     #Automated mail update
     name = request.user.username
-    email_address = request.user.email
+    email_address = invoice.billing_email
     status = ' is currently being processed'
     sender_email = settings.EMAIL_HOST_USER
     email_body = f"""
