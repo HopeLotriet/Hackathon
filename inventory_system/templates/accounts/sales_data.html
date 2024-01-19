@@ -1,49 +1,70 @@
-<!-- accounts/templates/accounts/sales_data.html -->
-
 {% extends 'accounts/home.html' %}
 {% load static %}
 
-{% block title %}Sales Data Analysis{% endblock %}
+{% block title %}Sales Data Analysis Results{% endblock %}
 
 {% block content %}
 <div class="content-wrapper">
     <div class="container mt-5">
-        <h1>Sales Data Analysis</h1>
-
-        <!-- Display form for uploading sales data -->
-        <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="mb-3">
-                {{ form }}
-            </div>
-            <button type="submit" class="btn btn-primary">Analyze</button>
-        </form>
+        <h1>Sales Data Analysis Results</h1>
 
         {% if forecast_data_12_months %}
-            <!-- Display forecast results if available -->
-            <h2>Forecast Results</h2>
-            
-           
-            <!-- 12 Months Forecast -->
-            <h3>12 Months Forecast</h3>
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Product</th>
-                        <th>Date</th>
-                        <th>Forecast</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for entry in forecast_data.12_months %}
-                        <tr>
-                            <td>{{ entry.product }}</td>
-                            <td>{{ entry.ds }}</td>
-                            <td>{{ entry.yhat }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+            <!-- Plot the forecast graph -->
+            <div id="forecast-graph" class="mt-5">
+                <h3>Forecast Graph</h3>
+                <script>
+                    // JavaScript code for plotting the forecast graph using Chart.js
+                    // Include Chart.js in your HTML file
+
+                    // Extract data from Django template to JavaScript
+                    var forecastData = {{ forecast_data_12_months|safe }};
+
+                    // Prepare data for Chart.js
+                    var labels = forecastData.map(entry => entry.Date);
+                    var data = forecastData.map(entry => entry.Forecast);
+
+                    // Plot the graph
+                    var ctx = document.getElementById('forecast-graph').getContext('2d');
+                    var myChart = new Chart(ctx, {
+                        type: 'line',
+                        data: {
+                            labels: labels,
+                            datasets: [{
+                                label: 'Forecast',
+                                data: data,
+                                borderColor: 'orange',
+                                borderWidth: 2,
+                                fill: false
+                            }]
+                        },
+                        options: {
+                            responsive: true,
+                            maintainAspectRatio: false,
+                            scales: {
+                                x: {
+                                    type: 'time',
+                                    time: {
+                                        unit: 'month',
+                                        displayFormats: {
+                                            month: 'MMM YYYY'
+                                        }
+                                    },
+                                    title: {
+                                        display: true,
+                                        text: 'Date'
+                                    }
+                                },
+                                y: {
+                                    title: {
+                                        display: true,
+                                        text: 'Forecast'
+                                    }
+                                }
+                            }
+                        }
+                    });
+                </script>
+            </div>
         {% endif %}
     </div>
 </div>

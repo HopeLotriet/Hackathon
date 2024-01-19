@@ -1,12 +1,6 @@
 from django import forms
 from django.forms import formset_factory
-from .models import (
-    Supplier, 
-    PurchaseBill, 
-    PurchaseItem,
-    PurchaseBillDetails, 
-    
-)
+from .models import Supplier, PurchaseBill, PurchaseItem, PurchaseBillDetails 
 from accounts.models import Inventory
 
 

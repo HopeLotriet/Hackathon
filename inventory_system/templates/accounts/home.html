@@ -18,7 +18,8 @@
         integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
         crossorigin="anonymous"></script>
     <script src="{% static 'fontawesomefree/js/all.min.js' %}"></script>
-
+    <!-- <script src="https://cdn.jsdelivr.net/npm/chart.js"></script> -->
+    
     <title>{% block title %}FarmFresh{% endblock %}</title>
 </head>
 
@@ -194,7 +195,7 @@
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="{% url 'sales_data' %}">Forecast</a></li>
+                            <li><a class="dropdown-item" href="{% url 'analyze_sales_data' %}">Forecast</a></li>
                         </ul>
                     </li>
 
@@ -244,7 +245,7 @@
 
                 <form class="d-flex" method="POST" action="{% url 'search' %}">
                     {% csrf_token %}
-                    <input class="form-control me-2" type="search" placeholder="Search" aria-label="Search" name="searched">
+                    <input class="form-control me-2" type="search" placeholder="What are you looking for?" aria-label="Search" name="searched">
                     <button class="btn custom-search-btn" type="submit">Search</button>
                 </form>
             

@@ -8,7 +8,7 @@ from django.contrib.auth import get_user_model
 from django.contrib import messages
 from .models import Inventory, Order, Invoice , cart, OrderAmount, customerOrderHistory, cart_records, SalesData
 from django.shortcuts import get_object_or_404
-from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm, InvoiceForm, CreateUserForm, SalesDataForm
+from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm, InvoiceForm, CreateUserForm, SalesDataUploadForm
 from django.contrib import messages
 import io
 from django_pandas.io import read_frame
@@ -41,14 +41,15 @@ from django.db.models import Count, Sum
 from django.http import JsonResponse
 from statsmodels.tsa.holtwinters import ExponentialSmoothing
 import csv
-from .utils import perform_forecasting_analysis
 from django.http import HttpResponseRedirect
 from xhtml2pdf import pisa
 from django.template.loader import get_template
 from matplotlib import pyplot as plt
-from prophet import Prophet
-import joblib
 from datetime import datetime
+from django.http import HttpResponseRedirect
+from io import TextIOWrapper
+from statsmodels.tsa.arima.model import ARIMA
+from datetime import timedelta
 
 @login_required
 def home(request):
@@ -1048,56 +1049,48 @@ from django.contrib.auth import logout
 def logout(request):
     return render(request, 'system/login.html')
 
-def sales_data(request):
-    forecast_data_12_months = None
-    form = SalesDataForm()
+def analyze_sales_data(request):
+    # Get the data from the Inventory model
+    inventories = Inventory.objects.all()
+    sales_df = pd.DataFrame(list(inventories.values('last_sales_date', 'sales')))
+    sales_df['last_sales_date'] = pd.to_datetime(sales_df['last_sales_date'])
 
-    if request.method == 'POST':
-        form = SalesDataForm(request.POST, request.FILES)
+    # Convert 'sales' column to numeric, handling errors by setting them to NaN
+    sales_df['sales'] = pd.to_numeric(sales_df['sales'], errors='coerce')
 
-        if form.is_valid():
-            # Handle the uploaded file
-            sales_data = pd.read_csv(request.FILES['sales_data'])
+    # Drop rows with NaN values in the 'sales' column
+    sales_df = sales_df.dropna(subset=['sales'])
 
-            # Load the saved Prophet model
-            model = joblib.load(r'C:\Users\hopel\projects\Hackathon\inventory_system\prophet_model.joblib')
+    # Continue with the time series analysis
+    df = sales_df.set_index('last_sales_date')
+    df_monthly = df.resample('M').sum()
 
-            # Rename columns to match the expected format by Prophet
-            df = sales_data.rename(columns={'Last Sale Date': 'ds', 'Quantity Sold': 'y'})
+    # Perform time series analysis
+    model = ARIMA(df_monthly['sales'], order=(1, 1, 1))
+    results = model.fit()
 
-            # Create and train the model if it hasn't been fitted yet
-            if not hasattr(model, 'history'):
-                model.fit(df)
+    # Generate future dates for forecasting
+    future_dates = pd.date_range(start=df_monthly.index[-1], periods=12, freq='M')[1:]
+    
+    # Get forecasted values and their index
+    forecast = results.get_forecast(steps=12)
+    forecast_values = forecast.predicted_mean
+    forecast_index = pd.date_range(start=df_monthly.index[-1], periods=13, freq='M')[1:]
 
-            # Make future dataframe for forecasting (next 12 months)
-            today = datetime.now()
-            start_date = today.replace(day=1, month=today.month, year=today.year)
-            next_12_months = pd.date_range(start=start_date, periods=12, freq='M')
+    # Create a DataFrame for the forecast data
+    forecast_df = pd.DataFrame({'Date': forecast_index, 'Forecast': forecast_values})
 
-            # Ensure 'ds' column doesn't contain NaN values
-            if next_12_months.isnull().any():
-                # Handle NaN values, you can either fill or drop them
-                # For example, you can fill NaN with the next available date:
+    # Create product_forecasts within the view function
+    product_forecasts = []
+    for inventory in inventories:  # Iterate through your inventory data
+        product_forecasts.append({
+            'name': inventory.name,
+            'data': [
+                {'Date': date, 'Forecast': value} for date, value in zip(forecast_df['Date'], forecast_df['Forecast'])
+            ]
+        })
 
-                next_12_months = next_12_months.fillna(method='ffill')
+    context = {'product_forecasts': product_forecasts}
 
-            future = model.make_future_dataframe(periods=len(next_12_months))
-            future['ds'] = next_12_months
-
-                # Forecast for the next 12 months
-            forecast = model.predict(future)
-
-                # Extract relevant forecast information
-            forecast_data_12_months = forecast[['ds', 'yhat']].tail(12).to_dict(orient='records')
-
-                # Convert the 'ds' column to datetime format
-            forecast_data_12_months = pd.DataFrame(forecast_data_12_months)
-            forecast_data_12_months['ds'] = pd.to_datetime(forecast_data_12_months['ds'])
-
-                # Ensure forecast_data has the same number of rows as sales_data
-            forecast_data_12_months = forecast_data_12_months.head(len(sales_data))
-
-                # Merge with the 'Product' column
-            forecast_data_12_months = pd.merge(forecast_data_12_months, sales_data[['Product']], left_index=True, right_index=True)
-
-    return render(request, 'accounts/sales_data.html', {'form': form, 'forecast_data_12_months': forecast_data_12_months})
+    # Pass the forecast data to the template
+    return render(request, 'accounts/analyze_sales_data.html', context)

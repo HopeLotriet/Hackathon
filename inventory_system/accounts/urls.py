@@ -41,10 +41,9 @@ urlpatterns = [
     path('search/', login_required(views.search), name='search'),
     path('confirmation_email/<int:pk>/', login_required(views.confirmation_email), name='confirmation_email'),
     path('invoice_history', login_required(views.invoice_history), name='invoice_history'),
-    path('sales_data/', login_required(views.sales_data), name='sales_data'),
     path('generate_sales_report/', login_required(views.generate_sales_report), name='generate_sales_report'),
-    # path('generate_forecast/', login_required(views.generate_forecast), name='generate_forecast'),
-    path('subscription/', login_required(views.subscription), name='subscription'),
-    
+    path('analyze-sales-data/', views.analyze_sales_data, name='analyze_sales_data'),
+    #path('sales_data/', views.sales_data, name='sales_data'),
+    path('subscription/', login_required(views.subscription), name='subscription'), 
 ]
 
