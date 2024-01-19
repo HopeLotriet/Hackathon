@@ -22,7 +22,6 @@
     
     <title>{% block title %}FarmFresh{% endblock %}</title>
 </head>
-
 <style>
 
     body {
@@ -30,9 +29,13 @@
         display: flex;
         flex-direction: column;
         min-height: 100vh;
-        
+        opacity: 0.99;
     }
 
+    .dark-image {
+            /* Apply a dark filter to the image */
+            filter: brightness(0.5);
+    }
     .custom-border {
             border: 1px solid black;
             padding: 10px;
@@ -134,7 +137,7 @@
       animation: fadeInUp 1.5s ease-out;
     }
 
-        .custom-badge {
+    .custom-badge {
         height: 20px; /* Adjust the height as needed */
         width: 20px;  /* Make sure width and height are equal for a perfect circle */
 }
@@ -142,6 +145,14 @@
 .custom-btn {
     font-size: 20px; /* Adjust the font size as needed */
     margin-right: 10px; /* Optional: Add some right margin for better spacing */
+}
+
+.image-align {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 200px;
+    width: 200px;
 }
 
 </style>
@@ -226,19 +237,12 @@
                         </ul>
                     </li>
                     {% endif %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle active text-white" href="#" id="navbarDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Profile
-                        </a>
-                        
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{% url 'marketing' %}">Marketing</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="{% url 'profile' %}">About Us</a></li>
-                        </ul>
+                    
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="{% url 'marketing' %}">Marketing</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="{% url 'profile' %}">Profile</a>
                     </li>
                 </ul>
 
