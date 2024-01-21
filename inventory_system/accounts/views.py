@@ -54,6 +54,7 @@ from datetime import timedelta
 @login_required
 def home(request):
     logged_user = request.user
+
     if OrderAmount.objects.filter(customer=logged_user).exists():
         cart_record = get_object_or_404(OrderAmount, customer=logged_user)
         request.session['cart_count'] = cart_record.cart_count
@@ -634,16 +635,8 @@ def marketing(request):
 
 login_required
 def profile(request):
-    user_info = request.user
-    user_group =  Group.objects.all()
-    context = {
-        'username': user_info.username,
-        'first_name': user_info.first_name,
-        'last_name': user_info.last_name,
-        'email': user_info.email,
-    }
-    
-    return render(request, 'accounts/profile.html', context)
+        
+    return render(request, 'accounts/profile.html')
 
 login_required
 def about(request):

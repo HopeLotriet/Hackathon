@@ -15,3 +15,4 @@ admin.site.register(OrderAmount)
 admin.site.register(cart_records)
 admin.site.register(customerOrderHistory)
 
+

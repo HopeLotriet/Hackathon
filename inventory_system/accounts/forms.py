@@ -67,6 +67,7 @@ class CreateUserForm(UserCreationForm):
         ('accountant', 'Accountant')
     )
     role = forms.ChoiceField(choices=ROLE_CHOICES)
+    
 
     class Meta:
         model = CustomUser
