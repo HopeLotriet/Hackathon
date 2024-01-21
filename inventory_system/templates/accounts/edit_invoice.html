@@ -13,10 +13,14 @@
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
             {{ form.as_p }}
-            <button type="submit">Update Invoice</button>
+            <button class="btn btn-success" type="submit">Update Invoice</button>
         </form>
 
     </div>
 </div>
+
+<br>
+<br>
+<br>
 
 {% endblock %}

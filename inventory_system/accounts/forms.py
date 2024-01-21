@@ -2,7 +2,6 @@ from django import forms
 from django.forms import ModelForm, ChoiceField, Select, Form
 from .models import Inventory, Order, Invoice, SalesData
 from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser
 from django.contrib.auth import get_user_model
 
 
@@ -56,6 +55,7 @@ class InvoiceForm(forms.ModelForm):
         if payment_status == 'paid' and not payment_due_date:
             self.add_error('payment_due_date', 'Payment due date is required for paid invoices.')
 
+<<<<<<< HEAD
 class CreateUserForm(UserCreationForm):
     first_name = forms.CharField(max_length=255, required=True)
     last_name = forms.CharField(max_length=255, required=True)
@@ -72,6 +72,8 @@ class CreateUserForm(UserCreationForm):
     class Meta:
         model = CustomUser
         fields = ['username','first_name','last_name','email', 'role', 'password1', 'password2']
+=======
+>>>>>>> 3f104973d561f9a0a101544aafdb1bc42361a607
 
 class SalesDataUploadForm(forms.Form):
     sales_data = forms.FileField()

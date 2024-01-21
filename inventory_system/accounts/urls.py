@@ -1,7 +1,6 @@
 from django.urls import path, include
 from django.contrib import admin
 from . import views
-from .views import registration
 from django.contrib.auth.decorators import login_required
 
 
@@ -13,13 +12,13 @@ urlpatterns = [
     path("delete/<int:pk>/", login_required(views.delete), name="product_delete"),
     path("add/", login_required(views.add_product), name="product_add"),
     path('marketing/', login_required(views.marketing), name='marketing'),
+    path('profile/', login_required(views.profile), name='profile'),
     path('invoicing/', login_required(views.invoicing), name='invoicing'),
     path('create_invoice/', login_required(views.create_invoice), name='create_invoice'),
     path('invoice', login_required(views.invoice_detail), name='invoice_detail'),
     path('edit_invoice/<int:pk>/', login_required(views.edit_invoice), name='edit_invoice'),
     path('delete_invoice/<int:pk>/', login_required(views.delete_invoice), name='delete_invoice'),
     path('mark_as_paid/<int:pk>/', login_required(views.mark_invoice_as_paid), name='mark_invoice_as_paid'),
-    path('profile/', login_required(views.profile), name='profile'),
     path("dashboard/", login_required(views.dashboard), name="dashboard"),
     path('about/', login_required(views.about), name='about'),
     path('create_order/', login_required(views.create_order), name='create_order'),
@@ -43,7 +42,6 @@ urlpatterns = [
     path('invoice_history', login_required(views.invoice_history), name='invoice_history'),
     path('generate_sales_report/', login_required(views.generate_sales_report), name='generate_sales_report'),
     path('analyze-sales-data/', views.analyze_sales_data, name='analyze_sales_data'),
-    #path('sales_data/', views.sales_data, name='sales_data'),
     path('subscription/', login_required(views.subscription), name='subscription'), 
 ]
 

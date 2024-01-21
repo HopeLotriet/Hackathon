@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.0-2/css/all.min.css" />
@@ -19,6 +20,8 @@
         crossorigin="anonymous"></script>
     <script src="{% static 'fontawesomefree/js/all.min.js' %}"></script>
 
+    <!-- <link rel="stylesheet" href="{% static 'css/styles.css' %}"> -->
+
     <!-- <link rel="stylesheet" href="{% static 'cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css' %}"
     integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA=="
     crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
@@ -27,19 +30,19 @@
     <!-- <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}"> -->
 
     <!-- Include aos CSS -->
-    <link rel="stylesheet" href="{% static 'css/aos.css' %}">
+    <!-- <link rel="stylesheet" href="{% static 'css/aos.css' %}"> -->
 
     <!-- Include magnific-popup CSS -->
-    <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}">
+    <!-- <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}"> -->
 
     <!-- Include nice-select CSS -->
-    <link rel="stylesheet" href="{% static 'css/nice-select.css' %}">
+    <!-- <link rel="stylesheet" href="{% static 'css/nice-select.css' %}"> -->
 
     <!-- Include slick-theme CSS -->
-    <link rel="stylesheet" href="{% static 'css/slick-theme.css' %}">
+    <!-- <link rel="stylesheet" href="{% static 'css/slick-theme.css' %}"> -->
 
     <!-- Include slick CSS -->
-    <link rel="stylesheet" href="{% static 'css/slick.css' %}">
+    <!-- <link rel="stylesheet" href="{% static 'css/slick.css' %}"> -->
 
 
 
@@ -56,9 +59,10 @@
     }
 
     .dark-image {
-            /* Apply a dark filter to the image */
-            filter: brightness(0.5);
+        /* Apply a dark filter to the image */
+        filter: brightness(0.5);
     }
+
     .custom-border {
         border: 1px solid black;
         padding: 10px;
@@ -162,23 +166,66 @@
     }
 
     .custom-badge {
-        height: 20px; /* Adjust the height as needed */
-        width: 20px;  /* Make sure width and height are equal for a perfect circle */
-}
+        height: 20px;
+        /* Adjust the height as needed */
+        width: 20px;
+        /* Make sure width and height are equal for a perfect circle */
+    }
 
-.custom-btn {
-    font-size: 20px; /* Adjust the font size as needed */
-    margin-right: 10px; /* Optional: Add some right margin for better spacing */
-}
+    .custom-btn {
+        font-size: 20px;
+        /* Adjust the font size as needed */
+        margin-right: 10px;
+        /* Optional: Add some right margin for better spacing */
+    }
 
-.image-align {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 200px;
-    width: 200px;
-}
+    .image-align {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 200px;
+        width: 200px;
+    }
 
+    .ul_li {
+        list-style: none;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        flex-direction: row;
+        justify-content: center;
+        /* Optional: Adjust the alignment of items within the row */
+    }
+
+    .ul_li li {
+        margin-right: 10px;
+        /* Optional: Adjust the spacing between the images */
+    }
+
+    .box {
+        display: flex;
+        justify-content: space-between;
+        background-color: #ede6e6;
+        border: 2px solid #dcdcdc;
+        padding: 20px;
+        margin: 20px 0;
+        margin-left: 10%;
+        margin-right: 10%;
+        font-size: 20px;
+        height: 150px;
+        overflow: hidden;
+        /* transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; */
+    }
+
+    .box p {
+        margin: 0;
+        /* Remove default margin for paragraphs inside the box */
+    }
+
+    /* .box.active {
+    opacity: 1; 
+    transform: translateY(0);
+} */
 </style>
 
 
@@ -261,12 +308,12 @@
                         </ul>
                     </li>
                     {% endif %}
+
+                    <li class="nav-item"><a class="nav-link active text-white" href="{% url 'marketing' %}"
+                            class="text-white no-underline">Marketing</a></li>
                     
                     <li class="nav-item">
-                        <a class="nav-link active text-white" href="{% url 'marketing' %}">Marketing</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link active text-white" href="{% url 'profile' %}">Profile</a>
+                        <a class="nav-link active text-white" href="{% url 'users-profile' %}">Profile</a>
                     </li>
                 </ul>
 
@@ -289,6 +336,10 @@
 
     {% block content %}
 
+    <br>
+    <br>
+    <br>
+    <br>
     <br>
     <br>
 
@@ -343,6 +394,11 @@
 
     </section>
 
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
     <br>
     <br>
 
@@ -418,7 +474,14 @@
             </div>
         </div>
     </section>
-    <hr>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+    <br>
+
+
 
     <section class="product_section_2 sec_space_small" data-aos="fade-up" data-aos-duration="2000">
         <div class="product_section_2_wrap">
@@ -444,14 +507,32 @@
                                     Store Conscious</h2>
                             </div>
                             <div class="product_section_subtitle position-relative">
-                                <p class="pb-0">Lorem ipsum dolor amet, consectetur adipiscing elit, sed do eiusmod
-                                    tempor incididunt ut labore et dolore.</p>
+                                <p class="pb-0">Welcome to FarmFresh, your trusted source for fresh produce. At
+                                    FarmFresh, we are passionate
+                                    about providing you with the highest quality fruits, vegetables, and other
+                                    farm-fresh products.
+                                    Our commitment to excellence starts from the seed and extends all the way to your
+                                    table.</p>
                             </div>
                             <div class="product_section_desc">
-                                <p>Morbi eget congue lectus. Donec eleifend ultricies urna et euismod. Sed consectetur
-                                    tellus eget odio aliquet, vel vestibulum tellus sollicitudin. Morbi maximus metus eu
-                                    eros tincidunt, vitae mollis ante imperdiet. Nulla </p>
+                                <p>What sets us apart is our dedication to sustainable and organic farming practices. We
+                                    work
+                                    closely with local farmers who share our values to bring you a wide variety of
+                                    seasonal and
+                                    delicious produce. Our goal is not only to deliver exceptional taste but also to
+                                    promote a
+                                    healthier lifestyle and a greener environment.</p>
                             </div>
+                            <div class="product_section_desc">
+                                <p>At FarmFresh, we believe in transparency and traceability. That's why we make it a
+                                    priority to
+                                    share the stories behind the food you enjoy. Learn about the farmers, the regions,
+                                    and the
+                                    journey your food takes to reach you. We want you to feel a connection to the source
+                                    of your
+                                    nourishment.</p>
+                            </div>
+
                             <div class="product_section_btn">
                                 <a href="#!"><button type="button"
                                         class="btn custom_btn load_more_1 rounded-pill px-5 py-3 text-white">Subscribe
@@ -463,38 +544,108 @@
             </div>
         </div>
     </section>
-    <hr>
 
-    <section class="5">
+
+    <br>
+    <br>
+    <br>
+    <br>
+
+    <section class="instagram_section instagram_style_2" data-aos="fade-up" data-aos-duration="2000">
+        <div>
+            <h2 class="instagram_title pb-5 text-center">
+                More About Us
+            </h2>
+            <ul class="zoom-gallery instagram_image_content ul_li">
+                <li>
+                    <a class="popup_image" href="{% static 'images/instagram1.png' %}">
+                        <img src="{% static 'images/instagram1.png' %}" alt="image_not_found" />
+                    </a>
+                </li>
+                <li>
+                    <a class="popup_image" href="{% static 'images/instagram4.png' %}">
+                        <img src="{% static 'images/instagram4.png' %}" alt="image_not_found" />
+                    </a>
+                </li>
+                <li>
+                    <a class="popup_image" href="{% static 'images/instagram3.png' %}">
+                        <img src="{% static 'images/instagram3.png' %}" alt="image_not_found" />
+                    </a>
+                </li>
+                <li>
+                    <a class="popup_image" href="{% static 'images/instagram4.png' %}">
+                        <img src="{% static 'images/instagram4.png' %}" alt="image_not_found" />
+                    </a>
+                </li>
+                <li>
+                    <a class="popup_image" href="{% static 'images/instagram5.png' %}">
+                        <img src="{% static 'images/instagram5.png' %}" alt="image_not_found" />
+                    </a>
+                </li>
+            </ul>
+        </div>
+    </section>
+
+    <br>
+    <br>
+
+    <section class="five">
         <div class="container">
             <div class="row">
-                <div class="col-md-12">
-                    <h2>About Us</h2>
-                    <p>Welcome to FarmFresh, your trusted source for fresh produce. At FarmFresh, we are passionate
-                        about providing you with the highest quality fruits, vegetables, and other farm-fresh products.
-                        Our commitment to excellence starts from the seed and extends all the way to your table.</p>
-
-                    <p>What sets us apart is our dedication to sustainable and organic farming practices. We work
-                        closely with local farmers who share our values to bring you a wide variety of seasonal and
-                        delicious produce. Our goal is not only to deliver exceptional taste but also to promote a
-                        healthier lifestyle and a greener environment.</p>
-
-                    <p>At FarmFresh, we believe in transparency and traceability. That's why we make it a priority to
-                        share the stories behind the food you enjoy. Learn about the farmers, the regions, and the
-                        journey your food takes to reach you. We want you to feel a connection to the source of your
-                        nourishment.</p>
-
-                    <p>Explore our website to discover our latest offerings, recipes, and tips on how to make the most
-                        of your farm-fresh ingredients. Whether you're a seasoned chef or just starting in the kitchen,
-                        we're here to inspire and support your culinary adventures.</p>
-
-                    <p>Thank you for choosing FarmFresh. Join us on this flavorful journey as we strive to redefine the
-                        way you experience and enjoy fresh, wholesome, and delicious food.</p>
-
+                <div class="col-md-6">
+                    <div class="box">
+                        <p>Explore our website to discover our latest offerings, recipes, and tips on how to make the
+                            most
+                            of your farm-fresh ingredients. Whether you're a seasoned chef or just starting in the
+                            kitchen,
+                            we're here to inspire and support your culinary adventures.</p>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="box">
+                        <p>Thank you for choosing FarmFresh. Join us on this flavorful journey as we strive to redefine
+                            the
+                            way you experience and enjoy fresh, wholesome, and delicious food.</p>
+                    </div>
                 </div>
             </div>
         </div>
     </section>
+
+    <div class="content-wrapper">
+        <div class="container mt-5">
+            <div class="card bg-light p-4">
+                <h2 class="text-center mb-4">About Us</h2>
+                <p class="lead text-center mb-4">Welcome to FreshFarm, your go-to destination for high-quality, fresh produce straight from the farm to your doorstep. Our platform is designed with the modern farmer in mind, offering a comprehensive suite of tools and features to streamline your farming business and enhance your online presence.</p>
+          
+                <div class="row">
+                    <div class="col-lg-6">
+                        <h4 class="mb-3">Our Mission</h4>
+                        <p>We showcase our farm's bounty with our intuitive and user-friendly product. Explore a variety of fresh produce sourced directly from local farmers.</p>
+                    </div>
+          
+                    <div class="col-lg-6">
+                        <h4 class="mb-3">Inventory Management</h4>
+                        <p>We stay on top of our stock levels with real-time inventory tracking. Our system provides up-to-minute information on the quantity of each product in stock, ensuring we are never caught off guard.</p>
+                    </div>
+                </div>
+          
+                <div class="row mt-4">
+                    <div class="col-lg-6">
+                        <h4 class="mb-3">Order Management</h4>
+                        <p>We efficiently manage customer orders with our robust order tracking system. Keep tabs on the order status (pending, shipped, delivered), customer details, and order history in one centralized location.</p>
+                    </div>
+          
+                    <div class="col-lg-6">
+                      <h4 class="mb-3">Contact Us</h4>
+                      <p>If you have any questions or inquiries, feel free to reach out to us. Our dedicated support team is here to assist you.</p>
+                          <p>Email: support@freshfarm.com</p>
+                          <p>Phone: (011) 456-7890</p>
+                    </div>
+                </div>
+            </div>
+          </div>
+    </div>
 
 
 
@@ -504,46 +655,26 @@
 
     {% endblock %}
 
-    <footer class="bg-dark text-white py-5">
+    <footer class="bg-dark text-white py-3">
         <div class="container">
-            <div class="row">
-                <div class="col-md-3">
-                    <img src="{% static 'images/logo.jpeg' %}" alt="FarmFresh Logo" class="img-fluid">
-                    <p>Your Fresh Produce Marketplace</p>
-                </div>
-                <div class="col-md-3">
-                    <h5>Contact Us</h5>
-                    <p>Email: <a href="mailto:support@freshfarm.com"
-                            class="text-white no-underline">support@freshfarm.com</a></p>
-                    <p>Phone: (011) 456-7890</p>
-                    <p>Address: 69 Kingsway Avenue, JBS, Auckland Park, 2092</p>
-                </div>
-                <div class="col-md-3">
-                    <h5>Quick Links</h5>
-                    <ul class="list-unstyled">
-                        <li><a href="{% url 'marketing' %}" class="text-white no-underline">Marketing</a></li>
-                        <li><a href="{% url 'profile' %}" class="text-white no-underline">About Us</a></li>
-                        <li><a href="#" class="text-white no-underline">Terms of Service</a></li>
-                        <li><a href="#" class="text-white no-underline">Privacy Policy</a></li>
-                    </ul>
-                </div>
-                <div class="col-md-3">
-                    <h5>Follow Us</h5>
-                    <ul class="list-inline">
-                        <li class="list-inline-item"><a href="#" class="text-white"><i class="fab fa-facebook"></i></a>
-                        </li>
-                        <li class="list-inline-item"><a href="#" class="text-white"><i class="fab fa-twitter"></i></a>
-                        </li>
-                        <li class="list-inline-item"><a href="#" class="text-white"><i class="fab fa-instagram"></i></a>
-                        </li>
-                    </ul>
-                </div>
+
+            <div class="col-md-12 text-center">
+                <p>&copy; 2023 FarmFresh. All rights reserved.</p>
             </div>
-            <div class="row mt-3">
-                <div class="col-md-12 text-center">
-                    <p>&copy; 2023 FarmFresh. All rights reserved.</p>
-                </div>
+
+
+            <div class="col-md-12 text-center">
+                <ul class="list-inline">
+                    <li class="list-inline-item"><a href="#" class="text-white"><i class="fab fa-facebook"></i></a>
+                    </li>
+                    <li class="list-inline-item"><a href="#" class="text-white"><i class="fab fa-twitter"></i></a>
+                    </li>
+                    <li class="list-inline-item"><a href="#" class="text-white"><i class="fab fa-instagram"></i></a>
+                    </li>
+                </ul>
             </div>
+
+
         </div>
     </footer>
 
@@ -557,10 +688,10 @@
 
     <!-- Include other libraries -->
     <script src="{% static 'js/aos.js' %}"></script>
-    <script src="{% static 'js/magnific-popup.min.js' %}"></script>
-    <script src="{% static 'js/nice-select.min.js' %}"></script>
-    <script src="{% static 'js/countdown.min.js' %}"></script>
-    <script src="{% static 'js/slick.min.js' %}"></script>
+    <!-- <script src="{% static 'js/magnific-popup.min.js' %}"></script> -->
+    <!-- <script src="{% static 'js/nice-select.min.js' %}"></script> -->
+    <!-- <script src="{% static 'js/countdown.min.js' %}"></script> -->
+    <!-- <script src="{% static 'js/slick.min.js' %}"></script> -->
 
     <script>
         AOS.init();
