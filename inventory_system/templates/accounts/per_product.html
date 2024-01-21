@@ -6,6 +6,7 @@
 {% block content %}
 
 <div class="content-wrapper">
+   <div class="container mt-5">
     <div class="content-section">
         <div class="row mx-auto justify-content-center">
 
@@ -94,6 +95,7 @@
                 <h3 class="text-center">{{ inventory.barcode_data }}</h3>
                 </div>
             </div>
+            
 
             <a href="{% if inventory.id %}{% url 'product_update' inventory.id %}{% endif %}" class="btn btn-outline-success btn-sm mb-2">Update</a>
             <a href="{% if inventory.id %}{% url 'product_delete' inventory.id %}{% endif %}" class="btn btn-danger btn-sm mb-2">Delete</a>  
@@ -102,5 +104,9 @@
 
   </div>
 </div>
+   </div>
 </div>
+<br>
+<br>
+<br>
 {% endblock %}
