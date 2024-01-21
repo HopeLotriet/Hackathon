@@ -55,6 +55,25 @@ class InvoiceForm(forms.ModelForm):
         if payment_status == 'paid' and not payment_due_date:
             self.add_error('payment_due_date', 'Payment due date is required for paid invoices.')
 
+<<<<<<< HEAD
+class CreateUserForm(UserCreationForm):
+    first_name = forms.CharField(max_length=255, required=True)
+    last_name = forms.CharField(max_length=255, required=True)
+    email = forms.EmailField()
+    ROLE_CHOICES = (
+        ('staff', 'Staff'),
+        ('customer', 'Customer'),
+        ('supplier', 'Supplier'),
+        ('accountant', 'Accountant')
+    )
+    role = forms.ChoiceField(choices=ROLE_CHOICES)
+    
+
+    class Meta:
+        model = CustomUser
+        fields = ['username','first_name','last_name','email', 'role', 'password1', 'password2']
+=======
+>>>>>>> 3f104973d561f9a0a101544aafdb1bc42361a607
 
 class SalesDataUploadForm(forms.Form):
     sales_data = forms.FileField()
