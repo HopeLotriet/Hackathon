@@ -13,17 +13,6 @@ from django.views.decorators.csrf import csrf_protect
 
 
 
-
-@login_required
-def home(request):
-    logged_user = request.user
-    if OrderAmount.objects.filter(customer=logged_user).exists():
-        cart_record = get_object_or_404(OrderAmount, customer=logged_user)
-        request.session['cart_count'] = cart_record.cart_count
-    else:
-        request.session['cart_count'] = 0
-    return render(request, 'accounts/home.html')
-
 def logout(request):
     return render(request, 'users/login.html')
 
@@ -108,13 +97,13 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
                       "if an account exists with the email you entered. You should receive them shortly." \
                       " If you don't receive an email, " \
                       "please make sure you've entered the address you registered with, and check your spam folder."
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('')
 
 
 class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
     template_name = 'users/change_password.html'
     success_message = "Successfully Changed Your Password"
-    success_url = reverse_lazy('login')
+    success_url = reverse_lazy('home')
 
 
 @login_required

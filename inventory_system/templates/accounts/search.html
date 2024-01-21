@@ -14,7 +14,7 @@
             {% if inventories %}
                 <ul class="list-group">
                     {% for inventory in inventories %}
-                        {% if searched in inventory.name %}
+                        {% if searched|lower in inventory.name|lower %}
                             <li class="list-group-item">
                                 <div>
                                     <img src="{{ inventory.image.url }}" alt="{{ inventory.name }}" style="max-width: 100px; max-height: 100px;">
