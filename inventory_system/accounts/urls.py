@@ -1,7 +1,6 @@
 from django.urls import path, include
 from django.contrib import admin
 from . import views
-from .views import registration
 from django.contrib.auth.decorators import login_required
 
 
@@ -19,7 +18,6 @@ urlpatterns = [
     path('edit_invoice/<int:pk>/', login_required(views.edit_invoice), name='edit_invoice'),
     path('delete_invoice/<int:pk>/', login_required(views.delete_invoice), name='delete_invoice'),
     path('mark_as_paid/<int:pk>/', login_required(views.mark_invoice_as_paid), name='mark_invoice_as_paid'),
-    path('profile/', login_required(views.profile), name='profile'),
     path("dashboard/", login_required(views.dashboard), name="dashboard"),
     path('about/', login_required(views.about), name='about'),
     path('create_order/', login_required(views.create_order), name='create_order'),

@@ -2,13 +2,13 @@ from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth import login, authenticate, logout
 from django.contrib.auth.decorators import login_required, user_passes_test
-from django.contrib.auth.forms import UserCreationForm
 from django.http import HttpResponse
 from django.contrib.auth import get_user_model
 from django.contrib import messages
 from .models import Inventory, Order, Invoice , cart, OrderAmount, customerOrderHistory, cart_records, SalesData
 from django.shortcuts import get_object_or_404
-from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm, InvoiceForm, CreateUserForm, SalesDataUploadForm
+from user.forms import RegisterForm
+from .forms import InventoryUpdateForm, AddInventoryForm, OrderForm, UpdateStatusForm, UserInputForm, InvoiceForm, SalesDataUploadForm
 from django.contrib import messages
 import io
 from django_pandas.io import read_frame
@@ -62,51 +62,13 @@ def home(request):
     return render(request, 'accounts/home.html')
 
 def logout(request):
-    return render(request, 'system/login.html')
+    return render(request, 'users/login.html')
 
 class StockListView(FilterView):
     filterset_class = StockFilter
     queryset = Inventory.objects.filter(is_deleted=False)
     template_name = 'stock.html'
     paginate_by = 10
-
-def registration(request):
-    group_name = ''  # Provide a default value
-
-    if request.method == "POST":
-        User = get_user_model()
-        form = CreateUserForm(request.POST)
-        if form.is_valid():
-            user = form.save()
-
-            role = form.cleaned_data['role']
-
-            if role == 'customer':
-                group_name = 'customer'
-            elif role == 'admin':
-                group_name = 'admin'
-            elif role == 'supplier':
-                group_name = 'supplier'
-            elif role == 'accountant':
-                group_name = 'accountant'
-
-            try:
-                group = Group.objects.get(name=group_name)
-            except ObjectDoesNotExist:
-                # Create the group if it doesn't exist
-                group = Group.objects.create(name=group_name)
-
-            user.groups.add(group)
-
-            return redirect('login')
-
-    else:
-        form = CreateUserForm()
-
-    context = {
-        'form': form,
-    }
-    return render(request, 'system/registration.html', context)
 
 login_required
 def products(request):
