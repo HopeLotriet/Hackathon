@@ -594,6 +594,10 @@ def marketing(request):
     context = {}
     return render(request, 'accounts/marketing.html', context)
 
+def profile(request):
+    context = {}
+    return render(request, 'accounts/profile.html', context)
+
 login_required
 def profile(request):
     user_info = request.user
