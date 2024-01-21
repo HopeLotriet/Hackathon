@@ -8,7 +8,7 @@ from .models import *
 
 class AuthTestCase(TestCase):
     def setUp(self):
-        self.u = CustomUser.objects.create_user('test@dom.com', 'iamtest', 'pass')
+        self.u = User.objects.create_user('test@dom.com', 'iamtest', 'pass')
         self.u.is_staff = True
         self.u.is_superuser = True
         self.u.is_active = True

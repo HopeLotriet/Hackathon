@@ -1,0 +1,17 @@
+{% extends "accounts/home.html" %}
+{% block title %}Logout{% endblock title %}
+{% block content %}
+    <div class="card" style="width: 18rem;">
+        <div class="card-body">
+            <h5 class="card-title">You have been logged out</h5>
+            <p class="card-text">
+                Thanks for your time, contact us for any comments or suggestions using our email address.
+            </p>
+            <br><hr>
+            <form method="post" action="{% url 'login' %}">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-primary">Sign in again</button>
+            </form>
+        </div>
+    </div>
+{% endblock content %}

@@ -47,6 +47,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'accounts',
+    'user',
     'transactions',
     'fontawesomefree',
     'widget_tweaks',                            # uses 'django-widget-tweaks' app
@@ -54,6 +55,7 @@ INSTALLED_APPS = [
     # 'login_required', 
     'crispy_bootstrap4',
     'django_filters',
+    'social_django',
 ]
 
 MIDDLEWARE = [
@@ -153,7 +155,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 #the settings.py must use the custom user model
 
-AUTH_USER_MODEL = 'accounts.CustomUser'
+AUTH_USER_MODEL = 'auth.User'
 
 
 AUTHENTICATION_BACKENDS = (
@@ -162,8 +164,7 @@ AUTHENTICATION_BACKENDS = (
 
 LOW_QUANTITY = 5
 
-AUTH_USER_MODEL = 'accounts.CustomUser'
 
 # login redirect path settings
-LOGIN_REDIRECT_URL = "/accounts"
+LOGIN_REDIRECT_URL = "/accounts/"
 LOGIN_URL = "login"
