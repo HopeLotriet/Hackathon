@@ -13,17 +13,6 @@ from django.views.decorators.csrf import csrf_protect
 
 
 
-
-@login_required
-def home(request):
-    logged_user = request.user
-    if OrderAmount.objects.filter(customer=logged_user).exists():
-        cart_record = get_object_or_404(OrderAmount, customer=logged_user)
-        request.session['cart_count'] = cart_record.cart_count
-    else:
-        request.session['cart_count'] = 0
-    return render(request, 'accounts/home.html')
-
 def logout(request):
     return render(request, 'users/login.html')
 
