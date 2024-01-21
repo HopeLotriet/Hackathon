@@ -26,11 +26,9 @@
     integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA=="
     crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
 
-    <!-- Include bootstrap CSS -->
-    <!-- <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}"> -->
 
     <!-- Include aos CSS -->
-    <!-- <link rel="stylesheet" href="{% static 'css/aos.css' %}"> -->
+    <link rel="stylesheet" href="{% static 'css/aos.css' %}">
 
     <!-- Include magnific-popup CSS -->
     <!-- <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}"> -->
@@ -46,7 +44,7 @@
 
 
 
-    <title>{% block title %}FarmFresh{% endblock %}</title>
+<title>{% block title %}FarmFresh{% endblock %}</title>
 </head>
 <style>
     body {
@@ -55,7 +53,7 @@
         flex-direction: column;
         min-height: 100vh;
         opacity: 0.99;
-        background-color: rgba(232, 240, 243, 0.934);
+        background-color: rgba(255, 255, 255, 0.934);
     }
 
     .dark-image {
@@ -202,30 +200,6 @@
         /* Optional: Adjust the spacing between the images */
     }
 
-    .box {
-        display: flex;
-        justify-content: space-between;
-        background-color: #ede6e6;
-        border: 2px solid #dcdcdc;
-        padding: 20px;
-        margin: 20px 0;
-        margin-left: 10%;
-        margin-right: 10%;
-        font-size: 20px;
-        height: 150px;
-        overflow: hidden;
-        /* transition: opacity 0.5s ease-in-out, transform 0.5s ease-in-out; */
-    }
-
-    .box p {
-        margin: 0;
-        /* Remove default margin for paragraphs inside the box */
-    }
-
-    /* .box.active {
-    opacity: 1; 
-    transform: translateY(0);
-} */
 </style>
 
 
@@ -533,11 +507,6 @@
                                     nourishment.</p>
                             </div>
 
-                            <div class="product_section_btn">
-                                <a href="#!"><button type="button"
-                                        class="btn custom_btn load_more_1 rounded-pill px-5 py-3 text-white">Subscribe
-                                        <i class="fas fa-long-arrow-alt-right"></i></button></a>
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -588,29 +557,6 @@
 
     <br>
     <br>
-
-    <section class="five">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="box">
-                        <p>Explore our website to discover our latest offerings, recipes, and tips on how to make the
-                            most
-                            of your farm-fresh ingredients. Whether you're a seasoned chef or just starting in the
-                            kitchen,
-                            we're here to inspire and support your culinary adventures.</p>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="box">
-                        <p>Thank you for choosing FarmFresh. Join us on this flavorful journey as we strive to redefine
-                            the
-                            way you experience and enjoy fresh, wholesome, and delicious food.</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
 
     <div class="content-wrapper">
         <div class="container mt-5">
