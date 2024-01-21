@@ -43,6 +43,5 @@ urlpatterns = [
     path('generate_sales_report/', login_required(views.generate_sales_report), name='generate_sales_report'),
     path('analyze-sales-data/', views.analyze_sales_data, name='analyze_sales_data'),
     path('subscription/', login_required(views.subscription), name='subscription'), 
-    path('profile/', login_required(views.profile), name='profile'), 
 ]
 
