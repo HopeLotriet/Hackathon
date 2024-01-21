@@ -55,6 +55,5 @@ class InvoiceForm(forms.ModelForm):
         if payment_status == 'paid' and not payment_due_date:
             self.add_error('payment_due_date', 'Payment due date is required for paid invoices.')
 
-
 class SalesDataUploadForm(forms.Form):
     sales_data = forms.FileField()
