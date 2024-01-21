@@ -55,6 +55,8 @@ class RegisterView(View):
             
             role = form.cleaned_data['role']
 
+            group_name = ''
+
             if role == 'customer':
                 group_name = 'customer'
             elif role == 'admin':
