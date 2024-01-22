@@ -202,30 +202,42 @@
     }
 
     .service_content_wrap .service_inner_content {
-    margin-bottom: 20px; /* Add margin for spacing between items */
+    margin-bottom: 20px; 
     }
 
     .service_content_wrap .service_content_icon {
-    background-color: #2ecc71; /* Set your desired background color for the icons */
-    color: #fff; /* Set text color to white */
-    border-radius: 50%; /* Create a circular shape */
-    padding: 20px; /* Adjust padding as needed for better visual */
+    background-color: #2ecc71;
+    color: #fff; 
+    border-radius: 50%; 
+    padding: 20px; 
     }
 
     .service_content_wrap .service_content_text {
-    text-align: center; /* Center the text */
+    text-align: center; 
     }
 
     .service_content_wrap .service_content_title {
-    color: #333; /* Set title color */
-    font-size: 18px; /* Set title font size */
-    font-weight: 700; /* Set title font weight */
-    margin-top: 10px; /* Adjust top margin for spacing */
+    color: #333; 
+    font-size: 18px; 
+    font-weight: 700; 
+    margin-top: 10px;
     }
 
     .service_content_wrap .service_content_sub_title {
-    color: #777; /* Set subtitle color */
-    font-size: 14px; /* Set subtitle font size */
+    color: #777; 
+    font-size: 14px; 
+    }
+
+    .navbar {
+    position: fixed;
+    top: 0;
+    width: 100%;
+    z-index: 1000;
+    }
+
+        /* Add a margin to the body to avoid content being hidden behind the fixed navbar */
+    body {
+    margin-top: 68px; /* Adjust this value based on your navbar height */
     }
 
 </style>
@@ -653,6 +665,29 @@
 
     <script>
         AOS.init();
+    </script>
+
+     <!-- Add JavaScript code for the fixed navbar -->
+     <script>
+        // Get the navbar
+        var navbar = document.querySelector(".navbar");
+
+        // Get the offset position of the navbar
+        var sticky = navbar.offsetTop;
+
+        // Function to add/remove the 'fixed-navbar' class
+        function toggleFixedNavbar() {
+            if (window.pageYOffset >= sticky) {
+                navbar.classList.add("fixed-navbar");
+            } else {
+                navbar.classList.remove("fixed-navbar");
+            }
+        }
+
+        // When the user scrolls, call the toggleFixedNavbar function
+        window.onscroll = function () {
+            toggleFixedNavbar();
+        };
     </script>
 
     <!-- Back to Top Button Script -->
