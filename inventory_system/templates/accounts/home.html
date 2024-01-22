@@ -19,32 +19,11 @@
         integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
         crossorigin="anonymous"></script>
     <script src="{% static 'fontawesomefree/js/all.min.js' %}"></script>
-
-    <!-- <link rel="stylesheet" href="{% static 'css/styles.css' %}"> -->
-
-    <!-- <link rel="stylesheet" href="{% static 'cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css' %}"
-    integrity="sha512-Fo3rlrZj/k7ujTnHg4CGR2D7kSs0v4LLanw2qksYuRlEzO+tcaEPQogQ0KaoGN26/zrn20ImR1DfuLWnOo7aBA=="
-    crossorigin="anonymous" referrerpolicy="no-referrer" /> -->
-
-
-    <!-- Include aos CSS -->
+ 
     <link rel="stylesheet" href="{% static 'css/aos.css' %}">
 
-    <!-- Include magnific-popup CSS -->
-    <!-- <link rel="stylesheet" href="{% static 'css/magnific-popup.css' %}"> -->
 
-    <!-- Include nice-select CSS -->
-    <!-- <link rel="stylesheet" href="{% static 'css/nice-select.css' %}"> -->
-
-    <!-- Include slick-theme CSS -->
-    <!-- <link rel="stylesheet" href="{% static 'css/slick-theme.css' %}"> -->
-
-    <!-- Include slick CSS -->
-    <!-- <link rel="stylesheet" href="{% static 'css/slick.css' %}"> -->
-
-
-
-<title>{% block title %}FarmFresh{% endblock %}</title>
+    <title>{% block title %}FarmFresh{% endblock %}</title>
 </head>
 <style>
     body {
@@ -165,16 +144,12 @@
 
     .custom-badge {
         height: 20px;
-        /* Adjust the height as needed */
         width: 20px;
-        /* Make sure width and height are equal for a perfect circle */
     }
 
     .custom-btn {
         font-size: 20px;
-        /* Adjust the font size as needed */
         margin-right: 10px;
-        /* Optional: Add some right margin for better spacing */
     }
 
     .image-align {
@@ -198,6 +173,32 @@
     .ul_li li {
         margin-right: 10px;
         /* Optional: Adjust the spacing between the images */
+    }
+
+    .more-about-us-section .row.no-gutters img {
+        display: block;
+        width: 100%;
+        margin: 0 -15px;
+    }
+
+    #back-to-top-btn {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        display: none;
+        font-size: 20px;
+        border: none;
+        outline: none;
+        background-color: #00ff66;
+        color: #fff;
+        cursor: pointer;
+        border-radius: 50%;
+        padding: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    }
+
+    #back-to-top-btn:hover {
+        background-color: #0fb300;
     }
 
 </style>
@@ -285,7 +286,7 @@
 
                     <li class="nav-item"><a class="nav-link active text-white" href="{% url 'marketing' %}"
                             class="text-white no-underline">Marketing</a></li>
-                    
+
                     <li class="nav-item">
                         <a class="nav-link active text-white" href="{% url 'users-profile' %}">Profile</a>
                     </li>
@@ -310,8 +311,6 @@
 
     {% block content %}
 
-    <br>
-    <br>
     <br>
     <br>
     <br>
@@ -368,7 +367,6 @@
 
     </section>
 
-    <br>
     <br>
     <br>
     <br>
@@ -520,84 +518,81 @@
     <br>
     <br>
 
-    <section class="instagram_section instagram_style_2" data-aos="fade-up" data-aos-duration="2000">
-        <div>
-            <h2 class="instagram_title pb-5 text-center">
-                More About Us
-            </h2>
-            <ul class="zoom-gallery instagram_image_content ul_li">
-                <li>
-                    <a class="popup_image" href="{% static 'images/instagram1.png' %}">
-                        <img src="{% static 'images/instagram1.png' %}" alt="image_not_found" />
-                    </a>
-                </li>
-                <li>
-                    <a class="popup_image" href="{% static 'images/instagram4.png' %}">
-                        <img src="{% static 'images/instagram4.png' %}" alt="image_not_found" />
-                    </a>
-                </li>
-                <li>
-                    <a class="popup_image" href="{% static 'images/instagram3.png' %}">
-                        <img src="{% static 'images/instagram3.png' %}" alt="image_not_found" />
-                    </a>
-                </li>
-                <li>
-                    <a class="popup_image" href="{% static 'images/instagram4.png' %}">
-                        <img src="{% static 'images/instagram4.png' %}" alt="image_not_found" />
-                    </a>
-                </li>
-                <li>
-                    <a class="popup_image" href="{% static 'images/instagram5.png' %}">
-                        <img src="{% static 'images/instagram5.png' %}" alt="image_not_found" />
-                    </a>
-                </li>
-            </ul>
+
+    <section class="more-about-us-section sec_space_small" data-aos="fade-up" data-aos-duration="2000">
+        <div class="container">
+            <h2 class="text-center mb-5">More About Us</h2>
+            <div class="row no-gutters">
+                <div class="col-md-3">
+                    <img src="{% static 'images/instagram1.png' %}" alt="Image 1" class="img-fluid">
+                </div>
+                <div class="col-md-3">
+                    <img src="{% static 'images/instagram4.png' %}" alt="Image 2" class="img-fluid">
+                </div>
+                <div class="col-md-3">
+                    <img src="{% static 'images/instagram3.png' %}" alt="Image 3" class="img-fluid">
+                </div>
+                <div class="col-md-3">
+                    <img src="{% static 'images/instagram5.png' %}" alt="Image 5" class="img-fluid">
+                </div>
+
+            </div>
         </div>
     </section>
 
+
     <br>
     <br>
 
-    <div class="content-wrapper">
+    <div class="content-wrapper" data-aos="fade-up" data-aos-duration="2000">
         <div class="container mt-5">
             <div class="card bg-light p-4">
-                <h2 class="text-center mb-4">About Us</h2>
-                <p class="lead text-center mb-4">Welcome to FreshFarm, your go-to destination for high-quality, fresh produce straight from the farm to your doorstep. Our platform is designed with the modern farmer in mind, offering a comprehensive suite of tools and features to streamline your farming business and enhance your online presence.</p>
-          
                 <div class="row">
                     <div class="col-lg-6">
                         <h4 class="mb-3">Our Mission</h4>
-                        <p>We showcase our farm's bounty with our intuitive and user-friendly product. Explore a variety of fresh produce sourced directly from local farmers.</p>
+                        <p>We showcase our farm's bounty with our intuitive and user-friendly product. Explore a variety
+                            of fresh produce sourced directly from local farmers.</p>
                     </div>
-          
+
                     <div class="col-lg-6">
                         <h4 class="mb-3">Inventory Management</h4>
-                        <p>We stay on top of our stock levels with real-time inventory tracking. Our system provides up-to-minute information on the quantity of each product in stock, ensuring we are never caught off guard.</p>
+                        <p>We stay on top of our stock levels with real-time inventory tracking. Our system provides
+                            up-to-minute information on the quantity of each product in stock, ensuring we are never
+                            caught off guard.</p>
                     </div>
                 </div>
-          
+
                 <div class="row mt-4">
                     <div class="col-lg-6">
                         <h4 class="mb-3">Order Management</h4>
-                        <p>We efficiently manage customer orders with our robust order tracking system. Keep tabs on the order status (pending, shipped, delivered), customer details, and order history in one centralized location.</p>
+                        <p>We efficiently manage customer orders with our robust order tracking system. Keep tabs on the
+                            order status (pending, shipped, delivered), customer details, and order history in one
+                            centralized location.</p>
                     </div>
-          
+
                     <div class="col-lg-6">
-                      <h4 class="mb-3">Contact Us</h4>
-                      <p>If you have any questions or inquiries, feel free to reach out to us. Our dedicated support team is here to assist you.</p>
-                          <p>Email: support@freshfarm.com</p>
-                          <p>Phone: (011) 456-7890</p>
+                        <h4 class="mb-3">Contact Us</h4>
+                        <p>If you have any questions or inquiries, feel free to reach out to us. Our dedicated support
+                            team is here to assist you.</p>
+                        <p>Email: support@freshfarm.com</p>
+                        <p>Phone: (011) 456-7890</p>
                     </div>
                 </div>
             </div>
-          </div>
+        </div>
     </div>
 
+    <!-- Back to Top Button -->
+    <div>
+        <button id="back-to-top-btn" class="btn btn-primary back-to-top-btn" title="Go to top">
+            <i class="fas fa-arrow-up"></i>
+        </button>
+    </div>
 
+    <br>
+    <br>
+    <br>
 
-    <br>
-    <br>
-    <br>
 
     {% endblock %}
 
@@ -613,7 +608,8 @@
                 <ul class="list-inline">
                     <li class="list-inline-item"><a href="#" class="text-white"><i class="fab fa-facebook"></i></a>
                     </li>
-                    <li class="list-inline-item"><a href="#" class="text-white"><i class="fa-brands fa-x-twitter"></i></a>
+                    <li class="list-inline-item"><a href="#" class="text-white"><i
+                                class="fa-brands fa-x-twitter"></i></a>
                     </li>
                     <li class="list-inline-item"><a href="#" class="text-white"><i class="fab fa-instagram"></i></a>
                     </li>
@@ -624,24 +620,35 @@
         </div>
     </footer>
 
-
-
-    <!-- Include jQuery -->
-    <!-- <script src="{% static 'js/jquery.min.js' %}"></script> -->
-
-    <!-- Include Bootstrap JS -->
-    <!-- <script src="{% static 'js/bootstrap.bundle.min.js' %}"></script> -->
-
     <!-- Include other libraries -->
     <script src="{% static 'js/aos.js' %}"></script>
-    <!-- <script src="{% static 'js/magnific-popup.min.js' %}"></script> -->
-    <!-- <script src="{% static 'js/nice-select.min.js' %}"></script> -->
-    <!-- <script src="{% static 'js/countdown.min.js' %}"></script> -->
-    <!-- <script src="{% static 'js/slick.min.js' %}"></script> -->
+
 
     <script>
         AOS.init();
     </script>
+
+    <!-- Back to Top Button Script -->
+    <script>
+        // Get the button
+        var mybutton = document.getElementById("back-to-top-btn");
+
+        // When the user scrolls down 20px from the top of the document, show the button
+        window.onscroll = function () {
+            if (document.body.scrollTop > 20 || document.documentElement.scrollTop > 20) {
+                mybutton.style.display = "block";
+            } else {
+                mybutton.style.display = "none";
+            }
+        };
+
+        // When the user clicks on the button, scroll to the top of the document
+        mybutton.addEventListener("click", function () {
+            document.body.scrollTop = 0; // For Safari
+            document.documentElement.scrollTop = 0; // For Chrome, Firefox, IE, and Opera
+        });
+    </script>
+
 
 </body>
 
