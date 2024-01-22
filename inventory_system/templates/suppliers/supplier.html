@@ -8,7 +8,10 @@
 
 {% block content %}
 
-{% if messages %}
+
+<div class="content-wrapper">
+    <div class="container mt-5">
+        {% if messages %}
 <div class="row mt-3">
     {% for message in messages %}
         {% if message.tags == 'error' %}
@@ -102,6 +105,11 @@
     </div>
 
 </div>
+
+    </div>
+</div>
+
+
 
 <script>
     // Function to hide messages after a delay
