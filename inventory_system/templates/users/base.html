@@ -53,7 +53,7 @@
         flex-direction: column;
         min-height: 100vh;
         opacity: 0.99;
-        background-color: rgba(244, 246, 248, 0.934);
+        background-color: rgba(255, 255, 255, 0.934);
     }
 
     .dark-image {
@@ -214,97 +214,7 @@
                 aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
-            <div class="collapse navbar-collapse" id="navbarSupportedContent">
-                <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
-                    <li class="nav-item">
-                        <a class="nav-link active text-white" aria-current="page" href="{% url 'home' %}">Home</a>
-                    </li>
-                    {% if is_customer %}
-                    <li class="nav-item">
-                        <a class="nav-link active text-white" href="{% url 'products' %}">Products</a>
-                    </li>
-
-
-                    <li class="nav-item">
-                        <a class="nav-link active text-white" href="{% url 'view_cart' %}">Cart
-                            <span class="badge text-bg-warning">{{ request.session.cart_count|default:0 }}</span>
-                        </a>
-                    </li>
-
-
-                    <li class="nav-item">
-                        <a class="nav-link active text-white" href="{% url 'order_history' %}">Order History</a>
-                    </li>
-                    {% else %}
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle active text-white" href="#" id="navbarDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Inventory
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{% url 'stock' %}">Stock List</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="{% url 'dashboard' %}">Product Performance</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="{% url 'analyze_sales_data' %}">Forecast</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle active text-white" href="#" id="navbarDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Order Management
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{% url 'order_list' %}">Order List</a></li>
-                        </ul>
-                    </li>
-
-                    <li class="nav-item dropdown">
-                        <a class="nav-link dropdown-toggle active text-white" href="#" id="navbarDropdown" role="button"
-                            data-bs-toggle="dropdown" aria-expanded="false">
-                            Transactions
-                        </a>
-                        <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{% url 'suppliers-list' %}">Suppliers</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                            <li><a class="dropdown-item" href="{% url 'purchases-list' %}">Purchases</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
-                        </ul>
-                    </li>
-                    {% endif %}
-
-                    <li class="nav-item"><a class="nav-link active text-white" href="{% url 'marketing' %}"
-                            class="text-white no-underline">Marketing</a></li>
-                    
-                    <li class="nav-item">
-                        <a class="nav-link active text-white" href="{% url 'users-profile' %}">Profile</a>
-                    </li>
-                </ul>
-
-
-                <form class="d-flex" method="POST" action="{% url 'search' %}">
-                    {% csrf_token %}
-                    <input class="form-control me-2" type="search" placeholder="What are you looking for?"
-                        aria-label="Search" name="searched">
-                    <button class="btn custom-search-btn" type="submit">Search</button>
-                </form>
-
-                <form action="{% url 'logout' %}" method="post" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn custom-logout-btn">Logout</button>
-                </form>
-
-            </div>
+            
         </div>
     </nav>
 

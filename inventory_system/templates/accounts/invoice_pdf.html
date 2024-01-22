@@ -105,7 +105,7 @@
                                     </tr>
 
                                     <tr>
-                                        <td class="inner-box" style="width: 5%; font-weight: bold; text-align: center;">SL</td>
+                                        <td class="inner-box" style="width: 5%; font-weight: bold; text-align: center;">No</td>
                                         <td class="inner-box" style="width: 30%; font-weight: bold; text-align: center;">ITEM</td>
                                         <td class="inner-box" style="width: 12%; font-weight: bold; text-align: center;">QUANTITY</td>
                                         <td class="inner-box" style="width: 12%; font-weight: bold; text-align: center;">COST PER ITEM</td>
@@ -113,7 +113,7 @@
                                     </tr>
                                     {% for item in order_items %}
                                     <tr>
-                                        <td class="inner-box" style="width: 12%; text-align: center;">{{item.id}}</td>
+                                        <td class="inner-box" style="width: 12%; text-align: center;">{{item.No}}</td>
                                         <td class="inner-box" style="width: 12%; text-align: center;">{{ item.item }}</td>
                                         <td class="inner-box" style="width: 12%; text-align: center;">{{ item.item_quantity }}</td>
                                         <td class="inner-box" style="width: 12%; text-align: center;">R{{ item.item_cost }}</td>
@@ -131,7 +131,7 @@
                                         <td class="inner-box font-weight-bold" style="width: 12%; text-align: center;" colspan="5" ></td>
                                     </tr>
                                         <tr>
-                                            <td class="i font-weight-bold" style="width: 12%;">Delivery Notes</td>
+                                            <td class="i font-weight-bold" style="width: 12%;">Delivery Notes:</td>
                                             <td class=" align-middle" style="width: 12%;" colspan="4">{{ notes }}</td>
                                         </tr>
 
