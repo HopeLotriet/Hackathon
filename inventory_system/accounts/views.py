@@ -503,7 +503,7 @@ def update_order_status(request, order_id):
                     else:
                         status = "is delivered"
 
-                    name = request.user.username
+                    name = invoice.billing_name
                     email_address = invoice.billing_email
                     sender_email = settings.EMAIL_HOST_USER
                     email_body = f"""
@@ -909,7 +909,7 @@ def confirmation_email(request, pk):
     generated_pdf = "pdfs/invoice_pdf.pdf"
 
     #Automated mail update
-    name = request.user.username
+    name = invoice.billing_name
     email_address = invoice.billing_email
     status = ' is currently being processed'
     sender_email = settings.EMAIL_HOST_USER
@@ -926,7 +926,7 @@ def confirmation_email(request, pk):
     """
     # Create an EmailMessage object
     email = EmailMessage(
-    'Order status update',
+    'Order placement successful',
     email_body,
     sender_email,
     [email_address],
@@ -940,7 +940,7 @@ def confirmation_email(request, pk):
 
     pdf_success_message = request.session.pop('success_message', None)
 
-    messages.success(request, "Check out successful")
+    messages.success(request, "Checkout successful")
     return render(request, 'accounts/confirm_order.html', {'instruction': instruction, "pdf_message":pdf_success_message})
 
 # for cleaning trial runs of database
