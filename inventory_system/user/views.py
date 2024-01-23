@@ -10,7 +10,7 @@ from user.forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileFor
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import Group
 from django.views.decorators.csrf import csrf_protect
-from accounts.models import Invoice
+from accounts.models import Invoice, cart, cart_records, customerOrderHistory, OrderAmount
 
 
 def logout(request):
@@ -129,10 +129,11 @@ def profile(request):
         user_form = UpdateUserForm(instance=request.user)
         profile_form = UpdateProfileForm(instance=request.user.profile)
     
-    # update invoice email
-    customer_name = f"{logged_user.first_name} {logged_user.last_name}"
-    invoices = Invoice.objects.filter(billing_name=customer_name)
-
-    if invoices.exists():
-        invoices.update(billing_email=logged_user.email)
+    # update order management
+    customer_name = request.session['old_username']
+    Invoice.objects.filter(billing_name=customer_name).update(billing_email=logged_user.email)
+    cart.objects.filter(customer=customer_name).update(customer=request.user.username)
+    customerOrderHistory.objects.filter(customer=customer_name).update(customer=request.user.username)
+    cart_records.objects.filter(customer=customer_name).update(customer=request.user.username)
+    OrderAmount.objects.filter(customer=customer_name).update(customer=request.user.username)
     return render(request, 'users/profile.html', {'user_form': user_form, 'profile_form': profile_form, 'profile': profile_info, 'user': logged_user})

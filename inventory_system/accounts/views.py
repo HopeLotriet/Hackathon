@@ -53,8 +53,8 @@ from datetime import timedelta
 
 @login_required
 def home(request):
-    logged_user = f"{request.user.first_name} {request.user.last_name}"
-
+    logged_user = request.user
+    request.session['old_username'] = logged_user.username
     if OrderAmount.objects.filter(customer=logged_user).exists():
         cart_record = get_object_or_404(OrderAmount, customer=logged_user)
         request.session['cart_count'] = cart_record.cart_count
@@ -229,7 +229,7 @@ def dashboard(request):
 #adding items to cart for customers
 @login_required
 def view_cart(request):
-    logged_user = f"{request.user.first_name} {request.user.last_name}"
+    logged_user = request.user
     cart_items = cart.objects.filter(customer=logged_user)
     amount = OrderAmount.objects.filter(customer=logged_user)
 
@@ -247,7 +247,7 @@ def add_to_cart(request, item_id):
     item_name = item.name
     item_cost = item.cost_per_item
     quantities = 1
-    logged_user = f"{request.user.first_name} {request.user.last_name}"
+    logged_user = request.user
 
     user_specific_items = cart.objects.filter(customer=logged_user, item=item_name)
     if user_specific_items.exists():
@@ -297,7 +297,7 @@ def delete_from_cart(request, item_id):
     item = get_object_or_404(cart, id=item_id)
     item_cost = item.total_amount
     item_quantity = item.quantity
-    logged_user = f"{request.user.first_name} {request.user.last_name}"
+    logged_user = request.user
     
     existing_amount =OrderAmount.objects.get(customer=logged_user)
     existing_amount.amount_due -= item_cost     #decrease total price
@@ -329,7 +329,7 @@ def increase_cart_quantity(request, item_id):
     item.save()
 
     #increase total price
-    logged_user = f"{request.user.first_name} {request.user.last_name}"
+    logged_user = request.user
     existing_amount = OrderAmount.objects.get(customer=logged_user)
     existing_amount.amount_due += price
     existing_amount.cart_count += 1
@@ -341,7 +341,7 @@ def increase_cart_quantity(request, item_id):
 @login_required
 def decrease_cart_quantity(request, item_id):
     item = get_object_or_404(cart, id=item_id)
-    logged_user = f"{request.user.first_name} {request.user.last_name}"
+    logged_user = request.user
     existing_amount = OrderAmount.objects.get(customer=logged_user)
     
     new_quantity=item.quantity
@@ -380,7 +380,7 @@ def decrease_cart_quantity(request, item_id):
 
 @login_required
 def delete_cart(request):
-    logged_user = f"{request.user.first_name} {request.user.last_name}"
+    logged_user = request.user
     cart_entry = cart.objects.filter(customer=logged_user)
     cart_entry.delete()
 
@@ -478,7 +478,7 @@ def update_order_status(request, order_id):
     
 @login_required
 def order_history(request):
-    logged_user = f"{request.user.first_name} {request.user.last_name}"
+    logged_user = request.user
     has_data = customerOrderHistory.objects.exists()
     if has_data:
         previous_orders = customerOrderHistory.objects.filter(customer=logged_user)
@@ -489,7 +489,7 @@ def order_history(request):
 @login_required
 def return_order(request, order_id):
     current_order = get_object_or_404(customerOrderHistory, id=order_id)
-    logged_user = f"{request.user.first_name} {request.user.last_name}"
+    logged_user = request.user
     last_order = customerOrderHistory.objects.filter(customer=logged_user).last()
     if current_order == last_order:
         if current_order.customer_order_status != "Order canceled":
@@ -570,7 +570,7 @@ def invoicing(request):
 
 @login_required
 def create_invoice(request):
-    logged_user = f"{request.user.first_name} {request.user.last_name}"
+    logged_user = request.user
     #block placement of order if another one is progress
     has_data = Order.objects.filter(customer=logged_user).exists()
     if has_data:
@@ -622,8 +622,8 @@ def order_details(request):
 
     #fetch required information
     #billing name
-    logged_user = f"{request.user.first_name} {request.user.last_name}"
-
+    logged_user = request.user
+    customer_name = f"{logged_user.first_name} {logged_user.last_name}"
     # order id
     prefix = 'ORDER'
     timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
@@ -642,7 +642,7 @@ def order_details(request):
 
     # Update invoice entry
     invoice.order = order_id
-    invoice.billing_name = logged_user
+    invoice.billing_name = customer_name
     invoice.billing_email = email
     invoice.payment_due_date = due_date
     invoice.total_amount = payment_amount
@@ -653,7 +653,7 @@ def order_details(request):
 @login_required
 def invoice_detail(request):
     invoice = Invoice.objects.all().last()
-    logged_user = f"{request.user.first_name} {request.user.last_name}"
+    logged_user = request.user
     cart_items = cart_records.objects.filter(customer=logged_user)
     orderCount = OrderAmount.objects.all().last()
     context = {'invoice': invoice,
@@ -683,7 +683,7 @@ def edit_invoice(request, pk):
 def delete_invoice(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     invoice.delete()
-    logged_user = f"{request.user.first_name} {request.user.last_name}"
+    logged_user = request.user
     cart_entry = cart.objects.filter(customer=logged_user)
     cart_entry.delete()
 
@@ -706,7 +706,7 @@ def mark_invoice_as_paid(request, pk):
 def invoice_pdf(request, pk):
      # Your data to be passed to the template
     invoice = get_object_or_404(Invoice, pk=pk)
-    logged_user = f"{request.user.first_name} {request.user.last_name}"
+    logged_user = request.user
     cart_items = cart_records.objects.filter(customer=logged_user)
     orderCount = OrderAmount.objects.all().last()
     context = {
@@ -764,7 +764,7 @@ def invoice_pdf(request, pk):
 def confirm_order(request, pk):
 
     #adjust inventory table
-    logged_user = f"{request.user.first_name} {request.user.last_name}"
+    logged_user = request.user
     cart_items = cart.objects.filter(customer=logged_user)
 
     for item in cart_items:
@@ -814,7 +814,7 @@ def confirm_order(request, pk):
         product=all_items,
         quantity_ordered=total_quantity,
         amount_spent=amount,
-        customer=customer_name
+        customer=request.user.username
     )
     customer_order_entry.save()
 
