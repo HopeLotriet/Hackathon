@@ -53,7 +53,7 @@ from datetime import timedelta
 
 @login_required
 def home(request):
-    logged_user = request.user
+    logged_user = f"{request.user.first_name} {request.user.last_name}"
 
     if OrderAmount.objects.filter(customer=logged_user).exists():
         cart_record = get_object_or_404(OrderAmount, customer=logged_user)
@@ -229,7 +229,7 @@ def dashboard(request):
 #adding items to cart for customers
 @login_required
 def view_cart(request):
-    logged_user = request.user
+    logged_user = f"{request.user.first_name} {request.user.last_name}"
     cart_items = cart.objects.filter(customer=logged_user)
     amount = OrderAmount.objects.filter(customer=logged_user)
 
@@ -247,7 +247,7 @@ def add_to_cart(request, item_id):
     item_name = item.name
     item_cost = item.cost_per_item
     quantities = 1
-    logged_user = request.user.username
+    logged_user = f"{request.user.first_name} {request.user.last_name}"
 
     user_specific_items = cart.objects.filter(customer=logged_user, item=item_name)
     if user_specific_items.exists():
@@ -297,7 +297,7 @@ def delete_from_cart(request, item_id):
     item = get_object_or_404(cart, id=item_id)
     item_cost = item.total_amount
     item_quantity = item.quantity
-    logged_user = request.user
+    logged_user = f"{request.user.first_name} {request.user.last_name}"
     
     existing_amount =OrderAmount.objects.get(customer=logged_user)
     existing_amount.amount_due -= item_cost     #decrease total price
@@ -329,7 +329,7 @@ def increase_cart_quantity(request, item_id):
     item.save()
 
     #increase total price
-    logged_user = request.user.username
+    logged_user = f"{request.user.first_name} {request.user.last_name}"
     existing_amount = OrderAmount.objects.get(customer=logged_user)
     existing_amount.amount_due += price
     existing_amount.cart_count += 1
@@ -341,7 +341,7 @@ def increase_cart_quantity(request, item_id):
 @login_required
 def decrease_cart_quantity(request, item_id):
     item = get_object_or_404(cart, id=item_id)
-    logged_user = request.user.username
+    logged_user = f"{request.user.first_name} {request.user.last_name}"
     existing_amount = OrderAmount.objects.get(customer=logged_user)
     
     new_quantity=item.quantity
@@ -380,7 +380,7 @@ def decrease_cart_quantity(request, item_id):
 
 @login_required
 def delete_cart(request):
-    logged_user = request.user
+    logged_user = f"{request.user.first_name} {request.user.last_name}"
     cart_entry = cart.objects.filter(customer=logged_user)
     cart_entry.delete()
 
@@ -401,66 +401,6 @@ def order_list(request):
     return render(request, 'accounts/order_list.html', {'orders': order_lists})
 
 
-@login_required()
-def create_order(request):
-    if request.method == 'POST':
-        order_form = OrderForm(request.POST)
-        if order_form.is_valid():
-            order = order_form.save(commit=False)
-            product_name = order.product
-            name = order.customer
-            status = ' is currently being processed'
-
-            try:
-                # Retrieve the product from the database based on the name
-                inventory = Inventory.objects.get(name=product_name)
-
-                # Retrieve the current quantity in stock
-                quantity_in_stock = inventory.quantity_in_stock
-
-                # Subtract the ordered quantity from the quantity in stock
-                ordered_quantity = order.quantity_ordered
-                inventory.quantity_in_stock = max(0, quantity_in_stock - ordered_quantity)
-
-                #Automated mail update
-                email_body = f"""
-                Hello, {name}!
-
-                Thank you for placing your order with FarmFresh.
-
-                Please note that your order {status}.
-
-                Best regards,
-                FarmFresh
-                """
-                email = send_mail(
-                    'Order status update',
-                    email_body,
-                    'from@example.com',
-                    #make it dynamic once registration is complete
-                    ['amogelangmonnanyana@gmail.com']  
-                    )
-                
-                # Save the updated inventory back to the database
-                inventory.save()
-
-                # Now save the order with the updated inventory quantity in stock
-                order.save()
-
-                # Add a success message to be displayed to the user
-                messages.success(request, "Order created successfully.")
-                return redirect('order_list')
-
-            except Inventory.DoesNotExist:
-                messages.error(request, f"Product '{product_name}' not found in inventory.")
-        else:
-            messages.error(request, "Invalid order form. Please check your inputs.")
-
-    else:
-        order_form = OrderForm()
-    
-    return render(request, 'accounts/create_order.html', {'form': order_form, 'messages': messages.get_messages(request)})
-
 @login_required
 def update_order_status(request, order_id):
 
@@ -468,7 +408,7 @@ def update_order_status(request, order_id):
     order = get_object_or_404(Order, id=order_id)
     invoice = Invoice.objects.all().last()
 
-    customer_order = get_object_or_404(customerOrderHistory, id=order_id)
+    customer_order = get_object_or_404(customerOrderHistory, order_id=order.order_id)
     completion_status = order.order_status 
 
     if completion_status == "delivered" or completion_status =="Order canceled":
@@ -538,9 +478,9 @@ def update_order_status(request, order_id):
     
 @login_required
 def order_history(request):
-    logged_user = request.user
+    logged_user = f"{request.user.first_name} {request.user.last_name}"
     has_data = customerOrderHistory.objects.exists()
-    if logged_user.is_authenticated and has_data:
+    if has_data:
         previous_orders = customerOrderHistory.objects.filter(customer=logged_user)
     else:
         previous_orders = customerOrderHistory.objects.all()
@@ -548,11 +488,11 @@ def order_history(request):
 
 @login_required
 def return_order(request, order_id):
-    current_order = get_object_or_404(Order, id=order_id)
+    current_order = get_object_or_404(customerOrderHistory, id=order_id)
     logged_user = f"{request.user.first_name} {request.user.last_name}"
-    last_order = Order.objects.filter(customer=logged_user).last()
+    last_order = customerOrderHistory.objects.filter(customer=logged_user).last()
     if current_order == last_order:
-        if current_order.order_status != "Order canceled":
+        if current_order.customer_order_status != "Order canceled":
 
             if order_history:
                 
@@ -574,14 +514,13 @@ def return_order(request, order_id):
                     inventory_product.save()
 
                 #fetch product from order history and inventory and update their statuses
-                returning_order = get_object_or_404(customerOrderHistory, id=order_id)
-                returning_orderlist = get_object_or_404(Order, id=order_id)
+                returning_orderlist = get_object_or_404(Order, order_id=current_order.order_id)
 
                 returning_orderlist.order_status = "Order canceled"
                 returning_orderlist.save()
         
-                returning_order.customer_order_status = "Order canceled"
-                returning_order.save()
+                current_order.customer_order_status = "Order canceled"
+                current_order.save()
                 messages.success(request, "Order canceled!")
                 
         else:
@@ -631,12 +570,11 @@ def invoicing(request):
 
 @login_required
 def create_invoice(request):
-    logged_user = request.user
-    customer_name = f"{logged_user.first_name} {logged_user.last_name}"
+    logged_user = f"{request.user.first_name} {request.user.last_name}"
     #block placement of order if another one is progress
     has_data = Order.objects.filter(customer=logged_user).exists()
     if has_data:
-        previous_order = Order.objects.filter(customer=customer_name).last()
+        previous_order = Order.objects.filter(customer=logged_user).last()
         previous_order_status = previous_order.order_status
     else:
         previous_order_status = "delivered"
@@ -655,8 +593,7 @@ def create_invoice(request):
         context = {'form': form}
 
         #save cart entries before clearing
-        user_name = logged_user.username
-        existing_cart = cart.objects.filter(customer=user_name)
+        existing_cart = cart.objects.filter(customer=logged_user)
 
         for item in existing_cart:
             item_name = item.item
@@ -669,7 +606,7 @@ def create_invoice(request):
                 cost_per_item =item_cost,
                 quantity=item_quantity,
                 total_amount=price,
-                customer = user_name
+                customer = logged_user
             )
             cart_record.save()
         return render(request, 'accounts/create_invoice.html', context)
@@ -685,8 +622,7 @@ def order_details(request):
 
     #fetch required information
     #billing name
-    logged_user = request.user
-    customer_name = f"{logged_user.first_name} {logged_user.last_name}"
+    logged_user = f"{request.user.first_name} {request.user.last_name}"
 
     # order id
     prefix = 'ORDER'
@@ -695,7 +631,7 @@ def order_details(request):
     order_id = f'{prefix}-{timestamp}-{random_part}'
 
     #billing email
-    email = logged_user.email
+    email = request.user.email
 
     #payment date
     due_date = datetime.now().date() + timedelta(days=7)
@@ -706,7 +642,7 @@ def order_details(request):
 
     # Update invoice entry
     invoice.order = order_id
-    invoice.billing_name = customer_name
+    invoice.billing_name = logged_user
     invoice.billing_email = email
     invoice.payment_due_date = due_date
     invoice.total_amount = payment_amount
@@ -717,7 +653,7 @@ def order_details(request):
 @login_required
 def invoice_detail(request):
     invoice = Invoice.objects.all().last()
-    logged_user = request.user
+    logged_user = f"{request.user.first_name} {request.user.last_name}"
     cart_items = cart_records.objects.filter(customer=logged_user)
     orderCount = OrderAmount.objects.all().last()
     context = {'invoice': invoice,
@@ -747,7 +683,7 @@ def edit_invoice(request, pk):
 def delete_invoice(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     invoice.delete()
-    logged_user = request.user.username
+    logged_user = f"{request.user.first_name} {request.user.last_name}"
     cart_entry = cart.objects.filter(customer=logged_user)
     cart_entry.delete()
 
@@ -770,7 +706,7 @@ def mark_invoice_as_paid(request, pk):
 def invoice_pdf(request, pk):
      # Your data to be passed to the template
     invoice = get_object_or_404(Invoice, pk=pk)
-    logged_user = request.user
+    logged_user = f"{request.user.first_name} {request.user.last_name}"
     cart_items = cart_records.objects.filter(customer=logged_user)
     orderCount = OrderAmount.objects.all().last()
     context = {
@@ -828,7 +764,7 @@ def invoice_pdf(request, pk):
 def confirm_order(request, pk):
 
     #adjust inventory table
-    logged_user = request.user.username
+    logged_user = f"{request.user.first_name} {request.user.last_name}"
     cart_items = cart.objects.filter(customer=logged_user)
 
     for item in cart_items:
@@ -858,7 +794,7 @@ def confirm_order(request, pk):
     all_items = ', '.join(item_list)
     
     #total quatities ordered
-    total_quantity = cart.objects.aggregate(total_quantity=Sum('quantity'))['total_quantity']
+    total_quantity = cart_products.aggregate(total_quantity=Sum('quantity'))['total_quantity']
 
     #total amount spent
     amount = invoice.total_amount
@@ -878,7 +814,7 @@ def confirm_order(request, pk):
         product=all_items,
         quantity_ordered=total_quantity,
         amount_spent=amount,
-        customer=request.user
+        customer=customer_name
     )
     customer_order_entry.save()
 

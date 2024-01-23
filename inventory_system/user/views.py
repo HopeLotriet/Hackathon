@@ -5,12 +5,12 @@ from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
 from django.views import View
 from django.contrib.auth.decorators import login_required
-
+from .models import Profile
 from user.forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import Group
 from django.views.decorators.csrf import csrf_protect
-
+from accounts.models import Invoice
 
 
 def logout(request):
@@ -108,17 +108,31 @@ class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
 
 @login_required
 def profile(request):
+    # view profile details
+    logged_user = request.user
+    profile_info = Profile.objects.get(user_id=logged_user.id)
+    
+    # edit profile details
     if request.method == 'POST':
         user_form = UpdateUserForm(request.POST, instance=request.user)
         profile_form = UpdateProfileForm(request.POST, request.FILES, instance=request.user.profile)
 
         if user_form.is_valid() and profile_form.is_valid():
+
             user_form.save()
             profile_form.save()
-            messages.success(request, 'Your profile is updated successfully')
-            return redirect(to='users-profile')
+            
+
+        messages.success(request, 'Your profile is updated successfully')
+        return redirect(to='users-profile')
     else:
         user_form = UpdateUserForm(instance=request.user)
         profile_form = UpdateProfileForm(instance=request.user.profile)
+    
+    # update invoice email
+    customer_name = f"{logged_user.first_name} {logged_user.last_name}"
+    invoices = Invoice.objects.filter(billing_name=customer_name)
 
-    return render(request, 'users/profile.html', {'user_form': user_form, 'profile_form': profile_form})
+    if invoices.exists():
+        invoices.update(billing_email=logged_user.email)
+    return render(request, 'users/profile.html', {'user_form': user_form, 'profile_form': profile_form, 'profile': profile_info, 'user': logged_user})

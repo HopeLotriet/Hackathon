@@ -1,6 +1,7 @@
 from django import forms
 from django.contrib.auth.models import User
 from django.contrib.auth.forms import UserCreationForm, AuthenticationForm
+from phonenumber_field.formfields import PhoneNumberField
 
 from .models import Profile
 
@@ -89,7 +90,9 @@ class UpdateUserForm(forms.ModelForm):
 class UpdateProfileForm(forms.ModelForm):
     avatar = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control-file'}))
     bio = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 5}))
+    phone_number = PhoneNumberField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+27 XX XXX XXXX'}))
 
     class Meta:
         model = Profile
-        fields = ['avatar', 'bio']
+        fields = ['avatar', 'bio', 'phone_number']
+

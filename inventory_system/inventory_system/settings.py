@@ -156,6 +156,7 @@ STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+PHONENUMBER_DEFAULT_REGION = 'ZA'
 
 #the settings.py must use the custom user model
 
@@ -172,3 +173,4 @@ LOW_QUANTITY = 5
 # login redirect path settings
 LOGIN_REDIRECT_URL = "/accounts/"
 LOGIN_URL = "login"
+
