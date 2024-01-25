@@ -51,10 +51,14 @@ FarmFresh Inventory Management System is a Django-based web application that hel
 
 ### Prerequisites
 
-- Prerequisites or dependencies that users need to install-
-* Django
-* Python
-* Django-Crispy-Forms
+- Installation of the latest python development kit from https://www.python.org/
+
+## Project Setup
+* Create an environment inside your project folder by running python<version> -m venv <virtual-environment-name>
+* Activate the environment by running env/Scripts/activate.bat //In CMD
+* Run the requirements file which has all the project dependencies using the $ pip install -r requirements.txt
+* Run migrations to create tables inside the sqlite database by running $python manage.py makemigrations and python manage.py migrate
+* Now run the application using $ python manage.py runserver command and copy and paste the localhost url http://127.0.0.1:8000/ to your browser. 
 
 
 ## Contributors
