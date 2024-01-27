@@ -16,6 +16,10 @@ from accounts.models import Invoice, cart, cart_records, customerOrderHistory, O
 def logout(request):
     return render(request, 'users/login.html')
 
+# custom 404 view
+def custom_404(request, exception):
+    return render(request, 'users/404.html', status=404)
+
 
 class RegisterView(View):
     group_name = ''  # Provide a default value

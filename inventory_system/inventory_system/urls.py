@@ -18,7 +18,7 @@ from os import name
 from django.contrib import admin
 from django.urls import path, include, re_path
 from accounts import views
-from user.views import CustomLoginView, ResetPasswordView, ChangePasswordView, LoginForm
+from user.views import CustomLoginView, ResetPasswordView, ChangePasswordView, LoginForm, custom_404
 from django.contrib.auth import views as auth_views
 from django.conf import settings
 from django.conf.urls.static import static
@@ -50,6 +50,8 @@ urlpatterns = [
     re_path(r'^oauth/', include('social_django.urls', namespace='social')),
 
 ]
+
+handler404 = 'user.views.custom_404'
 
 
 # Serve media files during development
