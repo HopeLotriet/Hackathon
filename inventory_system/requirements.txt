@@ -14,7 +14,7 @@ cryptography==42.0.0
 cssselect2==0.7.0
 cycler==0.12.1
 defusedxml==0.8.0rc2
-Django==5.0.1
+Django==3.2.1
 django-crispy-forms==2.1
 django-filter==23.5
 django-pandas==0.6.6
@@ -23,6 +23,7 @@ django-phonenumbers==1.0.1
 django-widget-tweaks==1.5.0
 fontawesomefree==6.5.1
 fonttools==4.47.2
+gunicorn==21.2.0
 html5lib==1.1
 idna==3.6
 kiwisolver==1.4.5
@@ -38,6 +39,7 @@ patsy==0.5.6
 phonenumbers==8.13.28
 pillow==10.2.0
 plotly==5.18.0
+psycopg2==2.9.9
 pycparser==2.21
 pyHanko==0.21.0
 pyhanko-certvalidator==0.26.3
@@ -72,4 +74,5 @@ tzlocal==5.2
 uritools==4.0.2
 urllib3==2.1.0
 webencodings==0.5.1
+whitenoise==6.6.0
 xhtml2pdf==0.2.14
