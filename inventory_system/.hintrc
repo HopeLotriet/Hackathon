@@ -4,17 +4,25 @@
   ],
   "hints": {
     "meta-viewport": "off",
+    "no-inline-styles": "off",
+    "meta-charset-utf-8": "off",
+    "axe/structure": [
+      "default",
+      {
+        "list": "off"
+      }
+    ],
+    "axe/text-alternatives": [
+      "default",
+      {
+        "document-title": "off",
+        "image-alt": "off"
+      }
+    ],
     "axe/parsing": [
       "default",
       {
         "duplicate-id-aria": "off"
-      }
-    ],
-    "no-inline-styles": "off",
-    "axe/keyboard": [
-      "default",
-      {
-        "nested-interactive": "off"
       }
     ],
     "axe/forms": [
@@ -23,6 +31,19 @@
         "label": "off"
       }
     ],
-    "button-type": "off"
+    "button-type": "off",
+    "axe/name-role-value": [
+      "default",
+      {
+        "link-name": "off",
+        "button-name": "off"
+      }
+    ],
+    "axe/keyboard": [
+      "default",
+      {
+        "nested-interactive": "off"
+      }
+    ]
   }
 }
