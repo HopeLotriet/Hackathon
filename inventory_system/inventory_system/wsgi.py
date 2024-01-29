@@ -11,7 +11,7 @@ import os
 
 from django.core.wsgi import get_wsgi_application
 
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'inventory_system.settings')
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'C:/Users/Gennifer Motsumi/Desktop/projects/Hackathon/inventory_system/inventory_system/wsgi.py')
 
 application = get_wsgi_application()
 
