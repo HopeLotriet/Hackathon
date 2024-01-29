@@ -24,7 +24,7 @@ from barcode.writer import ImageWriter
 from PIL import Image
 from io import BytesIO
 from django.core.files.base import ContentFile
-from barcode import Code128
+from barcode.codex import Code128
 from django.contrib.auth.models import Group
 from django.core.exceptions import ObjectDoesNotExist
 from django_filters.views import FilterView
