@@ -563,16 +563,16 @@
             <h2 class="text-center mb-5">More About Us</h2>
             <div class="row no-gutters">
                 <div class="col-md-3">
-                    <img src="{% static 'images/instagram1.png' %}" alt="Image 1" class="img-fluid">
+                    <img src="{% static 'images/close-up-picture-hand-holding-planting-seed-plant.jpg' %}" alt="Image 1" class="img-fluid">
                 </div>
                 <div class="col-md-3">
-                    <img src="{% static 'images/instagram4.png' %}" alt="Image 2" class="img-fluid">
+                    <img src="{% static 'images/top-view-female-cook-cutting-fresh-green-salad-gray-surface.jpg' %}" alt="Image 2" class="img-fluid">
                 </div>
                 <div class="col-md-3">
-                    <img src="{% static 'images/instagram3.png' %}" alt="Image 3" class="img-fluid">
+                    <img src="{% static 'images/close-up-box-with-vegetables-hands-mature-man.jpg' %}" alt="Image 3" class="img-fluid">
                 </div>
                 <div class="col-md-3">
-                    <img src="{% static 'images/instagram5.png' %}" alt="Image 5" class="img-fluid">
+                    <img src="{% static 'images/fresh-vegetables-fruit-market-stall.jpg' %}" alt="Image 5" class="img-fluid">
                 </div>
 
             </div>
@@ -632,7 +632,43 @@
     <br>
     <br>
 
+    <!-- Trigger button -->
+    <div class="text-center m-3">
+        <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#imagereferences">
+        Click to view image attributions
+        </button>
+    </div>
+    
 
+    <!-- Edit Profile Modal -->
+    <div class="modal fade" id="imagereferences" tabindex="-1" role="dialog" aria-labelledby="exampleModalLabel" aria-hidden="true">
+        <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title" id="exampleModalLabel">Image attributions</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+            </div>
+            <div class="modal-body">
+            <label class="small mb-1">Login background image :</label>
+                <li>The vegetables from a basket on wooden table: <a href="https://www.freepik.com/free-photo/vegetables-from-basket-wooden-table_7785613.htm#page=3&query=vegetables&position=3&from_view=keyword&track=sph&uuid=874b534f-566f-4976-8587-1032e70617ea">Image by master1305</a> on Freepik"></li>
+
+            <label class="small mb-1">Homepage images :</label>
+                <li>red green and yellow chili peppers and green chili peppers: Photo by <a href="https://unsplash.com/@enginakyurt?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">engin akyurt</a> on <a href="https://unsplash.com/photos/red-green-and-yellow-chili-peppers-and-green-chili-peppers-Y5n8mCpvlZU?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a></li>
+                <li>bunch of vegetables: Photo by <a href="https://unsplash.com/@nicotitto?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">nrd</a> on <a href="https://unsplash.com/photos/bunch-of-vegetables-D6Tu_L3chLE?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a></li>
+                <li>vegetables and fruits display: Photo by <a href="https://unsplash.com/@tombrunberg?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Tom Brunberg</a> on <a href="https://unsplash.com/photos/vegetables-and-fruits-display-D4ZtZX1UeAI?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a></li>
+                <li>Close up picture of hand holding planting the seed of the plant:<a href="https://www.freepik.com/free-photo/close-up-picture-hand-holding-planting-seed-plant_10992195.htm#query=planting%20seeds&position=1&from_view=search&track=ais&uuid=0fee9896-5288-471a-b029-cc8f2ddfa9c5">Image by jcomp</a> on Freepik</li>
+                <li>Close up of box with vegetables in hands of mature man: <a href="https://www.freepik.com/free-photo/close-up-box-with-vegetables-hands-mature-man_11600526.htm#query=agriculture%20produce&position=29&from_view=search&track=ais&uuid=6e5a7542-0783-4974-8f95-0aec1304757d">Image by gpointstudio</a> on Freepik</li>
+                <li>Top view female cook cutting fresh green salad on the gray surface: <a href="https://www.freepik.com/free-photo/top-view-female-cook-cutting-fresh-green-salad-gray-surface_16756942.htm#page=5&query=chopping%20vegetables&position=45&from_view=search&track=ais&uuid=630de469-388b-485e-8b13-534195d06f69">Image by mdjaff</a> on Freepik</li>
+                <li>Free photo fresh vegetables and fruit market stall: <a href="https://www.freepik.com/free-photo/fresh-vegetables-fruit-market-stall_4438342.htm#query=farm%20produce%20market&position=35&from_view=search&track=ais&uuid=d020978d-0484-4b37-a012-5a1d2ce8f759">Image by kstudio</a> on Freepik</li>
+                
+            <label class="small mb-1">Marketing image :</label>
+                <li>green and red fruit with green leaves: Photo by <a href="https://unsplash.com/@tangerinenewt?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Tangerine Newt</a> on <a href="https://unsplash.com/photos/green-and-red-fruit-with-green-leaves-RgT22Ixcq4Y?utm_content=creditCopyText&utm_medium=referral&utm_source=unsplash">Unsplash</a></li>
+                </div>
+        </div>
+        </div>
+    </div>
     {% endblock %}
 
     <footer class="bg-dark text-white py-3">
@@ -640,8 +676,8 @@
 
             <div class="col-md-12 text-center">
                 <p>&copy; 2023 FarmFresh. All rights reserved.</p>
+                  </div>
             </div>
-
 
             <div class="col-md-12 text-center">
                 <ul class="list-inline">
@@ -661,7 +697,6 @@
 
     <!-- Include other libraries -->
     <script src="{% static 'js/aos.js' %}"></script>
-
 
     <script>
         AOS.init();
