@@ -66,5 +66,3 @@ FarmFresh Inventory Management System is a Django-based web application that hel
 - Amogelang Monnanyana
 - Musawenkosi Nyathi
 - Xolani Sibisi
-
-
