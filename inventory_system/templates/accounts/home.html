@@ -6,6 +6,7 @@
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <script src="https://unpkg.com/aos@next/dist/aos.js"></script>
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
         integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
@@ -19,8 +20,9 @@
         integrity="sha384-BBtl+eGJRgqQAUMxJ7pMwbEyER4l1g+O15P+16Ep7Q9Q+zqX6gSbd85u4mG4QzX+"
         crossorigin="anonymous"></script>
     <script src="{% static 'fontawesomefree/js/all.min.js' %}"></script>
- 
     <link rel="stylesheet" href="{% static 'css/aos.css' %}">
+ 
+    <!-- <link rel="stylesheet" href="{% static 'css/styles.css' %}"> -->
 
 
     <title>{% block title %}FarmFresh{% endblock %}</title>
@@ -81,7 +83,7 @@
     }
 
     .carousel-caption h5 {
-        font-size: 90px;
+        font-size: 80px;
         font-weight: 600;
     }
 
@@ -572,8 +574,9 @@
                     <img src="{% static 'images/close-up-box-with-vegetables-hands-mature-man.jpg' %}" alt="Image 3" class="img-fluid">
                 </div>
                 <div class="col-md-3">
-                    <img src="{% static 'images/fresh-vegetables-fruit-market-stall.jpg' %}" alt="Image 5" class="img-fluid">
+                    <img src="{% static 'images/fresh_vegetables_fruit_market_stall.jpg' %}" alt="Image 5" class="img-fluid">
                 </div>
+                
 
             </div>
         </div>
