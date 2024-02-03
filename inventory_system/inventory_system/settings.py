@@ -33,6 +33,7 @@ EMAIL_HOST_PASSWORD = 'qauz znfu bkcj btzf'
 SECRET_KEY = 'django-insecure-!ep!c0a=y@*l)l0#1z2@a#&==bj!!j&lya+sud7t&cm!3mkmj2'
 
 # SECURITY WARNING: don't run with debug turned on in production!
+# DEBUG = False
 DEBUG = True
 
 ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'yourdomain.com', 'youripaddress', 'farmfresh-kmq6.onrender.com']
