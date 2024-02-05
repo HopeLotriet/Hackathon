@@ -1,8 +1,7 @@
 from django import forms
 from django.forms import ModelForm, ChoiceField, Select, Form
-from .models import Inventory, Order, Invoice, SalesData
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth import get_user_model
+from .models import Inventory, Order
+from orders.models import Invoice
 
 
 class InventoryUpdateForm(ModelForm):

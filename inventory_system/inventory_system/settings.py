@@ -51,6 +51,7 @@ INSTALLED_APPS = [
     'accounts',
     'user',
     'transactions',
+    'orders',
     'fontawesomefree',
     'widget_tweaks',                            # uses 'django-widget-tweaks' app
     'crispy_forms',                             # uses 'django-crispy-forms' app
