@@ -10,7 +10,7 @@ from user.forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileFor
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import Group
 from django.views.decorators.csrf import csrf_protect
-from accounts.models import Invoice, cart, cart_records, customerOrderHistory, OrderAmount
+from orders.models import Invoice, cart, cart_records, customerOrderHistory, OrderAmount
 
 
 def logout(request):
