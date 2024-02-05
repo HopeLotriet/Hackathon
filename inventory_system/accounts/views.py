@@ -141,6 +141,16 @@ def add_product(request):
 @login_required
 def dashboard(request):
     inventories = Inventory.objects.all()
+    
+    # Check if the inventories are empty
+    if not inventories:
+        # Handle case where inventory is empty
+        context = {
+            "message": "No data available for dashboard."
+        }
+        return render(request, "accounts/empty_dashboard.html", context=context)
+    
+    # Convert Inventory queryset to DataFrame
     df = read_frame(inventories)
 
        
