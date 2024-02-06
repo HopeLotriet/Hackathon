@@ -62,13 +62,7 @@
                                 {% csrf_token %}
                                 <div class="form-row">
                                     <div class="col-md-10 offset-md-1">
-                                        <div class="form-group text-center">
-                                            <a href="{% url 'social:begin' 'google-oauth2' %}" class="btn btn-link btn-lg active btn-block"><i class="fab fa-google"></i></a>
-                                            <a href="{% url 'social:begin' 'facebook' %}" class="btn btn-link btn-lg active btn-block"><i class="fab fa-facebook"></i></a>
-                                            <a href="{% url 'social:begin' 'twitter' %}" class="btn btn-link btn-lg active btn-block"><i class="fa-brands fa-x-twitter"></i></a>
-                                            <hr>
-                                            <p class="text-center"><strong>OR</strong></p>
-                                            <hr>
+                                        <div class="form-group">
                                             <label class="small mb-1">Username</label>
                                             {{ form.username }}
                                         </div>
@@ -105,7 +99,7 @@
                         </div>
                         <div class="card-footer text-center">
                             <div class="small">
-                                <a href="{% url 'users-register' %}">Don't have an account yet? Go to signup</a><br>
+                                <a href="{% url 'registration' %}">Don't have an account yet? Go to signup</a><br>
                                 <a href="{% url 'password_reset' %}"><i>Forgot Password?</i></a>
                             </div>
                         </div>

@@ -10,6 +10,7 @@ from .forms import InventoryUpdateForm, AddInventoryForm
 from django.contrib import messages
 from django_pandas.io import read_frame
 import pandas as pd
+from django.contrib.auth import logout
 import plotly
 import plotly.express as px
 import json
@@ -36,8 +37,6 @@ def home(request):
         request.session['cart_count'] = 0
     return render(request, 'accounts/home.html')
 
-def logout(request):
-    return render(request, 'users/login.html')
 
 class StockListView(FilterView):
     filterset_class = StockFilter
@@ -217,30 +216,15 @@ def marketing(request):
     context = {}
     return render(request, 'accounts/marketing.html', context)
 
+login_required
 def profile(request):
     context = {}
     return render(request, 'accounts/profile.html', context)
 
 login_required
-def profile(request):
-        
-    return render(request, 'accounts/profile.html')
-
-login_required
 def about(request):
     context = {}
     return render(request, 'accounts/about.html', context)
-
-def is_farmer(user):
-    return user.groups.filter(name='Farmers').exists()
-
-@login_required
-@user_passes_test(is_farmer, login_url='/accounts/login/')
-def farmer_dashboard(request):
-    # Your farmer-specific view logic
-    return render(request, 'accounts/farmer_dashboard.html')
-
-
 
 #Search for something
 @login_required
@@ -302,11 +286,10 @@ def subscription(request):
 
     return render(request, 'accounts/subscription.html')
 
-from django.contrib.auth import logout
 
 @login_required
 def logout(request):
-    return render(request, 'system/login.html')
+    return render(request, 'users/login.html')
 
 def analyze_sales_data(request):
     # Get the data from the Inventory model

@@ -28,7 +28,7 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('accounts/', include('accounts.urls')),
     path('transactions/', include('transactions.urls')),
-    path('user', include('user.urls')),
+    path('user/', include('user.urls')),
     path('orders/', include('orders.urls')),
 
     path('', CustomLoginView.as_view(redirect_authenticated_user=True, template_name='users/login.html',
@@ -48,7 +48,7 @@ urlpatterns = [
 
     path('password-change/', ChangePasswordView.as_view(), name='password_change'),
 
-    re_path(r'^oauth/', include('social_django.urls', namespace='social')),
+    # re_path(r'^oauth/', include('social_django.urls', namespace='social')),
 
 ]
 
