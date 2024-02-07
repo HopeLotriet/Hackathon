@@ -9,6 +9,7 @@ class Profile(models.Model):
 
     avatar = models.ImageField(default='default.jpg', upload_to='profile_images')
     bio = models.TextField()
+    address = models.CharField(max_length=100, blank=True)
     phone_number = PhoneNumberField(null=True, blank=True)
 
     def __str__(self):

@@ -10,7 +10,6 @@ from .forms import InventoryUpdateForm, AddInventoryForm
 from django.contrib import messages
 from django_pandas.io import read_frame
 import pandas as pd
-from django.contrib.auth import logout
 import plotly
 import plotly.express as px
 import json
@@ -217,11 +216,6 @@ def marketing(request):
     return render(request, 'accounts/marketing.html', context)
 
 login_required
-def profile(request):
-    context = {}
-    return render(request, 'accounts/profile.html', context)
-
-login_required
 def about(request):
     context = {}
     return render(request, 'accounts/about.html', context)
@@ -285,11 +279,6 @@ def subscription(request):
         return HttpResponseRedirect(reverse('subscription'))
 
     return render(request, 'accounts/subscription.html')
-
-
-@login_required
-def logout(request):
-    return render(request, 'users/login.html')
 
 def analyze_sales_data(request):
     # Get the data from the Inventory model
