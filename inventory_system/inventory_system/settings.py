@@ -8,10 +8,11 @@ https://docs.djangoproject.com/en/5.0/topics/settings/
 
 For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
+
 """
 
 from pathlib import Path
-import os
+import os, sys
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
@@ -35,7 +36,7 @@ SECRET_KEY = 'django-insecure-!ep!c0a=y@*l)l0#1z2@a#&==bj!!j&lya+sud7t&cm!3mkmj2
 # DEBUG = False
 DEBUG = True
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'yourdomain.com', 'youripaddress', 'https://farmfresh-kmq6.onrender.com']
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'yourdomain.com', 'youripaddress', 'farmfresh-kmq6.onrender.com']
 
 
 # Application definition
@@ -50,6 +51,7 @@ INSTALLED_APPS = [
     'accounts',
     'user',
     'transactions',
+    'orders',
     'fontawesomefree',
     'widget_tweaks',                            # uses 'django-widget-tweaks' app
     'crispy_forms',                             # uses 'django-crispy-forms' app
@@ -150,8 +152,7 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
 
-STATIC_ROOT = BASE_DIR / 'staticfiles'
-# STATIC_ROOT = os.path.join(BASE_DIR, 'static')
+STATIC_ROOT = 'staticfiles/'
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
 
@@ -175,5 +176,6 @@ LOW_QUANTITY = 5
 
 
 # login redirect path settings
-LOGIN_REDIRECT_URL = "/accounts/"
-LOGIN_URL = "login"
+LOGIN_REDIRECT_URL = '/accounts/'
+LOGIN_URL = 'login'
+

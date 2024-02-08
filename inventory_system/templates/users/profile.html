@@ -24,6 +24,7 @@
     {% endif %}
 
     <h1 class="text-center mb-4">Your profile</h1>
+    
         <div class="card p-3 mx-auto" style="max-width: 700px;">
             <div class="row my-3">
                 <img class="rounded-circle account-img" src="{{ user.profile.avatar.url }}" alt="Avatar" style="cursor: pointer; max-width: 200px;">
@@ -41,6 +42,9 @@
                   </p>
                   <p class="card-text">
                     <strong>Phone number:</strong> {{profile.phone_number}}
+                  </p>
+                  <p class="card-text">
+                    <strong>Address:</strong> {{user.address}}
                   </p>
                 </div>
               </div>

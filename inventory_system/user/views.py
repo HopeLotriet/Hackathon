@@ -10,13 +10,15 @@ from user.forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileFor
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import Group
 from django.views.decorators.csrf import csrf_protect
-from accounts.models import Invoice, cart, cart_records, customerOrderHistory, OrderAmount
+from django.contrib.auth import logout
+from orders.models import Invoice, cart, cart_records, customerOrderHistory, OrderAmount
 
-
+@login_required
 def logout(request):
     return render(request, 'users/login.html')
 
 # custom 404 view
+@login_required
 def custom_404(request, exception):
     return render(request, 'users/404.html', status=404)
 
@@ -44,7 +46,7 @@ class RegisterView(View):
         form = self.form_class(request.POST)
 
         if form.is_valid():
-            form.save()
+            user = form.save(commit=False)  # Save the form data but don't commit to the database yet
             
             role = form.cleaned_data['role']
 
@@ -54,10 +56,8 @@ class RegisterView(View):
                 group_name = 'customer'
             elif role == 'admin':
                 group_name = 'admin'
-            elif role == 'supplier':
-                group_name = 'supplier'
-            elif role == 'accountant':
-                group_name = 'accountant'
+            elif role == 'farmer':
+                group_name = 'farmer'
 
             try:
                 group = Group.objects.get(name=group_name)
@@ -65,7 +65,13 @@ class RegisterView(View):
                 # Create the group if it doesn't exist
                 group = Group.objects.create(name=group_name)
 
-            form.instance.groups.add(group)
+            if role == 'admin':
+                user.is_superuser = True
+                user.is_staff = True
+
+            user.save()  # Now commit the changes to the database
+
+            user.groups.add(group)  # Add the user to the group after saving
 
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}')
@@ -73,7 +79,6 @@ class RegisterView(View):
             return redirect(to='login')
 
         return render(request, self.template_name, {'form': form})
-
 
 # Class based view that extends from the built in login view to add a remember me functionality
 class CustomLoginView(LoginView):
@@ -107,7 +112,7 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
 class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
     template_name = 'users/change_password.html'
     success_message = "Successfully Changed Your Password"
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('login')
 
 
 @login_required

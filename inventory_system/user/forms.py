@@ -27,6 +27,11 @@ class RegisterForm(UserCreationForm):
                              widget=forms.TextInput(attrs={'placeholder': 'Email',
                                                            'class': 'form-control',
                                                            }))
+    address = forms.CharField(max_length=100,
+                                required=True,
+                                widget=forms.TextInput(attrs={'placeholder': 'Address',
+                                                                'class': 'form-control',
+                                                                }))
     password1 = forms.CharField(max_length=50,
                                 required=True,
                                 widget=forms.PasswordInput(attrs={'placeholder': 'Password',
@@ -42,16 +47,15 @@ class RegisterForm(UserCreationForm):
                                                                   'id': 'password',
                                                                   }))
     ROLE_CHOICES = (
-        ('staff', 'Staff'),
+        ('admin', 'Admin'),
         ('customer', 'Customer'),
-        ('supplier', 'Supplier'),
-        ('accountant', 'Accountant')
+        ('farmer', 'Farmer'),
     )
     role = forms.ChoiceField(choices=ROLE_CHOICES)
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username', 'email', 'role', 'password1', 'password2']
+        fields = ['first_name', 'last_name', 'username', 'email', 'address', 'role', 'password1', 'password2']
 
 
 class LoginForm(AuthenticationForm):

@@ -5,6 +5,6 @@ from user.views import CustomLoginView, ResetPasswordView, ChangePasswordView
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
-    path('register/', RegisterView.as_view(), name='users-register'),
+    path('register/', RegisterView.as_view(), name='registration'),
     path('profile/', profile, name='users-profile'),
 ]
