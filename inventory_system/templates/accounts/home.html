@@ -334,17 +334,23 @@
                 </ul>
 
 
-                <form class="d-flex" method="POST" action="{% url 'search' %}">
-                    {% csrf_token %}
-                    <input class="form-control me-2" type="search" placeholder="What are you looking for?"
-                        aria-label="Search" name="searched">
-                    <button class="btn custom-search-btn" type="submit">Search</button>
-                </form>
+                <div>
+                    <form class="d-flex" method="POST" action="{% url 'search' %}">
+                        {% csrf_token %}
+                        <input class="form-control me-2" type="search" placeholder="What are you looking for?"
+                            aria-label="Search" name="searched">
+                        <button class="btn custom-search-btn" type="submit">Search</button>
+                    </form>
+                </div>
 
-                <form action="{% url 'logout' %}" method="post" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn custom-logout-btn">Logout</button>
-                </form>
+                <div>
+
+                    <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn custom-logout-btn">Logout</button>
+                    </form>
+
+                </div>
 
             </div>
         </div>
@@ -678,7 +684,7 @@
         <div class="container">
 
             <div class="col-md-12 text-center">
-                <p>&copy; 2023 FarmFresh. All rights reserved.</p>
+                <p>&copy; 2024 FarmFresh. All rights reserved.</p>
                   </div>
             </div>
 
