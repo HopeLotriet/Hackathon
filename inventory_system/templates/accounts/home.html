@@ -42,6 +42,10 @@
         filter: brightness(0.5);
     }
 
+    .nav-link {
+    font-size: 18px;
+    }
+
     .custom-border {
         border: 1px solid black;
         padding: 10px;
@@ -72,19 +76,43 @@
         left: 0;
         bottom: 0;
         right: 0;
-        background: #000;
-        opacity: 0.7;
+        background: rgba(0, 0, 0, 0.5);
+        /* opacity: 0.7; */
     }
 
-    .carousel-caption {
-        bottom: 180px;
+    /* .carousel-caption {
+        /* bottom: 180px;
         padding-left: 100px;
-        padding-right: 100px;
+        padding-right: 100px; */
+        /* bottom: 50%; Adjust the position
+        transform: translateY(50%);
+        text-align: center; /* Align centrally */
+    /* } */ 
+
+    .carousel-caption {
+        bottom: 100px; /* Align at the bottom */
+        left: 20px; /* Align at the left */
+        transform: translateY(50%);
+        text-align: left; /* Align text to the left */
+        padding: 80px 60px; /* Add padding for better appearance */
+        max-width: 80%;
+        z-index: 1;
+    }
+
+    @media (max-width: 768px) {
+        .carousel-caption {
+            bottom: 20px; /* Adjust position for smaller screens */
+            left: 50%; /* Center horizontally */
+            transform: translateX(-50%); /* Center horizontally */
+            text-align: center; /* Align text to the center */
+            padding: 10px; /* Adjust padding for smaller screens */
+            max-width: 90%; /* Limit maximum width of caption for smaller screens */
+        }
     }
 
     .carousel-caption h5 {
-        font-size: 80px;
-        font-weight: 600;
+        font-size: 50px;
+        font-weight: 500;
     }
 
     .slider-btn {
@@ -92,11 +120,21 @@
     }
 
     .slider-btn .btn {
-        background-color: rgb(173, 207, 129);
+        /* background-color: rgb(173, 207, 129);
         color: rgb(0, 0, 0);
         border-radius: 0.5;
         padding: 1.0rem 1.5rem;
-        font-size: 1.5rem;
+        font-size: 1.5rem; */
+        background-color: #4CAF50; /* Change button color */
+        color: #fff;
+        border-radius: 5px; /* Add border-radius for rounded corners */
+        padding: 10px 20px; /* Increase padding for better appearance */
+        font-size: 1.2rem; /* Adjust font size */
+        border: none; /* Remove border */
+    }
+
+    .carousel-caption,.slider-btn {
+        animation: fadeInUp 1s ease forwards; /* Apply animation to both caption and button */
     }
 
     .btn a {
@@ -140,9 +178,9 @@
         }
     }
 
-    .animated-text {
+    /* .animated-text {
         animation: fadeInUp 1.5s ease-out;
-    }
+    } */
 
     .custom-badge {
         height: 20px;
@@ -334,17 +372,24 @@
                 </ul>
 
 
-                <form class="d-flex" method="POST" action="{% url 'search' %}">
-                    {% csrf_token %}
-                    <input class="form-control me-2" type="search" placeholder="What are you looking for?"
-                        aria-label="Search" name="searched">
-                    <button class="btn custom-search-btn" type="submit">Search</button>
-                </form>
+                <div>
+                    <form class="d-flex" method="POST" action="{% url 'search' %}">
+                        {% csrf_token %}
+                        <input class="form-control me-2" type="search" placeholder="What are you looking for?"
+                            aria-label="Search" name="searched">
+                        <button class="btn custom-search-btn" type="submit">Search</button>
+                    </form>
+                </div>
+                <br>
 
-                <form action="{% url 'logout' %}" method="post" style="display: inline;">
-                    {% csrf_token %}
-                    <button type="submit" class="btn custom-logout-btn">Logout</button>
-                </form>
+                <div>
+
+                    <form action="{% url 'logout' %}" method="post" style="display: inline;">
+                        {% csrf_token %}
+                        <button type="submit" class="btn custom-logout-btn">Logout</button>
+                    </form>
+
+                </div>
 
             </div>
         </div>
@@ -595,7 +640,7 @@
                         <p>We showcase our farm's bounty with our intuitive and user-friendly product. Explore a variety
                             of fresh produce sourced directly from local farmers.</p>
                     </div>
-
+    
                     <div class="col-lg-6">
                         <h4 class="mb-3">Inventory Management</h4>
                         <p>We stay on top of our stock levels with real-time inventory tracking. Our system provides
@@ -603,7 +648,7 @@
                             caught off guard.</p>
                     </div>
                 </div>
-
+    
                 <div class="row mt-4">
                     <div class="col-lg-6">
                         <h4 class="mb-3">Order Management</h4>
@@ -611,18 +656,28 @@
                             order status (pending, shipped, delivered), customer details, and order history in one
                             centralized location.</p>
                     </div>
-
+    
                     <div class="col-lg-6">
                         <h4 class="mb-3">Contact Us</h4>
                         <p>If you have any questions or inquiries, feel free to reach out to us. Our dedicated support
                             team is here to assist you.</p>
                         <p>Email: support@freshfarm.com</p>
                         <p>Phone: (011) 456-7890</p>
+                        
                     </div>
+                </div>
+                <!-- Contact us by emailing -->
+                <div class="text-center mt-4">
+                    <a href="mailto:support@freshfarm.com" style="text-decoration: none; color: #333;">
+                        <div style="display: inline-block; padding: 10px; background-color: #f7f7f7; border: 1px solid #ccc; border-radius: 5px;">
+                            <i class="fas fa-envelope" style="font-size: 18px;"></i> Contact Us
+                        </div>
+                    </a>
                 </div>
             </div>
         </div>
     </div>
+    
 
     <!-- Back to Top Button -->
     <div>
@@ -678,23 +733,9 @@
         <div class="container">
 
             <div class="col-md-12 text-center">
-                <p>&copy; 2023 FarmFresh. All rights reserved.</p>
+                <p>&copy; 2024 FarmFresh. All rights reserved.</p>
                   </div>
             </div>
-
-            <div class="col-md-12 text-center">
-                <ul class="list-inline">
-                    <li class="list-inline-item"><a href="#" class="text-white"><i class="fab fa-facebook"></i></a>
-                    </li>
-                    <li class="list-inline-item"><a href="#" class="text-white"><i
-                                class="fa-brands fa-x-twitter"></i></a>
-                    </li>
-                    <li class="list-inline-item"><a href="#" class="text-white"><i class="fab fa-instagram"></i></a>
-                    </li>
-                </ul>
-            </div>
-
-
         </div>
     </footer>
 

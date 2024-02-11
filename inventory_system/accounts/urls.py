@@ -12,6 +12,7 @@ urlpatterns = [
     path("delete/<int:pk>/", login_required(views.delete), name="product_delete"),
     path("add/", login_required(views.add_product), name="product_add"),
     path('marketing/', login_required(views.marketing), name='marketing'),
+    #path('profile/', login_required(views.profile), name='profile'),
     path("dashboard/", login_required(views.dashboard), name="dashboard"),
     path('about/', login_required(views.about), name='about'),
     path('stock/', login_required(views.stock), name='stock'),
