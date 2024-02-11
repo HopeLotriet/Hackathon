@@ -44,7 +44,7 @@
                     <strong>Phone number:</strong> {{profile.phone_number}}
                   </p>
                   <p class="card-text">
-                    <strong>Address:</strong> {{user.address}}
+                    <strong>Address:</strong> {{profile.address}}
                   </p>
                 </div>
               </div>
@@ -105,6 +105,11 @@
                 <div class="form-group">
                   <label class="small mb-1">Bio:</label>
                   {{ profile_form.bio }}
+                </div>
+                <br>
+                <div class="form-group">
+                  <label class="small mb-1">Address:</label>
+                  {{ profile_form.address }}
                 </div>
                 <br>
                 <div class="form-group text-center">

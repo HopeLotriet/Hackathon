@@ -12,6 +12,7 @@ from django.contrib.auth.models import Group
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth import logout
 from orders.models import Invoice, cart, cart_records, customerOrderHistory, OrderAmount
+from django.db import transaction
 
 @login_required
 def logout(request):
@@ -146,3 +147,4 @@ def profile(request):
     cart_records.objects.filter(customer=customer_name).update(customer=request.user.username)
     OrderAmount.objects.filter(customer=customer_name).update(customer=request.user.username)
     return render(request, 'users/profile.html', {'user_form': user_form, 'profile_form': profile_form, 'profile': profile_info, 'user': logged_user})
+    
