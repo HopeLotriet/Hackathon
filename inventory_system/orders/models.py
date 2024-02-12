@@ -30,6 +30,8 @@ class customerOrderHistory(models.Model):
     quantity_ordered = models.PositiveIntegerField(null=True)
     amount_spent = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
     customer_order_status = models.CharField(max_length=100, default='pending', null=True)
+    payment_method = models.CharField(max_length=100, default="")
+    payment_status = models.CharField(max_length=100, default="")
 
     def __str__(self) -> str:
         return str(self.order_id)
@@ -41,13 +43,14 @@ class cart_records(models.Model):
     quantity = models.IntegerField(null=False, blank=False)
     total_amount = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=False)
     customer = models.CharField(max_length=100, default="")
-     
+    
     def __str__(self) -> str:
         return str(self.item)
     
 class Order(models.Model):
     ORDER_STATUS_CHOICES = [
         ('pending', 'Pending'),
+        ('approved', 'Approved'),
         ('shipped', 'Shipped'),
         ('delivered', 'Delivered'),
     ]
@@ -57,29 +60,30 @@ class Order(models.Model):
     product = models.CharField(max_length=100, default="")
     quantity_ordered = models.PositiveIntegerField(null=True)
     amount_spent = models.DecimalField(max_digits=19, decimal_places=2, null=True, blank=True)
-    
+    payment_method = models.CharField(max_length=100, default="")
+    payment_status = models.CharField(max_length=100, default="")
     order_status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='pending')
 
     def __str__(self):
         return f"Order #{self.id}- {self.order_id} - {self.product} - {self.customer} - {self.quantity_ordered} units - Status: {self.order_status}"
     
 class Invoice(models.Model):
-    ORDER_STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('shipped', 'Shipped'),
-        ('delivered', 'Delivered'),
-    ]
 
     PAYMENT_STATUS_CHOICES = [
-        ('pending', 'Pending'),
-        ('paid', 'Paid'),
-        ('overdue', 'Overdue'),
+        ('Pending', 'Pending'),
+        ('Paid', 'Paid'),
+        ('Overdue', 'Overdue'),
     ]
 
     STATUS_CHOICES = [
         ('draft', 'Draft'),
         ('sent', 'Sent'),
         ('paid', 'Paid'),
+    ]
+
+    PAYMENT_METHOD_CHOICES =[
+        ('Debit/Credit card', 'Debit/Credit Card'),
+        ('Cash Deposit', 'Cash Deposit')
     ]
 
     order = models.CharField(max_length=255, default="----")
@@ -90,9 +94,11 @@ class Invoice(models.Model):
     billing_address = models.TextField()
     billing_email = models.EmailField()
 
-    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='pending')
-    payment_method = models.CharField(max_length=50, blank=True, null=True)
+    payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Pending')
+    payment_method = models.CharField(max_length=20, choices=PAYMENT_METHOD_CHOICES, default='')
     payment_due_date = models.DateField(blank=True, null=True)
+    payment_proof = models.FileField(upload_to='payment_proof/', null=True, blank=True)
+    paid_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True)
 
     notes = models.TextField(blank=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')

@@ -38,6 +38,9 @@
                 <th scope="col">Total order quantity</th>
                 <th scope="col"> Payment amount</th>
                 <th scope="col">Order status</th>
+                <th scope="col"> Payment method</th>
+                <th scope="col">Payment status</th>
+                <th></th>
                 <th></th>
             </tr>
             </thead>
@@ -52,8 +55,13 @@
                 <td scope="row">{{ order.quantity_ordered }} units</td>
                 <th scope="row">R{{order.amount_spent}}</th>
                 <td scope="row">{{order.customer_order_status}}</td>
+                <td scope="row">{{order.payment_method}}</td>
+                <td scope="row">{{order.payment_status}}</td>
                 <td scope="row">
                     <a href="{% url 'return_order' order.id %}" class="btn btn-danger btn-sm mb-2">Return order</a>
+                </td>
+                <td scope="row">
+                    <a href="{% url 'upload_proof_payment' order.id %}" class="btn btn-danger btn-sm mb-2">Upload proof of payment</a>
                 </td>
             </tr>
             {% endfor %}

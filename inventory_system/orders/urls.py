@@ -24,5 +24,7 @@ urlpatterns = [
     path('confirm_order/<int:pk>/', login_required(views.confirm_order), name='confirm_order'),
     path('confirmation_email/<int:pk>/', login_required(views.confirmation_email), name='confirmation_email'),
     path('invoice_history', login_required(views.invoice_history), name='invoice_history'),
+    path('pay_now/<int:pk>/', login_required(views.pay_now), name='pay_now'),
+    path('upload_proof_payment/<int:pk>/', login_required(views.upload_proof_payment), name='upload_proof_payment'),
 ]
 

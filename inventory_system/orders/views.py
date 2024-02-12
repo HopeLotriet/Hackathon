@@ -5,7 +5,7 @@ from django.contrib import messages
 from accounts.models import Inventory
 from .models import Order, Invoice , cart, OrderAmount, customerOrderHistory, cart_records
 from django.shortcuts import get_object_or_404
-from .forms import UpdateStatusForm, InvoiceForm
+from .forms import UpdateStatusForm, InvoiceForm, payNowForm, uploadPaymentForm
 from django.contrib import messages
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -18,7 +18,7 @@ from django.template.loader import get_template
 from datetime import datetime
 from datetime import timedelta
 
-# Create your views here.
+
 
 #adding items to cart for customers
 @login_required
@@ -212,9 +212,9 @@ def update_order_status(request, order_id):
             form = UpdateStatusForm(request.POST)
                     
             if form.is_valid():
-                current_status = order.order_status
+                pay_status = order.payment_status
             
-                if current_status != 'Order canceled':
+                if pay_status == 'Paid':
                     #update orderlist status
                     new_status = form.cleaned_data['new_status']
                     order.order_status = new_status
@@ -223,6 +223,8 @@ def update_order_status(request, order_id):
                     #update customer order status 
                     if new_status == 'shipped':
                         customer_order.customer_order_status = 'shipped'
+                    elif new_status == 'approved':
+                        customer_order.customer_order_status = 'approved'
                     elif new_status == 'delivered':
                         customer_order.customer_order_status = 'delivered'
                     
@@ -309,12 +311,29 @@ def return_order(request, order_id):
 
                 #fetch product from order history and inventory and update their statuses
                 returning_orderlist = get_object_or_404(Order, order_id=current_order.order_id)
-
                 returning_orderlist.order_status = "Order canceled"
-                returning_orderlist.save()
-        
                 current_order.customer_order_status = "Order canceled"
+               
+                # Change payment status on invoice, order and customer order history if its paid
+                invoice = get_object_or_404(Invoice, order=current_order.order_id)
+
+                refund = "Refund"
+                no_refund = "Not eligible for refund"
+                if current_order.payment_status == "Paid":
+                    invoice.payment_status = refund
+                    current_order.payment_status = refund
+                    returning_orderlist.payment_status = refund
+
+                elif current_order.payment_status == "Pending":
+                    invoice.payment_status = no_refund
+                    current_order.payment_status = no_refund
+                    returning_orderlist.payment_status = no_refund
+                
+                returning_orderlist.save() 
                 current_order.save()
+                invoice.save()
+
+                print(f"from order: {returning_orderlist.order_id}- {returning_orderlist.payment_status}, from customer_order:{current_order.order_id}-{current_order.payment_status}, from invoice: {invoice.order}-{invoice.payment_status}- {invoice.id}")
                 messages.success(request, "Order canceled!")
                 
         else:
@@ -372,13 +391,17 @@ def create_invoice(request):
 
 login_required
 def order_details(request):
-    # Get the last created invoice
-    invoice = Invoice.objects.all().last()
-
+    
     #fetch required information
+    # Address, payment method and deliver notes placeholder
+    address = "******************"
+    method = "*******************"
+    notes = "*******************************************************************************"
+
     #billing name
     logged_user = request.user
     customer_name = f"{logged_user.first_name} {logged_user.last_name}"
+
     # order id
     prefix = 'ORDER'
     timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
@@ -395,15 +418,37 @@ def order_details(request):
     order_amount = OrderAmount.objects.get(customer=logged_user)
     payment_amount = order_amount.amount_due
 
-    # Update invoice entry
-    invoice.order = order_id
-    invoice.billing_name = customer_name
-    invoice.billing_email = email
-    invoice.payment_due_date = due_date
-    invoice.total_amount = payment_amount
-    invoice.save()
-    return redirect('invoice_detail')
+    # Create new invoice
+    invoice = Invoice(order=order_id, 
+                      billing_name=customer_name, 
+                      billing_email=email, 
+                      payment_due_date=due_date, 
+                      total_amount=payment_amount,
+                      billing_address=address,
+                      payment_method=method,
+                      notes=notes
+                      )
 
+    invoice.save()
+    #save cart entries before clearing
+    existing_cart = cart.objects.filter(customer=logged_user)
+
+    for item in existing_cart:
+            item_name = item.item
+            item_cost = item.cost_per_item
+            item_quantity = item.quantity
+            price = item.total_amount
+
+            cart_record = cart_records(
+                item = item_name,
+                cost_per_item =item_cost,
+                quantity=item_quantity,
+                total_amount=price,
+                customer = logged_user
+            )
+            cart_record.save()
+
+    return redirect('invoice_detail')
 
 @login_required
 def invoice_detail(request):
@@ -538,7 +583,6 @@ def confirm_order(request, pk):
     invoice = get_object_or_404(Invoice, pk=pk)
     order = invoice.order
    
-
     #customer name
     customer_name =invoice.billing_name
 
@@ -560,7 +604,9 @@ def confirm_order(request, pk):
         customer=customer_name,
         product=all_items,
         quantity_ordered=total_quantity,
-        amount_spent=amount
+        amount_spent=amount,
+        payment_method = invoice.payment_method,
+        payment_status = invoice.payment_status
         )
     order_entry.save()
     
@@ -569,30 +615,26 @@ def confirm_order(request, pk):
         product=all_items,
         quantity_ordered=total_quantity,
         amount_spent=amount,
-        customer=request.user.username
+        customer=request.user.username,
+        payment_method = invoice.payment_method,
+        payment_status = invoice.payment_status
     )
     customer_order_entry.save()
 
-    #Generate invoice pdf
-    pdf_response = invoice_pdf(request, pk)
-
-    if pdf_response.status_code == 200:
-        pdf_success_message = "Order confirmed successfully."
-        request.session['success_message'] = pdf_success_message
-
-    #clear cart
-    cart_table = cart.objects.filter(customer=logged_user)
-    cart_table.delete()
-
-    order_amount = OrderAmount.objects.filter(customer=logged_user)
-    order_amount.delete()
-    request.session['cart_count'] = 0
+    if invoice.payment_method == "Debit/Credit card":
+        return redirect("pay_now", pk=pk)
     
-    return redirect("confirmation_email", pk=pk)
+    else:
+        return redirect("confirmation_email", pk=pk)
 
 #send confirmation email with invoice attached to the customer
 @login_required
 def confirmation_email(request, pk):
+
+    #Generate invoice pdf
+    invoice_pdf(request, pk)
+
+    logged_user = request.user
     instruction = "Return to Products"
 
     #Fetch the invoice from database
@@ -610,7 +652,7 @@ def confirmation_email(request, pk):
     Thank you for placing your order with FarmFresh.
 
     Please note that your order {status}.
-    Attached is the invoice concerning your order. Please note the payment due date. 
+    Attached is the invoice concerning your order. 
 
     Best regards,
     FarmFresh
@@ -629,10 +671,46 @@ def confirmation_email(request, pk):
     # Send the email
     email.send()
 
-    pdf_success_message = request.session.pop('success_message', None)
+    #   clear cart
+    cart_table = cart.objects.filter(customer=logged_user)
+    cart_table.delete()
 
+    order_amount = OrderAmount.objects.filter(customer=logged_user)
+    order_amount.delete()
+    request.session['cart_count'] = 0
+
+    note = ""
+    if invoice.payment_status == "Pending":
+        note = '''  Ensure to settle the payment by the due date specified in the invoice. 
+                    Please note that your order can only be shipped and delivered once the payment is complete.
+                    Should you not settle the payment by the due date, the order will be canceled.
+                    Make sure to upload proof of payment.
+                    Payments can be done through EFT or cash deposits at any Discovery Bank ATM. 
+                    Use your unique invoice id as reference. 
+                    FarmFresh banking details are specified in the invoice.'''
+        
+    elif invoice.payment_status == "Paid":
+        note = '''  Payment successful!
+                    Your order will be delivered in approximately 3-5 working days.
+                    You will be notified when the order has been shipped and delivered.'''
+
+    context = {
+        'instruction': instruction,
+        'note': note    
+        }
+    
+    #update payment status if card is chosen
+    if invoice.payment_method == "Debit/Credit card":
+        order = get_object_or_404(Order, order_id=invoice.order)
+        order.payment_status = "Paid"
+        order.save()
+
+        customer_order = get_object_or_404(customerOrderHistory, order_id=invoice.order)
+        customer_order.payment_status = "Paid"
+        customer_order.save()
+    
     messages.success(request, "Checkout successful")
-    return render(request, 'orders/confirm_order.html', {'instruction': instruction, "pdf_message":pdf_success_message})
+    return render(request, 'orders/confirm_order.html', context)
 
 # for cleaning trial runs of database
 @login_required
@@ -645,11 +723,48 @@ def invoicing(request):
 
     return render(request, 'orders/invoicing.html', context)
 
-
-
 @login_required
 def invoice_history(request):
     invoice_history = Invoice.objects.all()
     invoice_history.delete()
     return redirect("order_list")
 
+def pay_now(request, pk): 
+    if request.method == "POST":
+        form = payNowForm(request.POST)
+        if form.is_valid():
+            invoice = get_object_or_404(Invoice, pk=pk)
+            invoice.payment_status = "Paid"
+            invoice.save()
+
+            form.save()
+            return redirect('confirmation_email', pk=pk)
+    else:
+        form = payNowForm()
+    return render(request, 'orders/payment.html', {'form': form})
+    
+def upload_proof_payment(request, pk):
+    logged_user= request.user
+
+    if request.method == "POST":
+        form = uploadPaymentForm(request.POST, request.FILES)
+        if form.is_valid():
+            customer_order = get_object_or_404(customerOrderHistory, pk=pk)
+            customer_order.payment_status = "Paid"
+            customer_order.save()
+
+            order = get_object_or_404(Order, order_id=customer_order.order_id)
+            order.payment_status = "Paid"
+            order.save()
+
+            invoice = get_object_or_404(Invoice, order=customer_order.order_id)
+            invoice.payment_status = "Paid"
+            invoice.save()
+
+            print(f"from invoice: {invoice.order}, from order: {order.order_id}, from customer order: {customer_order.order_id}, invoice number selected:{invoice.id}")
+            form.save()
+            messages.success(request, "Upload successful")
+            return redirect('order_history')
+    else:
+        form = uploadPaymentForm()
+    return render(request, 'orders/upload_payment.html', {'form': form})

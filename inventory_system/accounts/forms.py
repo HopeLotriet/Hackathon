@@ -56,3 +56,4 @@ class InvoiceForm(forms.ModelForm):
 
 class SalesDataUploadForm(forms.Form):
     sales_data = forms.FileField()
+

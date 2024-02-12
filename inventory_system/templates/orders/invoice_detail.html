@@ -11,8 +11,7 @@
     
         <div class="row">
             <form class="table-bordered custom-border">
-    
-
+               
                 <div class="container bg">
             
                     <br>
@@ -190,8 +189,10 @@
             </form>
             
         
-         <!-- Confirm order to generate pdf and send email to customer -->
+         
          <div class="text-center">
+              
+        <!-- Confirm order to generate pdf and send email to customer -->
           <span class="m-3"><a class="btn btn-success"  href="{% url 'confirm_order' invoice.id %}">Confirm order</a></span>
          <span class="m-3"><a class="btn btn-warning" href="{% url 'edit_invoice' invoice.id %}">Edit invoice</a></span>
          <span class="m-3"><a class="btn btn-danger" href="{% url 'delete_invoice' invoice.id %}">Cancel order</a></span>  
@@ -204,4 +205,5 @@
 <br>
 <br>
 <br>
+
 {% endblock %}
