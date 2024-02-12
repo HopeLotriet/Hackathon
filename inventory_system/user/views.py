@@ -10,13 +10,16 @@ from user.forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileFor
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import Group
 from django.views.decorators.csrf import csrf_protect
+from django.contrib.auth import logout
 from orders.models import Invoice, cart, cart_records, customerOrderHistory, OrderAmount
+from django.db import transaction
 
-
+@login_required
 def logout(request):
     return render(request, 'users/login.html')
 
 # custom 404 view
+@login_required
 def custom_404(request, exception):
     return render(request, 'users/404.html', status=404)
 
@@ -110,7 +113,7 @@ class ResetPasswordView(SuccessMessageMixin, PasswordResetView):
 class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
     template_name = 'users/change_password.html'
     success_message = "Successfully Changed Your Password"
-    success_url = reverse_lazy('home')
+    success_url = reverse_lazy('login')
 
 
 @login_required
@@ -144,3 +147,4 @@ def profile(request):
     cart_records.objects.filter(customer=customer_name).update(customer=request.user.username)
     OrderAmount.objects.filter(customer=customer_name).update(customer=request.user.username)
     return render(request, 'users/profile.html', {'user_form': user_form, 'profile_form': profile_form, 'profile': profile_info, 'user': logged_user})
+    

@@ -46,6 +46,10 @@
         padding: 10px;
     }
 
+    .nav-link {
+    font-size: 18px;
+    }
+
     .header-content h1 {
         margin-left: 10px;
 
@@ -82,17 +86,6 @@
                         <a class="nav-link active text-white" aria-current="page" href="{% url 'home' %}">Home</a>
                     </li>
 
-                    <li class="nav-item">
-                        <a class="nav-link active text-white" href="{% url 'products' %}">Products</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link active text-white" href="{% url 'view_cart' %}">Cart</a>
-                    </li>
-
-                    <li class="nav-item">
-                        <a class="nav-link active text-white" href="{% url 'order_history' %}">Order History</a>
-                    </li>
 
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle active text-white" href="#" id="navbarDropdown" role="button"

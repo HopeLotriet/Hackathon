@@ -27,11 +27,7 @@ class RegisterForm(UserCreationForm):
                              widget=forms.TextInput(attrs={'placeholder': 'Email',
                                                            'class': 'form-control',
                                                            }))
-    address = forms.CharField(max_length=100,
-                                required=True,
-                                widget=forms.TextInput(attrs={'placeholder': 'Address',
-                                                                'class': 'form-control',
-                                                                }))
+    
     password1 = forms.CharField(max_length=50,
                                 required=True,
                                 widget=forms.PasswordInput(attrs={'placeholder': 'Password',
@@ -55,7 +51,7 @@ class RegisterForm(UserCreationForm):
 
     class Meta:
         model = User
-        fields = ['first_name', 'last_name', 'username', 'email', 'address', 'role', 'password1', 'password2']
+        fields = ['first_name', 'last_name', 'username', 'email', 'role', 'password1', 'password2']
 
 
 class LoginForm(AuthenticationForm):
@@ -83,8 +79,10 @@ class UpdateUserForm(forms.ModelForm):
     username = forms.CharField(max_length=100,
                                required=True,
                                widget=forms.TextInput(attrs={'class': 'form-control'}))
+    
     email = forms.EmailField(required=True,
                              widget=forms.TextInput(attrs={'class': 'form-control'}))
+    
 
     class Meta:
         model = User
@@ -95,8 +93,10 @@ class UpdateProfileForm(forms.ModelForm):
     avatar = forms.ImageField(widget=forms.FileInput(attrs={'class': 'form-control-file'}))
     bio = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 5}))
     phone_number = PhoneNumberField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+27 XX XXX XXXX'}))
+    address = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '1234 Main St, City, Country'}))
+    
 
     class Meta:
         model = Profile
-        fields = ['avatar', 'bio', 'phone_number']
+        fields = ['avatar', 'bio', 'phone_number', 'address']
 
