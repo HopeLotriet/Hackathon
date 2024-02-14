@@ -69,7 +69,12 @@
                                                 <tr>
                                                     <td class="inner-box font-weight-bold" style="width: 25%;">PAYMENT METHOD</td>
                                                     <td class="inner-box align-middle" style="width: 25%;">
-                                                        {{ invoice.payment_method }}
+                                                        {% if invoice.payment_method == '*******************' %}
+                                                            <a href="{% url 'edit_invoice' invoice.id %}">Choose payment method</a>
+                                                        {% else %}
+                                                            {{ invoice.payment_method }}
+                                                            <a href="{% url 'edit_invoice' invoice.id %}">Change</a>
+                                                        {% endif %}
                                                     </td>
                                                 </tr>
                                             
@@ -129,14 +134,6 @@
                                                     </td>
                                                 </tr>
                                                 <tr>
-                                                    <td class="inner-box font-weight-bold" style="width: 12%; text-align: center;" colspan="5" ></td>
-                                                </tr>
-                                                    <tr>
-                                                        <td class="i font-weight-bold" style="width: 12%;">Delivery Notes</td>
-                                                        <td class=" align-middle" style="width: 12%;" colspan="4">{{ invoice.notes }}</td>
-                                                    </tr>
-            
-                                                    <tr>
                                                         <td class="i font-weight-bold" colspan="5" style="width: 12%;"></td>
                                                         
                                                     </tr>
@@ -193,8 +190,7 @@
          <div class="text-center">
               
         <!-- Confirm order to generate pdf and send email to customer -->
-          <span class="m-3"><a class="btn btn-success"  href="{% url 'confirm_order' invoice.id %}">Confirm order</a></span>
-         <span class="m-3"><a class="btn btn-warning" href="{% url 'edit_invoice' invoice.id %}">Edit invoice</a></span>
+        <span class="m-3"><a class="btn btn-success"  href="{% url 'confirm_order' invoice.id %}">Confirm order</a></span>
          <span class="m-3"><a class="btn btn-danger" href="{% url 'delete_invoice' invoice.id %}">Cancel order</a></span>  
          </div>
          

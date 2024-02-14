@@ -4,8 +4,9 @@ from django.http import HttpResponse
 from django.contrib import messages
 from accounts.models import Inventory
 from .models import Order, Invoice , cart, OrderAmount, customerOrderHistory, cart_records
+from user.models import Profile
 from django.shortcuts import get_object_or_404
-from .forms import UpdateStatusForm, InvoiceForm, payNowForm, uploadPaymentForm
+from .forms import UpdateStatusForm, InvoiceForm, uploadPaymentForm
 from django.contrib import messages
 from django.conf import settings
 from django.core.mail import EmailMessage
@@ -393,14 +394,20 @@ login_required
 def order_details(request):
     
     #fetch required information
-    # Address, payment method and deliver notes placeholder
-    address = "******************"
+    #address, payment method and deliver notes placeholder
+    address= "*******************"
     method = "*******************"
     notes = "*******************************************************************************"
 
+    
     #billing name
     logged_user = request.user
     customer_name = f"{logged_user.first_name} {logged_user.last_name}"
+    
+    #Address
+    if Profile.objects.filter(user_id=logged_user.id).exists():
+        address = get_object_or_404(Profile, user_id=logged_user.id).address
+        print(address)
 
     # order id
     prefix = 'ORDER'
@@ -447,8 +454,8 @@ def order_details(request):
                 customer = logged_user
             )
             cart_record.save()
-
-    return redirect('invoice_detail')
+    pk=Invoice.objects.all().last().id
+    return redirect('edit_invoice', pk)
 
 @login_required
 def invoice_detail(request):
@@ -621,11 +628,7 @@ def confirm_order(request, pk):
     )
     customer_order_entry.save()
 
-    if invoice.payment_method == "Debit/Credit card":
-        return redirect("pay_now", pk=pk)
-    
-    else:
-        return redirect("confirmation_email", pk=pk)
+    return redirect("confirmation_email", pk=pk)
 
 #send confirmation email with invoice attached to the customer
 @login_required
@@ -699,16 +702,6 @@ def confirmation_email(request, pk):
         'note': note    
         }
     
-    #update payment status if card is chosen
-    if invoice.payment_method == "Debit/Credit card":
-        order = get_object_or_404(Order, order_id=invoice.order)
-        order.payment_status = "Paid"
-        order.save()
-
-        customer_order = get_object_or_404(customerOrderHistory, order_id=invoice.order)
-        customer_order.payment_status = "Paid"
-        customer_order.save()
-    
     messages.success(request, "Checkout successful")
     return render(request, 'orders/confirm_order.html', context)
 
@@ -729,27 +722,14 @@ def invoice_history(request):
     invoice_history.delete()
     return redirect("order_list")
 
-def pay_now(request, pk): 
-    if request.method == "POST":
-        form = payNowForm(request.POST)
-        if form.is_valid():
-            invoice = get_object_or_404(Invoice, pk=pk)
-            invoice.payment_status = "Paid"
-            invoice.save()
-
-            form.save()
-            return redirect('confirmation_email', pk=pk)
-    else:
-        form = payNowForm()
-    return render(request, 'orders/payment.html', {'form': form})
     
 def upload_proof_payment(request, pk):
-    logged_user= request.user
-
+    customer_order = get_object_or_404(customerOrderHistory, pk=pk)
+    
     if request.method == "POST":
         form = uploadPaymentForm(request.POST, request.FILES)
         if form.is_valid():
-            customer_order = get_object_or_404(customerOrderHistory, pk=pk)
+            
             customer_order.payment_status = "Paid"
             customer_order.save()
 

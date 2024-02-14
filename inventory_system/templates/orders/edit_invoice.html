@@ -12,13 +12,13 @@
             <div class="col-md-8">
                 <div class="card">
                     <div class="card-header text-center">
-                        <h1>Edit Invoice</h1>
+                        <h1>Choose payment method</h1>
                     </div>
                     <div class="card-body">
                         <form method="post" enctype="multipart/form-data">
                             {% csrf_token %}
                             {{ form.as_p }}
-                            <button type="submit" class="btn btn-primary">Update Invoice</button>
+                            <button type="submit" class="btn btn-primary">Submit</button>
                         </form>
                     </div>
                 </div>
