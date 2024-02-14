@@ -6,14 +6,13 @@ from django.contrib import messages
 from .models import Inventory, SalesData
 from orders.models import OrderAmount
 from django.shortcuts import get_object_or_404
-from .forms import InventoryUpdateForm, AddInventoryForm
-from django.contrib import messages
+from .forms import InventoryUpdateForm, AddInventoryForm, SubscriptionForm
+from django.conf import settings
 from django_pandas.io import read_frame
 import pandas as pd
 import plotly
 import plotly.express as px
 import json
-from django.conf import settings
 from django.core.mail import send_mail
 from barcode.writer import ImageWriter
 from io import BytesIO
@@ -262,27 +261,40 @@ def generate_sales_report(request):
 @login_required
 def subscription(request):
     if request.method == 'POST':
-        email = request.POST.get('emailInput', '')
-        # Add validation for the email if needed
+        form = SubscriptionForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
 
-        # Send confirmation email
-        send_mail(
-            'Subscription Confirmation',
-            'Thank you for subscribing to FarmFresh! You will receive updates and promotions.',
-            settings.EMAIL_HOST_USER,
-            [email],
-            fail_silently=False,
-        )
+            # Send confirmation email
+            send_mail(
+                'Subscription Confirmation',
+                'Thank you for subscribing to FarmFresh! You will receive updates and promotions.',
+                settings.EMAIL_HOST_USER,
+                [email],
+                fail_silently=False,
+            )
 
-        # You can also store the email in the database if you want to manage subscribers
+            # Save email to the database
+            form.save()
 
-        return HttpResponseRedirect(reverse('subscription'))
+            return HttpResponseRedirect(reverse('subscription'))
+    else:
+        form = SubscriptionForm()
 
-    return render(request, 'accounts/subscription.html')
+    return render(request, 'accounts/subscription.html', {'form': form})
 
 def analyze_sales_data(request):
     # Get the data from the Inventory model
     inventories = Inventory.objects.all()
+    
+     # Check if the inventories are empty
+    if not inventories:
+        # Handle case where inventory is empty
+        context = {
+            "message": "No data available to forecast."
+        }
+        return render(request, "accounts/empty_forecast.html", context=context)
+    
     sales_df = pd.DataFrame(list(inventories.values('last_sales_date', 'sales')))
     sales_df['last_sales_date'] = pd.to_datetime(sales_df['last_sales_date'])
 
@@ -294,19 +306,19 @@ def analyze_sales_data(request):
 
     # Continue with the time series analysis
     df = sales_df.set_index('last_sales_date')
-    df_monthly = df.resample('M').sum()
+    df_weekly = df.resample('W').sum()  # Resample weekly instead of monthly
 
     # Perform time series analysis
-    model = ARIMA(df_monthly['sales'], order=(1, 1, 1))
+    model = ARIMA(df_weekly['sales'], order=(1, 1, 1))
     results = model.fit()
 
     # Generate future dates for forecasting
-    future_dates = pd.date_range(start=df_monthly.index[-1], periods=12, freq='M')[1:]
+    future_dates = pd.date_range(start=df_weekly.index[-1], periods=7, freq='W-MON')[1:]  # Forecast for a week
     
     # Get forecasted values and their index
-    forecast = results.get_forecast(steps=12)
+    forecast = results.get_forecast(steps=7)
     forecast_values = forecast.predicted_mean
-    forecast_index = pd.date_range(start=df_monthly.index[-1], periods=13, freq='M')[1:]
+    forecast_index = pd.date_range(start=df_weekly.index[-1], periods=8, freq='W-MON')[1:]
 
     # Create a DataFrame for the forecast data
     forecast_df = pd.DataFrame({'Date': forecast_index, 'Forecast': forecast_values})
@@ -325,3 +337,4 @@ def analyze_sales_data(request):
 
     # Pass the forecast data to the template
     return render(request, 'accounts/analyze_sales_data.html', context)
+

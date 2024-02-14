@@ -35,10 +35,10 @@
         min-height: 100vh;
         opacity: 0.99;
         background-color: rgba(244, 246, 248, 0.934);
+        margin-top: 68px; /* Add a margin to the body to avoid content being hidden behind the fixed navbar */
     }
 
     .dark-image {
-        /* Apply a dark filter to the image */
         filter: brightness(0.5);
     }
 
@@ -61,7 +61,7 @@
     }
 
     .carousel-item {
-        height: 80vh;
+        /* height: 100vh; */
         min-height: 300px;
         background: no-repeat scroll center scroll;
         -webkit-background-size: cover;
@@ -80,18 +80,9 @@
         /* opacity: 0.7; */
     }
 
-    /* .carousel-caption {
-        /* bottom: 180px;
-        padding-left: 100px;
-        padding-right: 100px; */
-        /* bottom: 50%; Adjust the position
-        transform: translateY(50%);
-        text-align: center; /* Align centrally */
-    /* } */ 
-
     .carousel-caption {
-        bottom: 100px; /* Align at the bottom */
-        left: 20px; /* Align at the left */
+        bottom: 150px; /* Align at the bottom */
+        left: 10px; /* Align at the left */
         transform: translateY(50%);
         text-align: left; /* Align text to the left */
         padding: 80px 60px; /* Add padding for better appearance */
@@ -99,13 +90,19 @@
         z-index: 1;
     }
 
+    @media (min-width: 768px) {
+    .carousel-item {
+        height: calc(100vh - 68px); /* Subtract the height of the fixed navbar */
+    }
+}
+
     @media (max-width: 768px) {
         .carousel-caption {
             bottom: 20px; /* Adjust position for smaller screens */
-            left: 50%; /* Center horizontally */
-            transform: translateX(-50%); /* Center horizontally */
-            text-align: center; /* Align text to the center */
-            padding: 10px; /* Adjust padding for smaller screens */
+            left: 50%; 
+            transform: translateX(-50%);
+            text-align: center;
+            padding: 10px; 
             max-width: 90%; /* Limit maximum width of caption for smaller screens */
         }
     }
@@ -115,25 +112,16 @@
         font-weight: 500;
     }
 
-    .slider-btn {
-        margin-top: 30px;
-    }
-
     .slider-btn .btn {
-        /* background-color: rgb(173, 207, 129);
-        color: rgb(0, 0, 0);
-        border-radius: 0.5;
-        padding: 1.0rem 1.5rem;
-        font-size: 1.5rem; */
-        background-color: #4CAF50; /* Change button color */
+        background-color: #4CAF50;
         color: #fff;
-        border-radius: 5px; /* Add border-radius for rounded corners */
-        padding: 10px 20px; /* Increase padding for better appearance */
-        font-size: 1.2rem; /* Adjust font size */
-        border: none; /* Remove border */
+        border-radius: 5px;
+        padding: 10px 20px;
+        font-size: 1.2rem; 
+        border: none; 
     }
 
-    .carousel-caption,.slider-btn {
+    .carousel-caption {
         animation: fadeInUp 1s ease forwards; /* Apply animation to both caption and button */
     }
 
@@ -177,10 +165,6 @@
             transform: translateY(0);
         }
     }
-
-    /* .animated-text {
-        animation: fadeInUp 1.5s ease-out;
-    } */
 
     .custom-badge {
         height: 20px;
@@ -273,11 +257,6 @@
     top: 0;
     width: 100%;
     z-index: 1000;
-    }
-
-        /* Add a margin to the body to avoid content being hidden behind the fixed navbar */
-    body {
-    margin-top: 68px; /* Adjust this value based on your navbar height */
     }
 
 </style>
@@ -415,27 +394,26 @@
             <div class="carousel-inner">
                 <div class="carousel-item active">
                     <img src="{% static 'images/back.jpg' %}" class="d-block w-100" alt="produce">
-                    <div class="carousel-caption d-none d-md-block">
+                    <div class="carousel-caption d-md-block">
                         <h5>Welcome to FarmFresh!</h5>
+                        <h6>Bringing Nature's Best to You</h6>
 
                     </div>
                 </div>
                 <div class="carousel-item">
                     <img src="{% static 'images/image1.jpg' %}" class="d-block w-100" alt="produce">
-                    <div class="carousel-caption d-none d-md-block">
+                    <div class="carousel-caption d-md-block">
                         <h5>Your Fresh Produce Marketplace</h5>
+                        <h6>Witness the journey of our produce, straight from the farm to your table</h6>
 
                     </div>
                 </div>
                 <div class="carousel-item">
                     <img src="{% static 'images/image4.jpg' %}" class="d-block w-100" alt="produce">
-                    <div class="carousel-caption d-none d-md-block">
-                        <h5>Click to see our produce</h5>
-                        <div class="slider-btn">
-
-                            <button class="btn btn-1"><a href="{% url 'products' %}">Products</a></button>
-
-                        </div>
+                    <div class="carousel-caption d-md-block">
+                            <h5>Click <a href="{% url 'products' %}" style="color: white">here</a> to see our produce</h5>
+                            <h6>Explore our ever-expanding catalog of farm-fresh delights, just a click away</h6>
+                     
                     </div>
                 </div>
             </div>

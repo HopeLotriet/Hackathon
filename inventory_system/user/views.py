@@ -147,4 +147,3 @@ def profile(request):
     cart_records.objects.filter(customer=customer_name).update(customer=request.user.username)
     OrderAmount.objects.filter(customer=customer_name).update(customer=request.user.username)
     return render(request, 'users/profile.html', {'user_form': user_form, 'profile_form': profile_form, 'profile': profile_info, 'user': logged_user})
-    

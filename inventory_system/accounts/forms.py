@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm, ChoiceField, Select, Form
-from .models import Inventory, Order
+from .models import Inventory, Order, Subscriber
 from orders.models import Invoice
 
 
@@ -56,4 +56,9 @@ class InvoiceForm(forms.ModelForm):
 
 class SalesDataUploadForm(forms.Form):
     sales_data = forms.FileField()
+
+class SubscriptionForm(forms.ModelForm):
+    class Meta:
+        model = Subscriber
+        fields = ['email']
 
