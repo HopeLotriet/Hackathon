@@ -283,11 +283,6 @@ def subscription(request):
 
     return render(request, 'accounts/subscription.html', {'form': form})
 
-import pandas as pd
-from django.shortcuts import render, redirect
-from statsmodels.tsa.arima.model import ARIMA
-from .models import Inventory  # Assuming Inventory model is defined in models.py
-
 def analyze_sales_data(request):
     # Get the data from the Inventory model
     inventories = Inventory.objects.all()
