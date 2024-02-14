@@ -85,5 +85,12 @@ class SalesData(models.Model):
     date = models.DateField()
     quantity_sold = models.IntegerField()
 
+class Subscriber(models.Model):
+    email = models.EmailField(unique=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.email
+
 
 
