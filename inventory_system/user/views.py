@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.urls import reverse_lazy
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordChangeView
 from django.contrib import messages
@@ -13,6 +13,8 @@ from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth import logout
 from orders.models import Invoice, cart, cart_records, customerOrderHistory, OrderAmount
 from django.db import transaction
+from django.contrib.auth.models import User
+
 
 @login_required
 def logout(request):
@@ -118,32 +120,41 @@ class ChangePasswordView(SuccessMessageMixin, PasswordChangeView):
 
 @login_required
 def profile(request):
-    # view profile details
     logged_user = request.user
     profile_info = Profile.objects.get(user_id=logged_user.id)
-    
-    # edit profile details
+
     if request.method == 'POST':
         user_form = UpdateUserForm(request.POST, instance=request.user)
         profile_form = UpdateProfileForm(request.POST, request.FILES, instance=request.user.profile)
 
         if user_form.is_valid() and profile_form.is_valid():
-
             user_form.save()
             profile_form.save()
-            
-
-        messages.success(request, 'Your profile is updated successfully')
-        return redirect(to='users-profile')
+            messages.success(request, 'Your profile is updated successfully')
+            return redirect(to='users-profile')
     else:
         user_form = UpdateUserForm(instance=request.user)
         profile_form = UpdateProfileForm(instance=request.user.profile)
-    
-    # update order management
+        
+        # update order management
     customer_name = request.session['old_username']
     Invoice.objects.filter(billing_name=customer_name).update(billing_email=logged_user.email)
     cart.objects.filter(customer=customer_name).update(customer=request.user.username)
     customerOrderHistory.objects.filter(customer=customer_name).update(customer=request.user.username)
     cart_records.objects.filter(customer=customer_name).update(customer=request.user.username)
     OrderAmount.objects.filter(customer=customer_name).update(customer=request.user.username)
-    return render(request, 'users/profile.html', {'user_form': user_form, 'profile_form': profile_form, 'profile': profile_info, 'user': logged_user})
+    
+    users = None
+    if request.user.is_superuser:
+        users = User.objects.exclude(is_superuser=True)
+
+    if request.user.is_superuser:
+        return render(request, 'users/admin_profile.html', {'users': users})
+    else:
+        return render(request, 'users/profile.html', {'user_form': user_form, 'profile_form': profile_form, 'profile': profile_info, 'user': logged_user})
+    
+def view_user(request, user_id):
+    user = get_object_or_404(User, id=user_id)
+    # You can fetch additional information related to the user if needed
+    return render(request, 'users/view_user.html', {'user': user})
+    
