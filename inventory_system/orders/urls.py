@@ -3,12 +3,9 @@ from . import views
 from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
-    path('invoicing/', login_required(views.invoicing), name='invoicing'),
-    path('create_invoice/', login_required(views.create_invoice), name='create_invoice'),
     path('invoice', login_required(views.invoice_detail), name='invoice_detail'),
     path('edit_invoice/<int:pk>/', login_required(views.edit_invoice), name='edit_invoice'),
     path('delete_invoice/<int:pk>/', login_required(views.delete_invoice), name='delete_invoice'),
-    path('mark_as_paid/<int:pk>/', login_required(views.mark_invoice_as_paid), name='mark_invoice_as_paid'),
     path('order_list', login_required(views.order_list), name='order_list'),
     path('update_order_status/<int:order_id>/', login_required(views.update_order_status), name='update_order_status'),
     path('order_history', login_required(views.order_history), name='order_history'),
@@ -25,5 +22,6 @@ urlpatterns = [
     path('confirmation_email/<int:pk>/', login_required(views.confirmation_email), name='confirmation_email'),
     path('invoice_history', login_required(views.invoice_history), name='invoice_history'),
     path('upload_proof_payment/<int:pk>/', login_required(views.upload_proof_payment), name='upload_proof_payment'),
+    path('review_payment/<str:id>/', login_required(views.review_payment), name='review_payment'),
 ]
 

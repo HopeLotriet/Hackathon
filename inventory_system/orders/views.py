@@ -11,14 +11,13 @@ from django.contrib import messages
 from django.conf import settings
 from django.core.mail import EmailMessage
 import uuid
-from django.utils import timezone
 from datetime import datetime, timedelta
 from django.db.models import Sum
 from xhtml2pdf import pisa
 from django.template.loader import get_template
 from datetime import datetime
 from datetime import timedelta
-
+from django.contrib.auth.models import User
 
 
 #adding items to cart for customers
@@ -191,8 +190,7 @@ def delete_cart(request):
 #Order management
 @login_required
 def order_list(request):
-    order_lists = Order.objects.all()
-    print(order_lists)
+    order_lists = Order.objects.all() 
     return render(request, 'orders/order_list.html', {'orders': order_lists})
 
 
@@ -201,12 +199,13 @@ def update_order_status(request, order_id):
 
     #block order status once it is changed to delivered
     order = get_object_or_404(Order, id=order_id)
-    invoice = Invoice.objects.all().last()
+    invoice = get_object_or_404(Invoice, order=order.order_id)
 
     customer_order = get_object_or_404(customerOrderHistory, order_id=order.order_id)
     completion_status = order.order_status 
 
     if completion_status == "delivered" or completion_status =="Order canceled":
+        messages.warning(request, "Cannot update on status on a complete or canceled order!")
         return redirect("order_list")
     else:
         if request.method == 'POST':
@@ -237,6 +236,8 @@ def update_order_status(request, order_id):
                         status = ' is currently being processed'
                     elif new_status == "shipped":
                         status = ' has been shipped'
+                    elif new_status == "approved":
+                        status = 'is approved'
                     else:
                         status = "is delivered"
 
@@ -343,119 +344,83 @@ def return_order(request, order_id):
         pass
     return redirect('order_history')
 
-@login_required
-def create_invoice(request):
+login_required
+def order_details(request):
     logged_user = request.user
-    #block placement of order if another one is progress
-    has_data = Order.objects.filter(customer=logged_user).exists()
-    if has_data:
-        previous_order = Order.objects.filter(customer=logged_user).last()
-        previous_order_status = previous_order.order_status
+    #initialise status
+    status = "delivered"
+    if customerOrderHistory.objects.exists():
+        previous_order =  customerOrderHistory.objects.filter(customer=logged_user).last()
+        status = previous_order.customer_order_status
     else:
-        previous_order_status = "delivered"
+        pass
 
-    context={}
-    if previous_order_status == "delivered" or previous_order_status == "Order canceled":
-        #add details for invoice fields
-        if request.method == 'POST':
-            form = InvoiceForm(request.POST)
-            if form.is_valid():
-                form.save()
-                return redirect('order_details')
-        else:
-            form = InvoiceForm()
+    if status == "delivered" or status == "Order canceled":
+        #fetch required information
+        #address, payment method and deliver notes placeholder
+        address= "*******************"
+        method = "*******************"
+        notes = "*******************************************************************************"
 
-        context = {'form': form}
+        
+        #billing name
+        customer_name = f"{logged_user.first_name} {logged_user.last_name}"
+        
+        #Address
+        if Profile.objects.filter(user_id=logged_user.id).exists():
+            address = get_object_or_404(Profile, user_id=logged_user.id).address
+            print(address)
 
+        #invoice unique id
+        prefix = logged_user
+        random_part = uuid.uuid4().hex[:5].upper()
+        invoice_id = f'{prefix}-{random_part}'
+        
+        #billing email
+        email = request.user.email
+
+        #payment date
+        due_date = datetime.now().date() + timedelta(days=7)
+
+        #Amount due
+        order_amount = OrderAmount.objects.get(customer=logged_user)
+        payment_amount = order_amount.amount_due
+
+        # Create new invoice
+        invoice = Invoice(invoice_no=invoice_id,
+                        order=invoice_id, 
+                        billing_name=customer_name, 
+                        billing_email=email, 
+                        payment_due_date=due_date, 
+                        total_amount=payment_amount,
+                        billing_address=address,
+                        payment_method=method,
+                        notes=notes
+                        )
+
+        invoice.save()
         #save cart entries before clearing
         existing_cart = cart.objects.filter(customer=logged_user)
 
         for item in existing_cart:
-            item_name = item.item
-            item_cost = item.cost_per_item
-            item_quantity = item.quantity
-            price = item.total_amount
+                item_name = item.item
+                item_cost = item.cost_per_item
+                item_quantity = item.quantity
+                price = item.total_amount
 
-            cart_record = cart_records(
-                item = item_name,
-                cost_per_item =item_cost,
-                quantity=item_quantity,
-                total_amount=price,
-                customer = logged_user
-            )
-            cart_record.save()
-        return render(request, 'orders/create_invoice.html', context)
+                cart_record = cart_records(
+                    item = item_name,
+                    cost_per_item =item_cost,
+                    quantity=item_quantity,
+                    total_amount=price,
+                    customer = logged_user
+                )
+                cart_record.save()
+        pk=Invoice.objects.all().last().id
+        return redirect('edit_invoice', pk)
     else:
-        pass
         messages.warning(request, "Placing new order while one is in progress is not allowed!")
         return redirect("products")
-
-login_required
-def order_details(request):
-    
-    #fetch required information
-    #address, payment method and deliver notes placeholder
-    address= "*******************"
-    method = "*******************"
-    notes = "*******************************************************************************"
-
-    
-    #billing name
-    logged_user = request.user
-    customer_name = f"{logged_user.first_name} {logged_user.last_name}"
-    
-    #Address
-    if Profile.objects.filter(user_id=logged_user.id).exists():
-        address = get_object_or_404(Profile, user_id=logged_user.id).address
-        print(address)
-
-    # order id
-    prefix = 'ORDER'
-    timestamp = timezone.now().strftime('%Y%m%d%H%M%S')
-    random_part = uuid.uuid4().hex[:6].upper()
-    order_id = f'{prefix}-{timestamp}-{random_part}'
-
-    #billing email
-    email = request.user.email
-
-    #payment date
-    due_date = datetime.now().date() + timedelta(days=7)
-
-    #Amount due
-    order_amount = OrderAmount.objects.get(customer=logged_user)
-    payment_amount = order_amount.amount_due
-
-    # Create new invoice
-    invoice = Invoice(order=order_id, 
-                      billing_name=customer_name, 
-                      billing_email=email, 
-                      payment_due_date=due_date, 
-                      total_amount=payment_amount,
-                      billing_address=address,
-                      payment_method=method,
-                      notes=notes
-                      )
-
-    invoice.save()
-    #save cart entries before clearing
-    existing_cart = cart.objects.filter(customer=logged_user)
-
-    for item in existing_cart:
-            item_name = item.item
-            item_cost = item.cost_per_item
-            item_quantity = item.quantity
-            price = item.total_amount
-
-            cart_record = cart_records(
-                item = item_name,
-                cost_per_item =item_cost,
-                quantity=item_quantity,
-                total_amount=price,
-                customer = logged_user
-            )
-            cart_record.save()
-    pk=Invoice.objects.all().last().id
-    return redirect('edit_invoice', pk)
 
 @login_required
 def invoice_detail(request):
@@ -469,7 +434,6 @@ def invoice_detail(request):
                }
     
     return render(request, 'orders/invoice_detail.html', context)
-
 
 @login_required
 def edit_invoice(request, pk):
@@ -501,13 +465,6 @@ def delete_invoice(request, pk):
     messages.success(request, "Order canceled")
     return redirect('products')
 
-@login_required
-def mark_invoice_as_paid(request, pk):
-    invoice = get_object_or_404(Invoice, pk=pk)
-    invoice.payment_status = 'paid'
-    invoice.save()
-    return redirect('invoice_detail', pk=pk)
-
 #generate pdf of invoice
 @login_required
 def invoice_pdf(request, pk):
@@ -517,7 +474,7 @@ def invoice_pdf(request, pk):
     cart_items = cart_records.objects.filter(customer=logged_user)
     orderCount = OrderAmount.objects.all().last()
     context = {
-    'invoice_number': invoice.id,
+    'invoice_number': invoice.invoice_no,
     'order_id': invoice.order,
     'total_amount': f"R{invoice.total_amount}",
     'date': invoice.date_created,
@@ -707,29 +664,19 @@ def confirmation_email(request, pk):
 
 # for cleaning trial runs of database
 @login_required
-def invoicing(request):
-    invoices = Invoice.objects.all()
-
-    context = {
-        'invoices': invoices,
-    }
-
-    return render(request, 'orders/invoicing.html', context)
-
-@login_required
 def invoice_history(request):
     invoice_history = Invoice.objects.all()
     invoice_history.delete()
     return redirect("order_list")
-
-    
+  
 def upload_proof_payment(request, pk):
     customer_order = get_object_or_404(customerOrderHistory, pk=pk)
-    
+    invoice = get_object_or_404(Invoice, order=customer_order.order_id)
     if request.method == "POST":
-        form = uploadPaymentForm(request.POST, request.FILES)
+        form = uploadPaymentForm(request.POST, request.FILES, instance=invoice)
         if form.is_valid():
             
+            #Update statuses
             customer_order.payment_status = "Paid"
             customer_order.save()
 
@@ -737,14 +684,52 @@ def upload_proof_payment(request, pk):
             order.payment_status = "Paid"
             order.save()
 
-            invoice = get_object_or_404(Invoice, order=customer_order.order_id)
             invoice.payment_status = "Paid"
             invoice.save()
-
+            invoice.payment_proof = form['payment_proof']
             print(f"from invoice: {invoice.order}, from order: {order.order_id}, from customer order: {customer_order.order_id}, invoice number selected:{invoice.id}")
-            form.save()
+            
+            #Notify admin that proof of payment is uploaded by customer
+            staff_users = User.objects.filter(is_staff=True)
+            for user in staff_users:
+                name = user.username
+                customer = invoice.billing_name
+                subject = f"Proof of payment for order id#{invoice.order} uploaded"
+                email_address = user.email
+                sender_email = settings.EMAIL_HOST_USER
+                email_body = f"""
+                Hello, {name}
+
+                Please note that {customer} uploaded their proof of payment for their order.
+                Make sure to review the proof of payment prior to approving the order. 
+
+                Best regards,
+                FarmFresh
+                """
+                        # Create an EmailMessage object
+                email = EmailMessage(
+                        subject,
+                        email_body,
+                        sender_email,
+                        [email_address],
+                        )
+
+                        # Send the email
+                email.send()
             messages.success(request, "Upload successful")
             return redirect('order_history')
     else:
-        form = uploadPaymentForm()
+        form = uploadPaymentForm(instance=invoice)
     return render(request, 'orders/upload_payment.html', {'form': form})
+
+def review_payment(request, id):
+    invoice = get_object_or_404(Invoice, order=id)
+    if invoice.payment_proof:
+        proof = invoice.payment_proof.path
+        with open(proof, 'rb') as pdf_file:
+            response = HttpResponse(pdf_file.read(), content_type='application/pdf')
+            response['Content-Disposition'] = 'inline; filename="proof of payment.pdf"'
+            return response
+    else:
+        return HttpResponse('The PDF file does not exist.', status=404)
+    
