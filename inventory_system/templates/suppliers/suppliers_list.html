@@ -47,7 +47,7 @@
                 <tr>
                     <th width="25%">Company Name</th>
                     <th width="20%">Contact</th>
-                    <th width="25%">Reg No</th>
+                    <th width="25%">Company Reg No</th>
                     <th width="30%">Actions</th>
                 </tr>
             </thead>
@@ -61,7 +61,7 @@
                         <p> <a href="{% url 'supplier' supplier.name %}">{{ supplier.name }}</a> </p>
                     </td>
                     <td class="align-middle"> {{ supplier.phone }} </td>
-                    <td class="align-middle"> {{ supplier.vat }} </td>
+                    <td class="align-middle"> {{ supplier.reg_no }} </td>
                     <td class="align-middle">
                         <div class="align-middle">
                             <a href="{% url 'edit-supplier' supplier.pk %}" class="btn btn-info btn-sm">Edit Details</a>
