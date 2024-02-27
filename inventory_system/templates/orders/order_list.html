@@ -38,8 +38,8 @@
                     <th scope="col">Order status</th>
                     <th scope="col"> Payment method</th>
                     <th scope="col">Payment status</th>
-                    <th></th>
-                    <th></th>
+                    <th scope="col">Update</th>
+                   
                 </tr>
             </thead>
         
@@ -56,9 +56,7 @@
                 <td scope="row">{{order.order_status}}</td>
                 <td scope="row">{{order.payment_method}}</td>
                 <td scope="row">{{order.payment_status}}</td>
-                <td scope="row">
-                    <a href="{% url 'update_order_status' order.id %}" class="btn btn-primary">Update Status</a>
-            </td>
+                <td scope="row"><a href="{% url 'update_order_status' order.id %}" class="btn btn-primary">Update Status</a></td>
             </tr>
             {% endfor %}
             </tbody>

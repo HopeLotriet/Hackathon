@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
-from .models import Inventory, SalesData
+from .models import Inventory, SalesData, Subscriber
 from orders.models import OrderAmount
 from django.shortcuts import get_object_or_404
 from .forms import InventoryUpdateForm, AddInventoryForm, SubscriptionForm
@@ -264,24 +264,15 @@ def subscription(request):
         form = SubscriptionForm(request.POST)
         if form.is_valid():
             email = form.cleaned_data['email']
-
-            # Send confirmation email
-            send_mail(
-                'Subscription Confirmation',
-                'Thank you for subscribing to FarmFresh! You will receive updates and promotions.',
-                settings.EMAIL_HOST_USER,
-                [email],
-                fail_silently=False,
-            )
-
-            # Save email to the database
-            form.save()
-
+            subscriber, created = Subscriber.objects.get_or_create(email=email)
+            if created:
+                # Send confirmation email
+                send_subscription_confirmation_email(email)
             return HttpResponseRedirect(reverse('subscription'))
     else:
         form = SubscriptionForm()
-
     return render(request, 'accounts/subscription.html', {'form': form})
+
 
 def analyze_sales_data(request):
     # Get the data from the Inventory model
