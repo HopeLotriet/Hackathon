@@ -86,7 +86,8 @@ class Invoice(models.Model):
         ('Cash Deposit', 'Cash Deposit')
     ]
 
-    order = models.CharField(max_length=255, default="----")
+    invoice_no = models.CharField(max_length=255, default="")
+    order = models.CharField(max_length=255, default="")
     date_created = models.DateTimeField(auto_now_add=True)
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     

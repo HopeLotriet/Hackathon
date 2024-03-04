@@ -38,8 +38,8 @@
                     <th scope="col">Order status</th>
                     <th scope="col"> Payment method</th>
                     <th scope="col">Payment status</th>
-                    <th scope="col">Update</th>
-                   
+                    <th>Update order status</th>
+                    <th>Proof of payment</th>
                 </tr>
             </thead>
         
@@ -56,7 +56,16 @@
                 <td scope="row">{{order.order_status}}</td>
                 <td scope="row">{{order.payment_method}}</td>
                 <td scope="row">{{order.payment_status}}</td>
-                <td scope="row"><a href="{% url 'update_order_status' order.id %}" class="btn btn-primary">Update Status</a></td>
+                <td scope="row">
+                    {% if order.payment_status == 'Pending' or order.order_status == 'delivered' or order.order_status == 'Order canceled' %}
+                        <a href="{% url 'update_order_status' order.id %}" class="btn btn-primary disabled" role="button" aria-disabled="true">Update Status</a>
+                    {% else %}
+                    <a href="{% url 'update_order_status' order.id %}" class="btn btn-primary">Update Status</a>
+                    {% endif %}
+                </td>
+                <td scope="row">
+                    <a href="{% url 'review_payment' order.order_id %}" width="100%" height="600px">View proof of payment</a>
+                </td>
             </tr>
             {% endfor %}
             </tbody>
