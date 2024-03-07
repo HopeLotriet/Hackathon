@@ -12,7 +12,7 @@
         {{ form.media }} 
         <form method="POST" enctype="multipart/form-data">
             <fieldset>
-                <legend class="border-bottom pb-2 mb-4 text-center">Inventory Update Form</legend>
+                <legend class="border-bottom pb-2 mb-4 text-center" style="padding-top: 2.0rem;">Inventory Update Form</legend>
                 {% csrf_token %}
                 <div class="form-group">
                     {{ form|crispy }}

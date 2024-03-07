@@ -1,0 +1,22 @@
+<!-- bulk_email.html -->
+{% extends 'accounts/home.html' %}
+{% load static %}
+
+{% block title %}Admin - Send Bulk Emails{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container mt-5">
+        <h1 class="text-center mb-4" style="padding-top: 2.0rem;">Send Bulk Emails</h1>
+        <div class="row">
+            <div class="col-lg-6 offset-lg-3">
+                <form method="post" action="{% url 'send_bulk_emails' %}">
+                    {% csrf_token %}
+                    {{ form.as_p }}
+                    <button type="submit" class="btn btn-primary">Send Emails</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -62,3 +62,14 @@ class SubscriptionForm(forms.ModelForm):
         model = Subscriber
         fields = ['email']
 
+class BulkEmailForm(forms.Form):
+    RECIPIENT_CHOICES = [
+        ('all', 'All Users'),
+        ('active', 'Active Users'),
+        ('inactive', 'Inactive Users'),
+    ]
+    
+    recipient_type = forms.ChoiceField(choices=RECIPIENT_CHOICES, label='Recipient Type')
+    message = forms.CharField(widget=forms.Textarea, label='Message')
+
+

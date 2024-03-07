@@ -343,8 +343,16 @@
                     </li>
                     {% endif %}
 
+                    {% if is_customer %}
+                    <!-- Display marketing page link for customers -->
                     <li class="nav-item"><a class="nav-link active text-white" href="{% url 'marketing' %}"
-                            class="text-white no-underline">Marketing</a></li>
+                        class="text-white no-underline">Marketing</a></li>
+                {% else %}
+                    <!-- Display bulk email page link for admin -->
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="{% url 'send_bulk_emails' %}">Send Bulk Emails</a>
+                    </li>
+                {% endif %}
 
                     <li class="nav-item">
                         <a class="nav-link active text-white" href="{% url 'users-profile' %}">Profile</a>
