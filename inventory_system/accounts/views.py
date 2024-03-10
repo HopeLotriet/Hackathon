@@ -14,6 +14,7 @@ import plotly
 import plotly.express as px
 import json
 from django.core.mail import send_mail
+from django.core.mail import EmailMessage
 from barcode.writer import ImageWriter
 from io import BytesIO
 from django.core.files.base import ContentFile
@@ -46,8 +47,6 @@ class StockListView(FilterView):
 
 
 login_required
-
-
 def products(request):
     inventories = Inventory.objects.all()
     context = {
@@ -232,23 +231,17 @@ def dashboard(request):
 
 
 login_required
-
-
 def marketing(request):
     context = {}
     return render(request, 'accounts/marketing.html', context)
 
 
 login_required
-
-
 def about(request):
     context = {}
     return render(request, 'accounts/about.html', context)
 
 # Search for something
-
-
 @login_required
 def search(request):
     if request.method == "POST":
@@ -373,25 +366,25 @@ def send_bulk_emails(request):
     if request.method == 'POST' and form.is_valid():
         recipient_type = form.cleaned_data['recipient_type']
         message = form.cleaned_data['message']
+        recipients = []
 
         if recipient_type == 'all':
             subscribers = Subscriber.objects.all()
+            recipients = [subscriber.email for subscriber in subscribers]
 
-        # Extract email addresses
-        recipients = [subscriber.email for subscriber in subscribers]
+        # Send bulk emails only if recipients exist
+        if recipients:
+            send_mail(
+                'Your Subject',  # Subject
+                message,         # Message body
+                settings.EMAIL_HOST_USER,  # Sender's email from Django settings
+                recipients,      # List of recipients
+                fail_silently=False,  # Raise an exception if sending fails
+                auth_user=settings.EMAIL_HOST_USER,  # SMTP server username
+                auth_password=settings.EMAIL_HOST_PASSWORD,  # SMTP server password
+                connection=None,
+            )
 
-        # Send bulk emails
-        send_mail(
-            'Your Subject',  # Subject
-            message,         # Message body
-            settings.EMAIL_HOST_USER,  # Sender's email from Django settings
-            recipients,      # List of recipients
-            fail_silently=False,  # Raise an exception if sending fails
-            auth_user=settings.EMAIL_HOST_USER,  # SMTP server username
-            auth_password=settings.EMAIL_HOST_PASSWORD,  # SMTP server password
-            connection=None,
-        )
-
-        # return render(request, 'success.html')  # Render a success page or redirect as needed
+            return render(request, 'success.html')  # Render a success page or redirect as needed
 
     return render(request, 'accounts/bulk_email.html', {'form': form})

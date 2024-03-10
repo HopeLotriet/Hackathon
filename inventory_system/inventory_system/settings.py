@@ -177,4 +177,3 @@ LOW_QUANTITY = 5
 # login redirect path settings
 LOGIN_REDIRECT_URL = '/accounts/'
 LOGIN_URL = 'login'
-
