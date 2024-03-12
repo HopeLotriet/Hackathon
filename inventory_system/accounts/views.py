@@ -283,22 +283,6 @@ def generate_sales_report(request):
 
     return response
 
-
-@login_required
-def subscription(request):
-    if request.method == 'POST':
-        form = SubscriptionForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data['email']
-            subscriber, created = Subscriber.objects.get_or_create(email=email)
-            if created:
-                # Send confirmation email
-                send_subscription_confirmation_email(email)
-            return HttpResponseRedirect(reverse('subscription'))
-    else:
-        form = SubscriptionForm()
-    return render(request, 'accounts/subscription.html', {'form': form})
-
 @login_required
 def analyze_sales_data(request):
     # Get the data from the Inventory model
@@ -359,6 +343,30 @@ def analyze_sales_data(request):
     # Pass the forecast data to the template
     return render(request, 'accounts/analyze_sales_data.html', context)
 
+
+@login_required
+def subscription(request):
+    if request.method == 'POST':
+        form = SubscriptionForm(request.POST)
+        if form.is_valid():
+            email = form.cleaned_data['email']
+            subscriber, created = Subscriber.objects.get_or_create(email=email)
+            if created:
+                # Send confirmation email
+                send_subscription_confirmation_email(email)
+            return HttpResponseRedirect(reverse('subscription_confirmation'))
+    else:
+        form = SubscriptionForm()
+    return render(request, 'accounts/subscription.html', {'form': form})
+
+def send_subscription_confirmation_email(email):
+    subject = 'Subscription Confirmation'
+    message = 'Thank you for subscribing to FarmFresh! You will receive updates and promotions in your inbox.'
+    sender_email = settings.EMAIL_HOST_USER
+    recipient_list = [email]
+    send_mail(subject, message, sender_email, recipient_list)
+
+
 @login_required
 def send_bulk_emails(request):
     if request.method == 'POST':
@@ -368,13 +376,26 @@ def send_bulk_emails(request):
             message = form.cleaned_data['message']
             recipients = []
 
+            # Filter subscribers based on recipient type
             if recipient_type == 'all':
                 subscribers = Subscriber.objects.all()
-                recipients = [subscriber.email for subscriber in subscribers]
+            elif recipient_type == 'active':
+                subscribers = Subscriber.objects.filter(is_active=True)
+            elif recipient_type == 'inactive':
+                subscribers = Subscriber.objects.filter(is_active=False)
+            else:
+                # Handle invalid recipient type
+                return HttpResponseRedirect(reverse('send_bulk_emails'))
+
+            # Get email addresses of selected recipients
+            recipients = [subscriber.email for subscriber in subscribers]
 
             # Send bulk emails only if recipients exist
             if recipients:
-                # Code for sending emails
+                # Send emails
+                subject = 'Your Subject Here'
+                for recipient in recipients:
+                    send_mail(subject, message, settings.EMAIL_HOST_USER, [recipient])
 
                 return render(request, 'success.html')  # Render a success page or redirect as needed
     else:
