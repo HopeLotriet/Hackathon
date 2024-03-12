@@ -58,6 +58,7 @@ class SalesDataUploadForm(forms.Form):
     sales_data = forms.FileField()
 
 class SubscriptionForm(forms.ModelForm):
+    email = forms.EmailField(label='Email address')
     class Meta:
         model = Subscriber
         fields = ['email']
@@ -70,6 +71,8 @@ class BulkEmailForm(forms.Form):
     ]
     
     recipient_type = forms.ChoiceField(choices=RECIPIENT_CHOICES, label='Recipient Type')
+    subject = forms.CharField(max_length=100, label='Subject')
     message = forms.CharField(widget=forms.Textarea, label='Message')
+    file = forms.FileField(label='Upload File', required=False)
 
 

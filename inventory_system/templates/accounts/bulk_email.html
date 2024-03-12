@@ -35,11 +35,11 @@
         <h1 class="text-center mt-5 mb-4">Send Bulk Emails</h1>
         <div class="row">
             <div class="col-lg-6 offset-lg-3">
-                <form method="post" action="{% url 'send_bulk_emails' %}">
+                <form method="post" action="{% url 'send_bulk_emails' %}" enctype="multipart/form-data">
                     {% csrf_token %}
                     {{ form.as_p }}
                     <button type="submit" class="btn btn-primary">Send Emails</button>
-                </form>
+                </form>                
             </div>
         </div>
         <!-- End of bulk email section -->

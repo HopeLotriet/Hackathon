@@ -25,6 +25,9 @@ import csv
 from matplotlib import pyplot as plt
 from statsmodels.tsa.arima.model import ARIMA
 from django.contrib.auth.models import User
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 
 
 @login_required
@@ -343,21 +346,25 @@ def analyze_sales_data(request):
     # Pass the forecast data to the template
     return render(request, 'accounts/analyze_sales_data.html', context)
 
-
 @login_required
 def subscription(request):
     if request.method == 'POST':
         form = SubscriptionForm(request.POST)
         if form.is_valid():
-            email = form.cleaned_data['email']
-            subscriber, created = Subscriber.objects.get_or_create(email=email)
-            if created:
-                # Send confirmation email
-                send_subscription_confirmation_email(email)
-            return HttpResponseRedirect(reverse('subscription_confirmation'))
+            try:
+                email = form.cleaned_data['email']
+                subscriber, created = Subscriber.objects.get_or_create(email=email)
+                if created:
+                    # Send confirmation email
+                    send_subscription_confirmation_email(email)
+                messages.success(request, "You have successfully subscribed!")
+                return HttpResponseRedirect(reverse('subscription_confirmation'))
+            except Exception as e:
+                messages.error(request, f"An error occurred: {str(e)}")
     else:
         form = SubscriptionForm()
     return render(request, 'accounts/subscription.html', {'form': form})
+
 
 def send_subscription_confirmation_email(email):
     subject = 'Subscription Confirmation'
@@ -370,10 +377,12 @@ def send_subscription_confirmation_email(email):
 @login_required
 def send_bulk_emails(request):
     if request.method == 'POST':
-        form = BulkEmailForm(request.POST)
+        form = BulkEmailForm(request.POST, request.FILES)
         if form.is_valid():
             recipient_type = form.cleaned_data['recipient_type']
+            subject = form.cleaned_data['subject']
             message = form.cleaned_data['message']
+            file = request.FILES.get('file')
             recipients = []
 
             # Filter subscribers based on recipient type
@@ -393,11 +402,13 @@ def send_bulk_emails(request):
             # Send bulk emails only if recipients exist
             if recipients:
                 # Send emails
-                subject = 'Your Subject Here'
                 for recipient in recipients:
-                    send_mail(subject, message, settings.EMAIL_HOST_USER, [recipient])
+                    email = EmailMultiAlternatives(subject, message, settings.EMAIL_HOST_USER, [recipient])
+                    if file:
+                        email.attach(file.name, file.read(), file.content_type)
+                    email.send()
 
-                return render(request, 'success.html')  # Render a success page or redirect as needed
+                return render(request, 'accounts/success.html')  # Render a success page or redirect as needed
     else:
         form = BulkEmailForm()
 
