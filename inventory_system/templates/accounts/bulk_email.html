@@ -7,7 +7,34 @@
 {% block content %}
 <div class="content-wrapper">
     <div class="container mt-5">
-        <h1 class="text-center mb-4" style="padding-top: 2.0rem;">Send Bulk Emails</h1>
+        <h1 class="text-center mb-4" style="padding-top: 2.0rem;">Subscribers List</h1>
+        <!-- Table to display subscribers -->
+        <div class="row">
+            <div class="col-lg-12">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th scope="col">Username</th>
+                            <th scope="col">Email</th>
+                            <th scope="col">Active</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for user in subscribers %}
+                            <tr>
+                                <td>{{ user.username }}</td>
+                                <td>{{ user.email }}</td>
+                                <td>{% if user.profile.subscribed %}Yes{% else %}No{% endif %}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <!-- End of subscribers table -->
+        
+        <!-- Section to send bulk emails -->
+        <h1 class="text-center mt-5 mb-4">Send Bulk Emails</h1>
         <div class="row">
             <div class="col-lg-6 offset-lg-3">
                 <form method="post" action="{% url 'send_bulk_emails' %}">
@@ -17,6 +44,11 @@
                 </form>
             </div>
         </div>
+        <!-- End of bulk email section -->
     </div>
 </div>
+
+<br>
+<br>
+<br>
 {% endblock %}

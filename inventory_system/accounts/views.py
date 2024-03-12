@@ -299,7 +299,7 @@ def subscription(request):
         form = SubscriptionForm()
     return render(request, 'accounts/subscription.html', {'form': form})
 
-
+@login_required
 def analyze_sales_data(request):
     # Get the data from the Inventory model
     inventories = Inventory.objects.all()
@@ -359,32 +359,32 @@ def analyze_sales_data(request):
     # Pass the forecast data to the template
     return render(request, 'accounts/analyze_sales_data.html', context)
 
-
+@login_required
 def send_bulk_emails(request):
-    form = BulkEmailForm(request.POST or None)
+    if request.method == 'POST':
+        form = BulkEmailForm(request.POST)
+        if form.is_valid():
+            recipient_type = form.cleaned_data['recipient_type']
+            message = form.cleaned_data['message']
+            recipients = []
 
-    if request.method == 'POST' and form.is_valid():
-        recipient_type = form.cleaned_data['recipient_type']
-        message = form.cleaned_data['message']
-        recipients = []
+            if recipient_type == 'all':
+                subscribers = Subscriber.objects.all()
+                recipients = [subscriber.email for subscriber in subscribers]
 
-        if recipient_type == 'all':
-            subscribers = Subscriber.objects.all()
-            recipients = [subscriber.email for subscriber in subscribers]
+            # Send bulk emails only if recipients exist
+            if recipients:
+                # Code for sending emails
 
-        # Send bulk emails only if recipients exist
-        if recipients:
-            send_mail(
-                'Your Subject',  # Subject
-                message,         # Message body
-                settings.EMAIL_HOST_USER,  # Sender's email from Django settings
-                recipients,      # List of recipients
-                fail_silently=False,  # Raise an exception if sending fails
-                auth_user=settings.EMAIL_HOST_USER,  # SMTP server username
-                auth_password=settings.EMAIL_HOST_PASSWORD,  # SMTP server password
-                connection=None,
-            )
+                return render(request, 'success.html')  # Render a success page or redirect as needed
+    else:
+        form = BulkEmailForm()
 
-            return render(request, 'success.html')  # Render a success page or redirect as needed
+    # Retrieve the list of subscribers and pass it to the template
+    subscribers = Subscriber.objects.all()
+    context = {
+        'form': form,
+        'subscribers': subscribers,
+    }
 
-    return render(request, 'accounts/bulk_email.html', {'form': form})
+    return render(request, 'accounts/bulk_email.html', context)
