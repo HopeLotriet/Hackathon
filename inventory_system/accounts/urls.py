@@ -1,8 +1,6 @@
-from django.urls import path, include
-from django.contrib import admin
+from django.urls import path
 from . import views
 from django.contrib.auth.decorators import login_required
-
 
 urlpatterns = [
     path('', login_required(views.home), name='home'),
@@ -16,7 +14,6 @@ urlpatterns = [
     path('marketing/', login_required(views.marketing), name='marketing'),
     path("dashboard/", login_required(views.dashboard), name="dashboard"),
     path('about/', login_required(views.about), name='about'),
-    path('stock/', login_required(views.stock), name='stock'),
     path('search/', login_required(views.search), name='search'),
     path('generate_sales_report/', login_required(views.generate_sales_report), name='generate_sales_report'),
     path('analyze-sales-data/', views.analyze_sales_data, name='analyze_sales_data'),

@@ -43,6 +43,7 @@
                     <th scope="col">Sales or Revenue</th>
                     <th scope="col">Stock Date</th>
                     <th scope="col">Last Sales Date</th>
+                    <th scope="col">Image</th>
                     
 
                 </tr>
@@ -63,6 +64,13 @@
                         <td>R{{ inventory.sales }}</td>
                         <td>{{ inventory.stock_date }}</td>
                         <td>{{ inventory.last_sales_date }}</td>
+                        <td style="text-align: center; vertical-align: middle;">
+                            {% if inventory.image %}
+                                <img src="{{ inventory.image.url }}" alt="{{ inventory.name }}" style="max-width: 150px; max-height: 100px;">
+                            {% else %}
+                                No Image Available
+                            {% endif %}
+                        </td>
                     
                 </tr>
                 {% endfor %}

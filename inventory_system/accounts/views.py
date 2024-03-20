@@ -85,7 +85,6 @@ def inventory_list(request):
 
     return render(request, 'accounts/inventory_list.html', {'inventories': inventories})
 
-
 @login_required
 def create_inventory(request):
     if request.method == 'POST':
@@ -93,12 +92,60 @@ def create_inventory(request):
         if form.is_valid():
             inventory = form.save(commit=False)
             inventory.sales = inventory.cost_per_item * inventory.quantity_sold
+            
+            # Generate barcode and save it to the new inventory item
+            barcode_data = str(inventory.pk) + " " + inventory.name  # Barcode data
+            code128 = Code128(barcode_data, writer=ImageWriter())
+            barcode_image = code128.render()
+
+            # Convert the barcode image to PNG format
+            image_io = BytesIO()
+            barcode_image.save(image_io, format='PNG')
+            barcode_image_file = ContentFile(image_io.getvalue())
+            inventory.barcode.save(f'barcode_{barcode_data}.png', barcode_image_file, save=False)
+
             inventory.save()
+
+            messages.success(request, "Successfully Added Product")
             return redirect('inventory_list')
     else:
         form = InventoryForm()
 
     return render(request, 'accounts/create_inventory.html', {'form': form})
+
+
+@login_required
+def add_product(request):
+    if request.method == "POST":
+        updateForm = AddInventoryForm(request.POST, request.FILES)
+        if updateForm.is_valid():
+            new_inventory = updateForm.save(commit=False)
+            new_inventory.sales = float(
+                updateForm.data['cost_per_item']) * float(updateForm.data['quantity_sold'])
+
+            # Generate barcode and save it to the new inventory item
+            # You can modify this based on your barcode data
+            barcode_data = new_inventory.name + \
+                " " + str(new_inventory.cost_per_item)
+            code128 = Code128(barcode_data, writer=ImageWriter())
+            image = code128.render()
+
+            # Convert the barcode image to PNG format
+            image_io = BytesIO()
+            image.save(image_io, format='PNG')
+            image_file = ContentFile(image_io.getvalue())
+            new_inventory.barcode.save(
+                f'barcode_{barcode_data}.png', image_file, save=False)
+
+            new_inventory.save()
+
+            messages.success(request, "Successfully Added Product")
+            return redirect('stock')  # You can adjust the redirect URL
+
+    else:
+        updateForm = AddInventoryForm()
+
+    return render(request, 'accounts/inventory_add.html', {'form': updateForm})
 
 @login_required
 def per_product(request, pk):
@@ -108,6 +155,13 @@ def per_product(request, pk):
     }
     return render(request, "accounts/per_product.html", context=context)
 
+def products(request):
+    catalogs = Catalog.objects.filter(is_deleted=False)  # Fetch all non-deleted catalogs
+    context = {
+        "title": "Products",
+        "catalogs": catalogs
+    }
+    return render(request, 'orders/products.html', context=context)
 
 @login_required
 def update(request, pk):
@@ -148,47 +202,6 @@ def add_product(request):
 
     return render(request, 'accounts/inventory_add.html', {'form': updateForm})
 
-@login_required
-def products(request):
-    inventories = Inventory.objects.all()
-    context = {
-        "title": "Inventory List",
-        "inventories": inventories
-    }
-    return render(request, 'orders/products.html', context=context)
-
-@login_required
-def add_product(request):
-    if request.method == "POST":
-        updateForm = AddInventoryForm(request.POST, request.FILES)
-        if updateForm.is_valid():
-            new_inventory = updateForm.save(commit=False)
-            new_inventory.sales = float(
-                updateForm.data['cost_per_item']) * float(updateForm.data['quantity_sold'])
-
-            # Generate barcode and save it to the new inventory item
-            # You can modify this based on your barcode data
-            barcode_data = new_inventory.name + \
-                " " + str(new_inventory.cost_per_item)
-            code128 = Code128(barcode_data, writer=ImageWriter())
-            image = code128.render()
-
-            # Convert the barcode image to PNG format
-            image_io = BytesIO()
-            image.save(image_io, format='PNG')
-            image_file = ContentFile(image_io.getvalue())
-            new_inventory.barcode.save(
-                f'barcode_{barcode_data}.png', image_file, save=False)
-
-            new_inventory.save()
-
-            messages.success(request, "Successfully Added Product")
-            return redirect('stock')  # You can adjust the redirect URL
-
-    else:
-        updateForm = AddInventoryForm()
-
-    return render(request, 'accounts/inventory_add.html', {'form': updateForm})
 
 
 
