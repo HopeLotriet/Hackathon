@@ -6,6 +6,8 @@ from django.contrib.auth.decorators import login_required
 
 urlpatterns = [
     path('', login_required(views.home), name='home'),
+    path('catalog/', login_required(views.catalog_list), name='catalog_list'),
+    path('catalog_create/', views.catalog_create, name='catalog_create'),
     path('products/', login_required(views.products), name='products'),
     path('per_product/<int:pk>/', login_required(views.per_product), name='per_product'),
     path("product_update/<int:pk>/", login_required(views.update), name="product_update"),
@@ -20,5 +22,6 @@ urlpatterns = [
     path('analyze-sales-data/', views.analyze_sales_data, name='analyze_sales_data'),
     path('subscription/', login_required(views.subscription), name='subscription'),
     path('send_bulk_emails/',login_required(views.send_bulk_emails), name='send_bulk_emails'),
+    path('create_inventory/', views.create_inventory, name='create_inventory'),
+    path('inventory_list/', views.inventory_list, name='inventory_list')
 ]
-

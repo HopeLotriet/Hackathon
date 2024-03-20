@@ -3,10 +3,10 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
-from .models import Inventory, SalesData, Subscriber
+from .models import Catalog, Inventory, SalesData, Subscriber
 from orders.models import OrderAmount
 from django.shortcuts import get_object_or_404
-from .forms import InventoryUpdateForm, AddInventoryForm, SubscriptionForm, BulkEmailForm
+from .forms import InventoryUpdateForm, AddInventoryForm, SubscriptionForm, BulkEmailForm, CatalogForm, InventoryForm
 from django.conf import settings
 from django_pandas.io import read_frame
 import pandas as pd
@@ -14,21 +14,21 @@ import plotly
 import plotly.express as px
 import json
 from django.core.mail import send_mail
-from django.core.mail import EmailMessage
 from barcode.writer import ImageWriter
 from io import BytesIO
 from django.core.files.base import ContentFile
 from barcode.codex import Code128
-from django_filters.views import FilterView
-from .filters import StockFilter
 import csv
 from matplotlib import pyplot as plt
 from statsmodels.tsa.arima.model import ARIMA
 from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
-from django.template.loader import render_to_string
-from django.utils.html import strip_tags
+from django.views.generic.edit import CreateView
+from django.urls import reverse_lazy
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+LOW_QUANTITY = getattr(settings, 'LOW_QUANTITY', 5)
 
 @login_required
 def home(request):
@@ -41,47 +41,64 @@ def home(request):
         request.session['cart_count'] = 0
     return render(request, 'accounts/home.html')
 
-
-class StockListView(FilterView):
-    filterset_class = StockFilter
-    queryset = Inventory.objects.filter(is_deleted=False)
-    template_name = 'stock.html'
-    paginate_by = 10
-
-
-login_required
-def products(request):
-    inventories = Inventory.objects.all()
-    context = {
-        "title": "Inventory List",
-        "inventories": inventories
-    }
-    return render(request, 'orders/products.html', context=context)
-
+@login_required
+def catalog_list(request):
+    catalogs = Catalog.objects.filter(supplier=request.user)
+    return render(request, 'accounts/catalog_list.html', {'catalogs': catalogs})
 
 @login_required
-def stock(request):
-    inventories = Inventory.objects.all()
+def catalog_create(request):
+    if request.method == 'POST':
+        form = CatalogForm(request.POST)
+        if form.is_valid():
+            catalog = form.save(commit=False)
+            catalog.supplier = request.user  # Assign the current user as the supplier
+            catalog.save()
+            return redirect('catalog_list')
+    else:
+        form = CatalogForm()
+    return render(request, 'accounts/catalog_create.html', {'form': form})
 
+@login_required
+def inventory_list(request):
+    inventories = Inventory.objects.filter(catalog__supplier=request.user)
+    
     # Check for low stock items
-    low_stock_inventory = inventories.filter(
-        quantity_in_stock__lte=LOW_QUANTITY)
+    low_stock_inventory = inventories.filter(quantity_in_stock__lte=LOW_QUANTITY)
 
     if low_stock_inventory.exists():
         # Display a message for each low stock item
         for item in low_stock_inventory:
-            messages.warning(
-                request, f"Low stock alert: {item.name} - quantity in stock: {item.quantity_in_stock}")
+            messages.warning(request, f"Low stock alert: {item.name} - quantity in stock: {item.quantity_in_stock}")
 
-    context = {
-        "title": "Inventory List",
-        "inventories": inventories
-    }
-    return render(request, 'accounts/stock.html', context=context)
+    paginator = Paginator(inventories, 10)  # Show 10 items per page
+
+    page = request.GET.get('page')
+    try:
+        inventories = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        inventories = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        inventories = paginator.page(paginator.num_pages)
+
+    return render(request, 'accounts/inventory_list.html', {'inventories': inventories})
 
 
-LOW_QUANTITY = getattr(settings, 'LOW_QUANTITY', 5)
+@login_required
+def create_inventory(request):
+    if request.method == 'POST':
+        form = InventoryForm(request.POST)
+        if form.is_valid():
+            inventory = form.save(commit=False)
+            inventory.sales = inventory.cost_per_item * inventory.quantity_sold
+            inventory.save()
+            return redirect('inventory_list')
+    else:
+        form = InventoryForm()
 
+    return render(request, 'accounts/create_inventory.html', {'form': form})
 
 @login_required
 def per_product(request, pk):
@@ -96,17 +113,11 @@ def per_product(request, pk):
 def update(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
     if request.method == "POST":
-        updateForm = InventoryUpdateForm(
-            request.POST, request.FILES, instance=inventory)
+        updateForm = InventoryUpdateForm(request.POST, request.FILES, instance=inventory)
         if updateForm.is_valid():
-            inventory.name = updateForm.data['name']
-            inventory.quantity_in_stock = updateForm.data['quantity_in_stock']
-            inventory.quantity_sold = updateForm.data['quantity_sold']
-            inventory.cost_per_item = updateForm.data['cost_per_item']
-            inventory.sales = float(
-                inventory.cost_per_item) * float(inventory.quantity_sold)
+            inventory = updateForm.save(commit=False)
+            inventory.sales = inventory.cost_per_item * inventory.quantity_sold
             inventory.save()
-            inventory.image = updateForm['image']
             messages.success(request, "Update Successful")
             return redirect(reverse('per_product', kwargs={'pk': pk}))
     else:
@@ -114,14 +125,37 @@ def update(request, pk):
 
     return render(request, 'accounts/inventory_update.html', {'form': updateForm})
 
-
 @login_required
 def delete(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
-    inventory.delete()
+    inventory.is_deleted = True
+    inventory.save()
     messages.success(request, "Inventory Deleted")
-    return redirect('stock')
+    return redirect('inventory_list')
 
+@login_required
+def add_product(request):
+    if request.method == "POST":
+        updateForm = AddInventoryForm(request.POST, request.FILES)
+        if updateForm.is_valid():
+            new_inventory = updateForm.save(commit=False)
+            new_inventory.sales = new_inventory.cost_per_item * new_inventory.quantity_sold
+            new_inventory.save()
+            messages.success(request, "Successfully Added Product")
+            return redirect('stock')  # You can adjust the redirect URL
+    else:
+        updateForm = AddInventoryForm()
+
+    return render(request, 'accounts/inventory_add.html', {'form': updateForm})
+
+@login_required
+def products(request):
+    inventories = Inventory.objects.all()
+    context = {
+        "title": "Inventory List",
+        "inventories": inventories
+    }
+    return render(request, 'orders/products.html', context=context)
 
 @login_required
 def add_product(request):
@@ -155,6 +189,30 @@ def add_product(request):
         updateForm = AddInventoryForm()
 
     return render(request, 'accounts/inventory_add.html', {'form': updateForm})
+
+
+
+# @login_required
+# def update(request, pk):
+#     inventory = get_object_or_404(Inventory, pk=pk)
+#     if request.method == "POST":
+#         updateForm = InventoryUpdateForm(
+#             request.POST, request.FILES, instance=inventory)
+#         if updateForm.is_valid():
+#             inventory.name = updateForm.data['name']
+#             inventory.quantity_in_stock = updateForm.data['quantity_in_stock']
+#             inventory.quantity_sold = updateForm.data['quantity_sold']
+#             inventory.cost_per_item = updateForm.data['cost_per_item']
+#             inventory.sales = float(
+#                 inventory.cost_per_item) * float(inventory.quantity_sold)
+#             inventory.save()
+#             inventory.image = updateForm['image']
+#             messages.success(request, "Update Successful")
+#             return redirect(reverse('per_product', kwargs={'pk': pk}))
+#     else:
+#         updateForm = InventoryUpdateForm(instance=inventory)
+
+#     return render(request, 'accounts/inventory_update.html', {'form': updateForm})
 
 
 @login_required

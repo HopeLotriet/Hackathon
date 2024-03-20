@@ -50,7 +50,6 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'accounts',
     'user',
-    'transactions',
     'orders',
     'fontawesomefree',
     'widget_tweaks',                            # uses 'django-widget-tweaks' app

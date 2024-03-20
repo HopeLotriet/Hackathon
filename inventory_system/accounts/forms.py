@@ -1,8 +1,20 @@
 from django import forms
 from django.forms import ModelForm, ChoiceField, Select, Form
-from .models import Inventory, Order, Subscriber
+from .models import Catalog, Inventory, Order, Subscriber
 from orders.models import Invoice
 
+class CatalogForm(forms.ModelForm):
+    class Meta:
+        model = Catalog
+        fields = ['name', 'description']
+
+class InventoryForm(forms.ModelForm):
+    class Meta:
+        model = Inventory
+        fields = ['catalog', 'name', 'cost_per_item', 'quantity_in_stock', 'quantity_sold', 'barcode', 'image']
+
+    # Define a hidden field for catalog_id
+    # catalog_id = forms.IntegerField(widget=forms.HiddenInput())
 
 class InventoryUpdateForm(ModelForm):
     class Meta:

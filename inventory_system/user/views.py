@@ -8,12 +8,10 @@ from django.contrib.auth.decorators import login_required
 from .models import Profile
 from user.forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileForm
 from django.core.exceptions import ObjectDoesNotExist
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import User, Group
 from django.views.decorators.csrf import csrf_protect
 from django.contrib.auth import logout
 from orders.models import Invoice, cart, cart_records, customerOrderHistory, OrderAmount
-from django.db import transaction
-from django.contrib.auth.models import User
 
 
 @login_required
@@ -21,14 +19,14 @@ def logout(request):
     return render(request, 'users/login.html')
 
 # custom 404 view
+
+
 @login_required
 def custom_404(request, exception):
     return render(request, 'users/404.html', status=404)
 
 
 class RegisterView(View):
-    group_name = ''  # Provide a default value
-    
     form_class = RegisterForm
     initial = {'key': 'value'}
     template_name = 'users/register.html'
@@ -49,8 +47,10 @@ class RegisterView(View):
         form = self.form_class(request.POST)
 
         if form.is_valid():
-            user = form.save(commit=False)  # Save the form data but don't commit to the database yet
-            
+            print("Form data:", request.POST)
+            # Save the form data but don't commit to the database yet
+            user = form.save(commit=False)
+
             role = form.cleaned_data['role']
 
             group_name = ''
@@ -59,8 +59,8 @@ class RegisterView(View):
                 group_name = 'customer'
             elif role == 'admin':
                 group_name = 'admin'
-            elif role == 'farmer':
-                group_name = 'farmer'
+            elif role == 'supplier':
+                group_name = 'supplier'
 
             try:
                 group = Group.objects.get(name=group_name)
@@ -84,6 +84,8 @@ class RegisterView(View):
         return render(request, self.template_name, {'form': form})
 
 # Class based view that extends from the built in login view to add a remember me functionality
+
+
 class CustomLoginView(LoginView):
     form_class = LoginForm
 
@@ -125,7 +127,8 @@ def profile(request):
 
     if request.method == 'POST':
         user_form = UpdateUserForm(request.POST, instance=request.user)
-        profile_form = UpdateProfileForm(request.POST, request.FILES, instance=request.user.profile)
+        profile_form = UpdateProfileForm(
+            request.POST, request.FILES, instance=request.user.profile)
 
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
@@ -135,15 +138,20 @@ def profile(request):
     else:
         user_form = UpdateUserForm(instance=request.user)
         profile_form = UpdateProfileForm(instance=request.user.profile)
-        
+
         # update order management
     customer_name = request.session['old_username']
-    Invoice.objects.filter(billing_name=customer_name).update(billing_email=logged_user.email)
-    cart.objects.filter(customer=customer_name).update(customer=request.user.username)
-    customerOrderHistory.objects.filter(customer=customer_name).update(customer=request.user.username)
-    cart_records.objects.filter(customer=customer_name).update(customer=request.user.username)
-    OrderAmount.objects.filter(customer=customer_name).update(customer=request.user.username)
-    
+    Invoice.objects.filter(billing_name=customer_name).update(
+        billing_email=logged_user.email)
+    cart.objects.filter(customer=customer_name).update(
+        customer=request.user.username)
+    customerOrderHistory.objects.filter(
+        customer=customer_name).update(customer=request.user.username)
+    cart_records.objects.filter(customer=customer_name).update(
+        customer=request.user.username)
+    OrderAmount.objects.filter(customer=customer_name).update(
+        customer=request.user.username)
+
     users = None
     if request.user.is_superuser:
         users = User.objects.exclude(is_superuser=True)
@@ -152,9 +160,9 @@ def profile(request):
         return render(request, 'users/admin_profile.html', {'users': users})
     else:
         return render(request, 'users/profile.html', {'user_form': user_form, 'profile_form': profile_form, 'profile': profile_info, 'user': logged_user})
-    
+
+
 def view_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     # You can fetch additional information related to the user if needed
     return render(request, 'users/view_user.html', {'user': user})
-    
