@@ -258,6 +258,10 @@
     z-index: 1000;
     }
     
+    .card {
+    min-height: 300px; /* Adjust the height as needed */
+    }
+
 
 </style>
 
@@ -296,21 +300,21 @@
                         <a class="nav-link active text-white" href="{% url 'order_history' %}">Order History</a>
                     </li>
                     {% else %}
+
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle active text-white" href="#" id="navbarDropdown" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
-                            Inventory
+                            Catalogue
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{% url 'stock' %}">Stock List</a></li>
+                            <li><a class="dropdown-item" href="{% url 'catalog_list' %}">Catalog</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="{% url 'dashboard' %}">Product Performance</a></li>
+                            <li><a class="dropdown-item" href="{% url 'inventory_list' %}">Inventory List</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="{% url 'analyze_sales_data' %}">Forecast</a></li>
                         </ul>
                     </li>
 
@@ -327,19 +331,18 @@
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle active text-white" href="#" id="navbarDropdown" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
-                            Transactions
+                            Analytics
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdown">
-                            <li><a class="dropdown-item" href="{% url 'suppliers-list' %}">Suppliers</a></li>
+                            <li><a class="dropdown-item" href="{% url 'dashboard' %}">Product Performance</a></li>
                             <li>
                                 <hr class="dropdown-divider">
                             </li>
-                            <li><a class="dropdown-item" href="{% url 'purchases-list' %}">Purchases</a></li>
-                            <li>
-                                <hr class="dropdown-divider">
-                            </li>
+                            <li><a class="dropdown-item" href="{% url 'analyze_sales_data' %}">Forecast</a></li>
                         </ul>
                     </li>
+
+
                     {% endif %}
 
                     {% if is_customer %}
@@ -521,6 +524,60 @@
     <br>
     <br>
     <br>
+
+    <section class="ratings-testimonials-section sec_space_small" data-aos="fade-up" data-aos-duration="2000">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="card-title">Customer Ratings</h2>
+                            <ul class="ratings-list">
+                                {% for rating in latest_ratings %}
+                                    <li>
+                                        <div class="rating">
+                                            <span class="user">{{ rating.user }}</span> rated
+                                            <span class="product">{{ rating.inventory.name }}</span>:
+                                            <span class="stars">
+                                                {% for choice in rating.RATING_CHOICES %}
+                                                    {% if choice.0 <= rating.rating %}
+                                                        <i class="fas fa-star"></i> <!-- Filled star -->
+                                                    {% else %}
+                                                        <i class="far fa-star"></i> <!-- Empty star -->
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </span>
+                                            
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="card-title">Latest Testimonials</h2>
+                            <ul class="testimonials-list">
+                                {% for testimonial in latest_testimonials %}
+                                    <li>
+                                        <div class="testimonial">
+                                            <span class="user">{{ testimonial.user }}</span>:
+                                            <span class="quote">{{ testimonial.text }}</span>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+    
+    
+
     <br>
     <br>
     <br>

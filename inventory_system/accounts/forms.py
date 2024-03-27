@@ -1,8 +1,20 @@
 from django import forms
 from django.forms import ModelForm, ChoiceField, Select, Form
-from .models import Inventory, Order, Subscriber
+from .models import Catalog, Inventory, Order, Subscriber
 from orders.models import Invoice
 
+class CatalogForm(forms.ModelForm):
+    class Meta:
+        model = Catalog
+        fields = ['name', 'description']
+
+class InventoryForm(forms.ModelForm):
+    class Meta:
+        model = Inventory
+        fields = ['catalog', 'name', 'cost_per_item', 'quantity_in_stock', 'quantity_sold', 'barcode', 'image']
+
+    # Define a hidden field for catalog_id
+    # catalog_id = forms.IntegerField(widget=forms.HiddenInput())
 
 class InventoryUpdateForm(ModelForm):
     class Meta:
@@ -58,6 +70,7 @@ class SalesDataUploadForm(forms.Form):
     sales_data = forms.FileField()
 
 class SubscriptionForm(forms.ModelForm):
+    email = forms.EmailField(label='Email address')
     class Meta:
         model = Subscriber
         fields = ['email']
@@ -70,6 +83,8 @@ class BulkEmailForm(forms.Form):
     ]
     
     recipient_type = forms.ChoiceField(choices=RECIPIENT_CHOICES, label='Recipient Type')
+    subject = forms.CharField(max_length=100, label='Subject')
     message = forms.CharField(widget=forms.Textarea, label='Message')
+    file = forms.FileField(label='Upload File', required=False)
 
 

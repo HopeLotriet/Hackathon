@@ -2,9 +2,17 @@
 from django.db import models
 from django.contrib.auth.models import User
 from orders.models import Order
+from django.contrib.auth.models import User
+
+class Catalog(models.Model):
+    name = models.CharField(max_length=100)
+    is_deleted = models.BooleanField(default=False)
+    description = models.CharField(max_length=200)
+    supplier = models.ForeignKey(User, on_delete=models.CASCADE)
 
 
 class Inventory(models.Model):
+    catalog = models.ForeignKey(Catalog, on_delete=models.CASCADE)
     name = models.CharField(max_length=100, null=False, blank=False)
     cost_per_item = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
     quantity_in_stock = models.IntegerField(null=False, blank=False)
@@ -15,15 +23,14 @@ class Inventory(models.Model):
     is_deleted = models.BooleanField(default=False)
     barcode = models.ImageField(upload_to='barcodes/', blank=True, null=True)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
-    farmer = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
-
-     # New field to store historical sales data
+    # New field to store historical sales data
     sales_data = models.JSONField(null=True, blank=True)
 
     def update_sales_data(self):
         # Fetch historical sales records for this inventory item
-        historical_sales = Order.objects.filter(product=self).exclude(order_status='pending').order_by('order_date')
+        historical_sales = Order.objects.filter(product=self).exclude(
+            order_status='pending').order_by('order_date')
 
         # Update the sales_data dictionary
         sales_data = {
@@ -37,8 +44,10 @@ class Inventory(models.Model):
 
     def __str__(self) -> str:
         return self.name
-    
+
 # Create your models here.
+
+
 class CustomerPermissions(models.Model):
     class Meta:
         permissions = (
@@ -52,6 +61,7 @@ class CustomerPermissions(models.Model):
             ("view_product_details", "Can view product details"),
         )
 
+
 class StaffPermissions(models.Model):
     class Meta:
         permissions = (
@@ -61,6 +71,7 @@ class StaffPermissions(models.Model):
             # ("view_inventory", "Manage inventory")
             # Add more permissions as needed
         )
+
 
 class SupplierPermissions(models.Model):
     class Meta:
@@ -72,10 +83,23 @@ class SupplierPermissions(models.Model):
             # Add more permissions as needed
         )
 
+class accountantPermissions(models.Model):
+  
+    class Meta:
+        permissions = (
+            ("view_records", "Manage records"),
+            ("add_record", "Add record"),
+            ("update_record", "Update records"),
+            # Add more permissions as needed
+        )
+
+
 class SalesData(models.Model):
-    product = models.ForeignKey(Inventory, on_delete=models.CASCADE, default=None)
+    product = models.ForeignKey(
+        Inventory, on_delete=models.CASCADE, default=None)
     date = models.DateField()
     quantity_sold = models.IntegerField()
+
 
 class Subscriber(models.Model):
     email = models.EmailField(unique=True)
@@ -86,7 +110,21 @@ class Subscriber(models.Model):
     def __str__(self):
         return self.email
     
+class Rating(models.Model):
+    RATING_CHOICES = (
+        (1, '1 star'),
+        (2, '2 stars'),
+        (3, '3 stars'),
+        (4, '4 stars'),
+        (5, '5 stars'),
+    )
 
+    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(choices=RATING_CHOICES)
 
-
-
+class Testimonial(models.Model):
+    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)

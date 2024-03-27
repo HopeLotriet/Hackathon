@@ -736,4 +736,3 @@ def review_payment(request, id):
             return response
     else:
         return HttpResponse('The PDF file does not exist.', status=404)
-    

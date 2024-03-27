@@ -3,10 +3,10 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
-from .models import Inventory, SalesData, Subscriber
+from .models import Catalog, Inventory, SalesData, Subscriber, Rating, Testimonial
 from orders.models import OrderAmount
 from django.shortcuts import get_object_or_404
-from .forms import InventoryUpdateForm, AddInventoryForm, SubscriptionForm, BulkEmailForm
+from .forms import InventoryUpdateForm, AddInventoryForm, SubscriptionForm, BulkEmailForm, CatalogForm, InventoryForm
 from django.conf import settings
 from django_pandas.io import read_frame
 import pandas as pd
@@ -14,110 +14,115 @@ import plotly
 import plotly.express as px
 import json
 from django.core.mail import send_mail
-from django.core.mail import EmailMessage
 from barcode.writer import ImageWriter
 from io import BytesIO
 from django.core.files.base import ContentFile
 from barcode.codex import Code128
-from django_filters.views import FilterView
-from .filters import StockFilter
 import csv
 from matplotlib import pyplot as plt
 from statsmodels.tsa.arima.model import ARIMA
 from django.contrib.auth.models import User
+from django.core.mail import EmailMultiAlternatives
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
+
+LOW_QUANTITY = getattr(settings, 'LOW_QUANTITY', 5)
 
 @login_required
 def home(request):
     logged_user = request.user
     request.session['old_username'] = logged_user.username
+
+    # Retrieve cart count for the logged-in user
     if OrderAmount.objects.filter(customer=logged_user).exists():
         cart_record = get_object_or_404(OrderAmount, customer=logged_user)
         request.session['cart_count'] = cart_record.cart_count
     else:
         request.session['cart_count'] = 0
-    return render(request, 'accounts/home.html')
 
+    # Retrieve latest ratings and testimonials
+    latest_ratings = Rating.objects.all().order_by('-id')[:5]
+    latest_testimonials = Testimonial.objects.all().order_by('-created_at')[:5]
 
-class StockListView(FilterView):
-    filterset_class = StockFilter
-    queryset = Inventory.objects.filter(is_deleted=False)
-    template_name = 'stock.html'
-    paginate_by = 10
-
-
-login_required
-def products(request):
-    inventories = Inventory.objects.all()
     context = {
-        "title": "Inventory List",
-        "inventories": inventories
+        'latest_ratings': latest_ratings,
+        'latest_testimonials': latest_testimonials,
     }
-    return render(request, 'orders/products.html', context=context)
+
+    return render(request, 'accounts/home.html', context)
 
 
 @login_required
-def stock(request):
-    inventories = Inventory.objects.all()
+def catalog_list(request):
+    catalogs = Catalog.objects.filter(supplier=request.user)
+    return render(request, 'accounts/catalog_list.html', {'catalogs': catalogs})
 
+@login_required
+def catalog_create(request):
+    if request.method == 'POST':
+        form = CatalogForm(request.POST)
+        if form.is_valid():
+            catalog = form.save(commit=False)
+            catalog.supplier = request.user  # Assign the current user as the supplier
+            catalog.save()
+            return redirect('catalog_list')
+    else:
+        form = CatalogForm()
+    return render(request, 'accounts/catalog_create.html', {'form': form})
+
+@login_required
+def inventory_list(request):
+    inventories = Inventory.objects.filter(catalog__supplier=request.user)
+    
     # Check for low stock items
-    low_stock_inventory = inventories.filter(
-        quantity_in_stock__lte=LOW_QUANTITY)
+    low_stock_inventory = inventories.filter(quantity_in_stock__lte=LOW_QUANTITY)
 
     if low_stock_inventory.exists():
         # Display a message for each low stock item
         for item in low_stock_inventory:
-            messages.warning(
-                request, f"Low stock alert: {item.name} - quantity in stock: {item.quantity_in_stock}")
+            messages.warning(request, f"Low stock alert: {item.name} - quantity in stock: {item.quantity_in_stock}")
 
-    context = {
-        "title": "Inventory List",
-        "inventories": inventories
-    }
-    return render(request, 'accounts/stock.html', context=context)
+    paginator = Paginator(inventories, 10)  # Show 10 items per page
 
+    page = request.GET.get('page')
+    try:
+        inventories = paginator.page(page)
+    except PageNotAnInteger:
+        # If page is not an integer, deliver first page.
+        inventories = paginator.page(1)
+    except EmptyPage:
+        # If page is out of range (e.g. 9999), deliver last page of results.
+        inventories = paginator.page(paginator.num_pages)
 
-LOW_QUANTITY = getattr(settings, 'LOW_QUANTITY', 5)
-
-
-@login_required
-def per_product(request, pk):
-    inventory = get_object_or_404(Inventory, pk=pk)
-    context = {
-        'inventory': inventory
-    }
-    return render(request, "accounts/per_product.html", context=context)
-
+    return render(request, 'accounts/inventory_list.html', {'inventories': inventories})
 
 @login_required
-def update(request, pk):
-    inventory = get_object_or_404(Inventory, pk=pk)
-    if request.method == "POST":
-        updateForm = InventoryUpdateForm(
-            request.POST, request.FILES, instance=inventory)
-        if updateForm.is_valid():
-            inventory.name = updateForm.data['name']
-            inventory.quantity_in_stock = updateForm.data['quantity_in_stock']
-            inventory.quantity_sold = updateForm.data['quantity_sold']
-            inventory.cost_per_item = updateForm.data['cost_per_item']
-            inventory.sales = float(
-                inventory.cost_per_item) * float(inventory.quantity_sold)
+def create_inventory(request):
+    if request.method == 'POST':
+        form = InventoryForm(request.POST)
+        if form.is_valid():
+            inventory = form.save(commit=False)
+            inventory.sales = inventory.cost_per_item * inventory.quantity_sold
+            
+            # Generate barcode and save it to the new inventory item
+            barcode_data = str(inventory.pk) + " " + inventory.name  # Barcode data
+            code128 = Code128(barcode_data, writer=ImageWriter())
+            barcode_image = code128.render()
+
+            # Convert the barcode image to PNG format
+            image_io = BytesIO()
+            barcode_image.save(image_io, format='PNG')
+            barcode_image_file = ContentFile(image_io.getvalue())
+            inventory.barcode.save(f'barcode_{barcode_data}.png', barcode_image_file, save=False)
+
             inventory.save()
-            inventory.image = updateForm['image']
-            messages.success(request, "Update Successful")
-            return redirect(reverse('per_product', kwargs={'pk': pk}))
+
+            messages.success(request, "Successfully Added Product")
+            return redirect('inventory_list')
     else:
-        updateForm = InventoryUpdateForm(instance=inventory)
+        form = InventoryForm()
 
-    return render(request, 'accounts/inventory_update.html', {'form': updateForm})
-
-
-@login_required
-def delete(request, pk):
-    inventory = get_object_or_404(Inventory, pk=pk)
-    inventory.delete()
-    messages.success(request, "Inventory Deleted")
-    return redirect('stock')
+    return render(request, 'accounts/create_inventory.html', {'form': form})
 
 
 @login_required
@@ -152,6 +157,86 @@ def add_product(request):
         updateForm = AddInventoryForm()
 
     return render(request, 'accounts/inventory_add.html', {'form': updateForm})
+
+@login_required
+def per_product(request, pk):
+    inventory = get_object_or_404(Inventory, pk=pk)
+    context = {
+        'inventory': inventory
+    }
+    return render(request, "accounts/per_product.html", context=context)
+
+def products(request):
+    catalogs = Catalog.objects.filter(is_deleted=False)  # Fetch all non-deleted catalogs
+    context = {
+        "title": "Products",
+        "catalogs": catalogs
+    }
+    return render(request, 'orders/products.html', context=context)
+
+@login_required
+def update(request, pk):
+    inventory = get_object_or_404(Inventory, pk=pk)
+    if request.method == "POST":
+        updateForm = InventoryUpdateForm(request.POST, request.FILES, instance=inventory)
+        if updateForm.is_valid():
+            inventory = updateForm.save(commit=False)
+            inventory.sales = inventory.cost_per_item * inventory.quantity_sold
+            inventory.save()
+            messages.success(request, "Update Successful")
+            return redirect(reverse('per_product', kwargs={'pk': pk}))
+    else:
+        updateForm = InventoryUpdateForm(instance=inventory)
+
+    return render(request, 'accounts/inventory_update.html', {'form': updateForm})
+
+@login_required
+def delete(request, pk):
+    inventory = get_object_or_404(Inventory, pk=pk)
+    inventory.is_deleted = True
+    inventory.save()
+    messages.success(request, "Inventory Deleted")
+    return redirect('inventory_list')
+
+@login_required
+def add_product(request):
+    if request.method == "POST":
+        updateForm = AddInventoryForm(request.POST, request.FILES)
+        if updateForm.is_valid():
+            new_inventory = updateForm.save(commit=False)
+            new_inventory.sales = new_inventory.cost_per_item * new_inventory.quantity_sold
+            new_inventory.save()
+            messages.success(request, "Successfully Added Product")
+            return redirect('stock')  # You can adjust the redirect URL
+    else:
+        updateForm = AddInventoryForm()
+
+    return render(request, 'accounts/inventory_add.html', {'form': updateForm})
+
+
+
+
+# @login_required
+# def update(request, pk):
+#     inventory = get_object_or_404(Inventory, pk=pk)
+#     if request.method == "POST":
+#         updateForm = InventoryUpdateForm(
+#             request.POST, request.FILES, instance=inventory)
+#         if updateForm.is_valid():
+#             inventory.name = updateForm.data['name']
+#             inventory.quantity_in_stock = updateForm.data['quantity_in_stock']
+#             inventory.quantity_sold = updateForm.data['quantity_sold']
+#             inventory.cost_per_item = updateForm.data['cost_per_item']
+#             inventory.sales = float(
+#                 inventory.cost_per_item) * float(inventory.quantity_sold)
+#             inventory.save()
+#             inventory.image = updateForm['image']
+#             messages.success(request, "Update Successful")
+#             return redirect(reverse('per_product', kwargs={'pk': pk}))
+#     else:
+#         updateForm = InventoryUpdateForm(instance=inventory)
+
+#     return render(request, 'accounts/inventory_update.html', {'form': updateForm})
 
 
 @login_required
@@ -283,23 +368,7 @@ def generate_sales_report(request):
 
     return response
 
-
 @login_required
-def subscription(request):
-    if request.method == 'POST':
-        form = SubscriptionForm(request.POST)
-        if form.is_valid():
-            email = form.cleaned_data['email']
-            subscriber, created = Subscriber.objects.get_or_create(email=email)
-            if created:
-                # Send confirmation email
-                send_subscription_confirmation_email(email)
-            return HttpResponseRedirect(reverse('subscription'))
-    else:
-        form = SubscriptionForm()
-    return render(request, 'accounts/subscription.html', {'form': form})
-
-
 def analyze_sales_data(request):
     # Get the data from the Inventory model
     inventories = Inventory.objects.all()
@@ -359,32 +428,114 @@ def analyze_sales_data(request):
     # Pass the forecast data to the template
     return render(request, 'accounts/analyze_sales_data.html', context)
 
+@login_required
+def subscription(request):
+    if request.method == 'POST':
+        form = SubscriptionForm(request.POST)
+        if form.is_valid():
+            try:
+                email = form.cleaned_data['email']
+                subscriber, created = Subscriber.objects.get_or_create(email=email)
+                if created:
+                    # Send confirmation email
+                    send_subscription_confirmation_email(email)
+                messages.success(request, "You have successfully subscribed!")
+                return HttpResponseRedirect(reverse('subscription_confirmation'))
+            except Exception as e:
+                messages.error(request, f"An error occurred: {str(e)}")
+    else:
+        form = SubscriptionForm()
+    return render(request, 'accounts/subscription.html', {'form': form})
 
+
+def send_subscription_confirmation_email(email):
+    subject = 'Subscription Confirmation'
+    message = 'Thank you for subscribing to FarmFresh! You will receive updates and promotions in your inbox.'
+    sender_email = settings.EMAIL_HOST_USER
+    recipient_list = [email]
+    send_mail(subject, message, sender_email, recipient_list)
+
+
+@login_required
 def send_bulk_emails(request):
-    form = BulkEmailForm(request.POST or None)
+    if request.method == 'POST':
+        form = BulkEmailForm(request.POST, request.FILES)
+        if form.is_valid():
+            recipient_type = form.cleaned_data['recipient_type']
+            subject = form.cleaned_data['subject']
+            message = form.cleaned_data['message']
+            file = request.FILES.get('file')
+            recipients = []
 
-    if request.method == 'POST' and form.is_valid():
-        recipient_type = form.cleaned_data['recipient_type']
-        message = form.cleaned_data['message']
-        recipients = []
+            # Filter subscribers based on recipient type
+            if recipient_type == 'all':
+                subscribers = Subscriber.objects.all()
+            elif recipient_type == 'active':
+                subscribers = Subscriber.objects.filter(is_active=True)
+            elif recipient_type == 'inactive':
+                subscribers = Subscriber.objects.filter(is_active=False)
+            else:
+                # Handle invalid recipient type
+                return HttpResponseRedirect(reverse('send_bulk_emails'))
 
-        if recipient_type == 'all':
-            subscribers = Subscriber.objects.all()
+            # Get email addresses of selected recipients
             recipients = [subscriber.email for subscriber in subscribers]
 
-        # Send bulk emails only if recipients exist
-        if recipients:
-            send_mail(
-                'Your Subject',  # Subject
-                message,         # Message body
-                settings.EMAIL_HOST_USER,  # Sender's email from Django settings
-                recipients,      # List of recipients
-                fail_silently=False,  # Raise an exception if sending fails
-                auth_user=settings.EMAIL_HOST_USER,  # SMTP server username
-                auth_password=settings.EMAIL_HOST_PASSWORD,  # SMTP server password
-                connection=None,
-            )
+            # Send bulk emails only if recipients exist
+            if recipients:
+                # Send emails
+                for recipient in recipients:
+                    email = EmailMultiAlternatives(subject, message, settings.EMAIL_HOST_USER, [recipient])
+                    if file:
+                        email.attach(file.name, file.read(), file.content_type)
+                    email.send()
 
-            return render(request, 'success.html')  # Render a success page or redirect as needed
+                return render(request, 'accounts/success.html')  # Render a success page or redirect as needed
+    else:
+        form = BulkEmailForm()
 
-    return render(request, 'accounts/bulk_email.html', {'form': form})
+    # Retrieve the list of subscribers and pass it to the template
+    subscribers = Subscriber.objects.all()
+    context = {
+        'form': form,
+        'subscribers': subscribers,
+    }
+
+    return render(request, 'accounts/bulk_email.html', context)
+
+@login_required
+def rate(request):
+    catalogs = Catalog.objects.filter(is_deleted=False)  # Fetch all non-deleted catalogs
+    context = {
+        "title": "Products",
+        "catalogs": catalogs
+    }
+    return render(request, 'accounts/rate.html', context)
+
+
+@login_required
+def rate_inventory(request, inventory_id):
+    if request.method == 'POST':
+        inventory = Inventory.objects.get(id=inventory_id)
+        user = request.user
+        rating = request.POST.get('rating')
+        Rating.objects.create(inventory=inventory, user=user, rating=rating)
+        messages.success(request, 'Thank you for rating!')
+    return redirect('rate')  # Redirect to the rate page
+
+@login_required
+def submit_testimonial(request, inventory_id):
+    if request.method == 'POST':
+        inventory = Inventory.objects.get(id=inventory_id)
+        user = request.user
+        text = request.POST.get('testimonial')
+        Testimonial.objects.create(inventory=inventory, user=user, text=text)
+        messages.success(request, 'Testimonial submitted successfully!')
+        
+        # Send email notification to the supplier
+        supplier_email = inventory.catalog.supplier.email
+        subject = 'New testimonial submitted'
+        message = f'A new testimonial has been submitted for the product "{inventory.name}".'
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [supplier_email])
+
+    return redirect('rate')  # Redirect to the rate page

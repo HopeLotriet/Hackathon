@@ -45,7 +45,7 @@ class RegisterForm(UserCreationForm):
     ROLE_CHOICES = (
         ('admin', 'Admin'),
         ('customer', 'Customer'),
-        ('farmer', 'Farmer'),
+        ('supplier', 'Supplier'),
     )
     role = forms.ChoiceField(choices=ROLE_CHOICES)
 

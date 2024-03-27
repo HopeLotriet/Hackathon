@@ -4,29 +4,28 @@
 {% block title %}FarmFresh - Invoicing{% endblock %}
 
 {% block content %}
-
 <div class="content-wrapper">
-    <div class="container mt-5 mb-5">
+    <div class="container mt-5 mb-5" style="padding-top: 2.0rem;">
         <h1 class="text-center mb-4">Invoice Details</h1>
-    
+
         <div class="row">
             <form class="table-bordered custom-border">
-               
+
                 <div class="container bg">
-            
+
                     <br>
-            
+
                     <div id="printArea" class="bg">
-            
+
                         <table class="table outer-box inner-box mx-auto">
                             <tbody>
-            
+
                                 <tr>
                                     <td class="text-center">
                                         <p style="font-size: 3.0rem;">PURCHASE INVOICE</p>
                                     </td>
                                 </tr>
-            
+
                                 <tr>
                                     <td class="text-center">
                                         <span style="font-size: 2.5rem;">FarmFresh</span> <br>
@@ -37,11 +36,11 @@
                                 </tr>
                                 <tr>
                                     <td>
-            
+
                                     </td>
                                 </tr>
-                              
-                                
+
+
                                 <tr>
                                     <td>
                                         <table class="table outer-box mx-auto">
@@ -54,6 +53,21 @@
                                                     <td class="inner-box font-weight-bold" style="width: 25%;">INVOICE NO</td>
                                                     <td class="inner-box" style="width: 25%;">{{ invoice.invoice_no }}</td>
                                                 </tr>
+
+                                                <!-- Include supplier details if available -->
+                                                {% if supplier_info %}
+                                                <tr>
+                                                    <td class="inner-box font-weight-bold" style="width: 50%;">SUPPLIER DETAILS</td>
+                                                    <td class="inner-box font-weight-bold" style="width: 25%;">SUPPLIER NAME</td>
+                                                    <td class="inner-box" style="width: 25%;">{{ supplier_info.name }}</td>
+                                                </tr>
+                                                <tr>
+                                                    <td class="inner-box" style="width: 50%;">{{ supplier_info.address }}</td>
+                                                    <td class="inner-box font-weight-bold" style="width: 25%;">SUPPLIER EMAIL</td>
+                                                    <td class="inner-box" style="width: 25%;">{{ supplier_info.email }}</td>
+                                                </tr>
+                                                {% endif %}
+                                                <!-- End of supplier details -->
                                                 <tr>
                                                     <td class="inner-box" style="width: 50%;">{{ invoice.billing_name }}</td>
                                                     <td class="inner-box font-weight-bold" style="width: 25%;">DATE</td>
@@ -70,11 +84,13 @@
                                                     <td class="inner-box font-weight-bold" style="width: 25%;">PAYMENT METHOD</td>
                                                     <td class="inner-box align-middle" style="width: 25%;">
                                                         {% if invoice.payment_method == '*******************' %}
-                                                            <a href="{% url 'edit_invoice' invoice.id %}">Choose payment method</a>
+                                                        <a href="{% url 'edit_invoice' invoice.id %}">Choose payment method</a>
                                                         {% else %}
-                                                            {{ invoice.payment_method }}
-                                                            <a href="{% url 'edit_invoice' invoice.id %}">Change</a>
+                                                        {{ invoice.payment_method }}
+                                                        <a href="{% url 'edit_invoice' invoice.id %}">Change</a>
                                                         {% endif %}
+                                                   
+
                                                     </td>
                                                 </tr>
                                             
