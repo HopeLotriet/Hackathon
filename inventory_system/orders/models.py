@@ -64,6 +64,9 @@ class Order(models.Model):
     payment_status = models.CharField(max_length=100, default="")
     order_status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='pending')
 
+    catalog = models.ForeignKey('accounts.Catalog', on_delete=models.CASCADE, related_name='orders', null=True)
+    supplier_email = models.EmailField(null=True)
+
     def __str__(self):
         return f"Order #{self.id}- {self.order_id} - {self.product} - {self.customer} - {self.quantity_ordered} units - Status: {self.order_status}"
     
@@ -105,6 +108,8 @@ class Invoice(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='draft')
     pdf_file = models.FileField(upload_to='pdfs/', null=True, blank=True)
 
+    supplier_info = models.JSONField(blank=True, null=True)
 
     def __str__(self):
         return f"Invoice #{self.pk}"
+    

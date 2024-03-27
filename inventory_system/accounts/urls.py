@@ -19,6 +19,9 @@ urlpatterns = [
     path('analyze-sales-data/', views.analyze_sales_data, name='analyze_sales_data'),
     path('subscription/', login_required(views.subscription), name='subscription'),
     path('send_bulk_emails/',login_required(views.send_bulk_emails), name='send_bulk_emails'),
-    path('create_inventory/', views.create_inventory, name='create_inventory'),
-    path('inventory_list/', views.inventory_list, name='inventory_list')
+    path('create_inventory/', login_required(views.create_inventory), name='create_inventory'),
+    path('inventory_list/', login_required(views.inventory_list), name='inventory_list'),
+    path('rate/', login_required(views.rate), name='rate'),
+    path('rate_inventory/<int:inventory_id>/', login_required(views.rate_inventory), name='rate_inventory'),
+    path('submit_testimonial/<int:inventory_id>/', login_required(views.submit_testimonial), name='submit_testimonial')
 ]

@@ -108,3 +108,22 @@ class Subscriber(models.Model):
 
     def __str__(self):
         return self.email
+    
+class Rating(models.Model):
+    RATING_CHOICES = (
+        (1, '1 star'),
+        (2, '2 stars'),
+        (3, '3 stars'),
+        (4, '4 stars'),
+        (5, '5 stars'),
+    )
+
+    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    rating = models.IntegerField(choices=RATING_CHOICES)
+
+class Testimonial(models.Model):
+    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True)

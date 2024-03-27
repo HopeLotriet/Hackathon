@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
-from .models import Catalog, Inventory, SalesData, Subscriber
+from .models import Catalog, Inventory, SalesData, Subscriber, Rating, Testimonial
 from orders.models import OrderAmount
 from django.shortcuts import get_object_or_404
 from .forms import InventoryUpdateForm, AddInventoryForm, SubscriptionForm, BulkEmailForm, CatalogForm, InventoryForm
@@ -23,10 +23,8 @@ from matplotlib import pyplot as plt
 from statsmodels.tsa.arima.model import ARIMA
 from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
-from django.views.generic.edit import CreateView
-from django.urls import reverse_lazy
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+
 
 LOW_QUANTITY = getattr(settings, 'LOW_QUANTITY', 5)
 
@@ -34,12 +32,25 @@ LOW_QUANTITY = getattr(settings, 'LOW_QUANTITY', 5)
 def home(request):
     logged_user = request.user
     request.session['old_username'] = logged_user.username
+
+    # Retrieve cart count for the logged-in user
     if OrderAmount.objects.filter(customer=logged_user).exists():
         cart_record = get_object_or_404(OrderAmount, customer=logged_user)
         request.session['cart_count'] = cart_record.cart_count
     else:
         request.session['cart_count'] = 0
-    return render(request, 'accounts/home.html')
+
+    # Retrieve latest ratings and testimonials
+    latest_ratings = Rating.objects.all().order_by('-id')[:5]
+    latest_testimonials = Testimonial.objects.all().order_by('-created_at')[:5]
+
+    context = {
+        'latest_ratings': latest_ratings,
+        'latest_testimonials': latest_testimonials,
+    }
+
+    return render(request, 'accounts/home.html', context)
+
 
 @login_required
 def catalog_list(request):
@@ -491,3 +502,40 @@ def send_bulk_emails(request):
     }
 
     return render(request, 'accounts/bulk_email.html', context)
+
+@login_required
+def rate(request):
+    catalogs = Catalog.objects.filter(is_deleted=False)  # Fetch all non-deleted catalogs
+    context = {
+        "title": "Products",
+        "catalogs": catalogs
+    }
+    return render(request, 'accounts/rate.html', context)
+
+
+@login_required
+def rate_inventory(request, inventory_id):
+    if request.method == 'POST':
+        inventory = Inventory.objects.get(id=inventory_id)
+        user = request.user
+        rating = request.POST.get('rating')
+        Rating.objects.create(inventory=inventory, user=user, rating=rating)
+        messages.success(request, 'Thank you for rating!')
+    return redirect('rate')  # Redirect to the rate page
+
+@login_required
+def submit_testimonial(request, inventory_id):
+    if request.method == 'POST':
+        inventory = Inventory.objects.get(id=inventory_id)
+        user = request.user
+        text = request.POST.get('testimonial')
+        Testimonial.objects.create(inventory=inventory, user=user, text=text)
+        messages.success(request, 'Testimonial submitted successfully!')
+        
+        # Send email notification to the supplier
+        supplier_email = inventory.catalog.supplier.email
+        subject = 'New testimonial submitted'
+        message = f'A new testimonial has been submitted for the product "{inventory.name}".'
+        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [supplier_email])
+
+    return redirect('rate')  # Redirect to the rate page
