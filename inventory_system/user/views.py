@@ -6,6 +6,7 @@ from django.contrib.messages.views import SuccessMessageMixin
 from django.views import View
 from django.contrib.auth.decorators import login_required
 from .models import Profile
+from accounts.models import Inventory
 from user.forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import Group
@@ -75,6 +76,11 @@ class RegisterView(View):
             user.save()  # Now commit the changes to the database
 
             user.groups.add(group)  # Add the user to the group after saving
+            
+            # Check if the user is a farmer and create an inventory for them
+            if role == 'farmer':
+                inventory = Inventory(farmer=user, name='Example Inventory', cost_per_item=0, quantity_in_stock=0, quantity_sold=0)
+                inventory.save()
 
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}')

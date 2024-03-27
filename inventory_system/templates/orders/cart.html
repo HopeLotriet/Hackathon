@@ -4,7 +4,6 @@
 {% block title %}Cart{% endblock %}
 
 {% block content %}
-
 <div class="content-wrapper">
     <div class="container mt-5">
         <h1 class="text-center mb-4" style="padding-top: 2.0rem;">Your cart items</h1>
@@ -12,8 +11,8 @@
         {% if messages %}
         <div class="row mt-3">
             {% for message in messages %}
-                {% if message.tags == 'error' %}
-                    <div class="col-md-10 col-12 mx-auto alert alert-danger">
+                {% if message.tags == 'warning' %}
+                    <div class="col-md-10 col-12 mx-auto alert alert-warning">
                         {{ message }}
                     </div>
                 {% else %}

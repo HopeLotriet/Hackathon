@@ -1,5 +1,6 @@
 # accounts/models.py
 from django.db import models
+from django.contrib.auth.models import User
 from orders.models import Order
 
 
@@ -14,6 +15,7 @@ class Inventory(models.Model):
     is_deleted = models.BooleanField(default=False)
     barcode = models.ImageField(upload_to='barcodes/', blank=True, null=True)
     image = models.ImageField(upload_to='images/', null=True, blank=True)
+    farmer = models.ForeignKey(User, on_delete=models.CASCADE, null=True)
 
 
      # New field to store historical sales data
@@ -54,10 +56,9 @@ class StaffPermissions(models.Model):
     class Meta:
         permissions = (
             ("view_dashboard", "Can view dashboard"),
-            ("manage_orders", "Can manage orders"),
             ("manage_products", "Can manage products"),
             ("view_products", "Manage products"),
-            ("view_inventory", "Manage inventory")
+            # ("view_inventory", "Manage inventory")
             # Add more permissions as needed
         )
 
@@ -65,20 +66,11 @@ class SupplierPermissions(models.Model):
     class Meta:
         permissions = (
             ("view_inventory", "Manage inventory"),
+            ("view_products", "Manage products"),
+            ("manage_orders", "Can manage orders"),
             ("add_products", "Add products to inventory")
             # Add more permissions as needed
         )
-
-class accountantPermissions(models.Model):
-  
-    class Meta:
-        permissions = (
-            ("view_records", "Manage records"),
-            ("add_record", "Add record"),
-            ("update_record", "Update records"),
-            # Add more permissions as needed
-        )
-
 
 class SalesData(models.Model):
     product = models.ForeignKey(Inventory, on_delete=models.CASCADE, default=None)

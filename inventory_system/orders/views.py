@@ -38,10 +38,14 @@ def add_to_cart(request, item_id):
     
     #add items to cart
     item = get_object_or_404(Inventory, id=item_id)
-    item_name = item.name
-    item_cost = item.cost_per_item
-    quantities = 1
-    logged_user = request.user
+    if item.quantity_in_stock <= 0:
+        messages.warning(request, "Item out of stock!")
+        return redirect("products")
+    else:
+        item_name = item.name
+        item_cost = item.cost_per_item
+        quantities = 1
+        logged_user = request.user
 
     user_specific_items = cart.objects.filter(customer=logged_user, item=item_name)
     if user_specific_items.exists():
