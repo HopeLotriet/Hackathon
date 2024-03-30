@@ -111,11 +111,14 @@ def delete_from_cart(request, item_id):
     existing_amount.cart_count -= item_quantity #decrease cart count
     
     item.delete()
-    existing_amount.save() 
-    request.session['cart_count'] = existing_amount.cart_count
-    messages.success(request, "Item removed from cart")
+    existing_amount.save()
 
-  
+    request.session['cart_count'] = existing_amount.cart_count
+    
+    if existing_amount.amount_due <= 0:
+        existing_amount.delete()
+
+    messages.success(request, "Item removed from cart")
     return redirect('view_cart')
 
 @login_required
@@ -173,15 +176,17 @@ def decrease_cart_quantity(request, item_id):
 
         #count items in cart
         request.session['cart_count'] = existing_amount.cart_count
+    
+    else:
+        pass
 
-    elif new_quantity <=0 and new_amount <= 0:
+    if new_quantity < 1:
         item.delete()
-
-    elif existing_amount.amount_due <= 0:
-        item.delete()
-
-        all_amounts = OrderAmount.objects.get(customer=logged_user)
-        all_amounts.delete()
+    else: 
+        pass
+    
+    if existing_amount.amount_due <= 0:
+        existing_amount.delete()
 
     return redirect("view_cart")
 
@@ -348,6 +353,57 @@ def return_order(request, order_id):
                 returning_orderlist.save() 
                 current_order.save()
                 invoice.save()
+
+                # Update supplier when an order has been canceled.
+                name = returning_orderlist.supplier
+                customer = invoice.billing_name
+                subject = f"Order canceled - id#{invoice.order}!"
+                email_address = returning_orderlist.supplier_email
+                sender_email = settings.EMAIL_HOST_USER
+                email_body = f"""
+                            Hello, {name}
+
+                            Please note that order #{invoice.order} has been canceled by {customer}.
+                            Ensure to facilitate the refund process where applicable.
+
+                            Best regards,
+                            FarmFresh
+                            """
+                # Create an EmailMessage object
+                email = EmailMessage(
+                    subject,
+                    email_body,
+                    sender_email,
+                    [email_address],
+                    )
+
+                # Send the email
+                email.send()
+
+
+                # Update customer for successful order return
+                customer_name = invoice.billing_name
+                customer_email = invoice.billing_email
+                customer_subject = f"Order canceled - id#{invoice.order}!"
+                email_message = f"""
+                    Hello, {customer_name}!
+
+                    Please note that your order has been successfully canceled.
+                    
+
+                    Best regards,
+                    FarmFresh
+                    """
+                    # Create an EmailMessage object
+                email_to_be_sent = EmailMessage(
+                    customer_subject,
+                    email_message,
+                    sender_email,
+                    [customer_email],
+                    )
+
+                # Send the email
+                email_to_be_sent.send()
 
                 print(f"from order: {returning_orderlist.order_id}- {returning_orderlist.payment_status}, from customer_order:{current_order.order_id}-{current_order.payment_status}, from invoice: {invoice.order}-{invoice.payment_status}- {invoice.id}")
                 messages.success(request, "Order canceled!")
@@ -591,7 +647,8 @@ def confirm_order(request, pk):
         payment_method = invoice.payment_method,
         payment_status = invoice.payment_status,
         catalog= chosen_catalog.id,
-        supplier = chosen_supplier.first_name
+        supplier = chosen_supplier.first_name,
+        supplier_email = chosen_supplier.email
         )
     order_entry.save()
     
@@ -681,6 +738,34 @@ def confirmation_email(request, pk):
         'note': note    
         }
     
+    # Notify supplier for order placed
+    order = get_object_or_404(Order, order_id=invoice.invoice_no)
+    name = order.supplier
+    customer = invoice.billing_name
+    subject = f"New order placement - id#{invoice.order}!"
+    email_address = order.supplier_email
+    sender_email = settings.EMAIL_HOST_USER
+    email_body = f"""
+                Hello, {name}
+
+                Please note that a new order has been placed by {customer}.
+                You will be notified when they upload their proof of payment.
+                Carefully review the proof of payment prior to approving the order. 
+
+                Best regards,
+                FarmFresh
+                """
+    # Create an EmailMessage object
+    email = EmailMessage(
+        subject,
+        email_body,
+        sender_email,
+        [email_address],
+        )
+
+    # Send the email
+    email.send()
+
     messages.success(request, "Checkout successful")
     return render(request, 'orders/confirm_order.html', context)
 
@@ -712,14 +797,13 @@ def upload_proof_payment(request, pk):
             print(f"from invoice: {invoice.order}, from order: {order.order_id}, from customer order: {customer_order.order_id}, invoice number selected:{invoice.id}")
             
             #Notify admin that proof of payment is uploaded by customer
-            staff_users = User.objects.filter(is_staff=True)
-            for user in staff_users:
-                name = user.username
-                customer = invoice.billing_name
-                subject = f"Proof of payment for order id#{invoice.order} uploaded"
-                email_address = user.email
-                sender_email = settings.EMAIL_HOST_USER
-                email_body = f"""
+            
+            name = order.supplier
+            customer = invoice.billing_name
+            subject = f"Proof of payment for order id#{invoice.order} uploaded"
+            email_address = order.supplier_email
+            sender_email = settings.EMAIL_HOST_USER
+            email_body = f"""
                 Hello, {name}
 
                 Please note that {customer} uploaded their proof of payment for their order.
@@ -729,7 +813,7 @@ def upload_proof_payment(request, pk):
                 FarmFresh
                 """
                         # Create an EmailMessage object
-                email = EmailMessage(
+            email = EmailMessage(
                         subject,
                         email_body,
                         sender_email,
@@ -737,7 +821,7 @@ def upload_proof_payment(request, pk):
                         )
 
                         # Send the email
-                email.send()
+            email.send()
             messages.success(request, "Upload successful")
             return redirect('order_history')
     else:
