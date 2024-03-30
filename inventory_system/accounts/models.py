@@ -10,9 +10,12 @@ class Catalog(models.Model):
     description = models.CharField(max_length=200)
     supplier = models.ForeignKey(User, on_delete=models.CASCADE)
 
+    def __str__(self):
+        return self.name
 
 class Inventory(models.Model):
     catalog = models.ForeignKey(Catalog, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=100, null=False, blank=False)
     cost_per_item = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
     quantity_in_stock = models.IntegerField(null=False, blank=False)

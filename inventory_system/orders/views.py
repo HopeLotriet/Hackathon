@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse
 from django.contrib import messages
-from accounts.models import Inventory
+from accounts.models import Inventory, Catalog
 from .models import Order, Invoice , cart, OrderAmount, customerOrderHistory, cart_records
 from user.models import Profile
 from django.shortcuts import get_object_or_404
@@ -46,47 +46,56 @@ def add_to_cart(request, item_id):
         item_cost = item.cost_per_item
         quantities = 1
         logged_user = request.user
-
-    user_specific_items = cart.objects.filter(customer=logged_user, item=item_name)
-    if user_specific_items.exists():
-        item = user_specific_items.first()
+        catalog = item.catalog_id
     
-        #increase quantity
-        new_quantity=item.quantity
-        new_quantity = new_quantity + 1
-        item.quantity = new_quantity
+    # only allow placement from one catalog
+    current_cart_item = cart.objects.filter(customer=logged_user)
 
-        #increase total_amount
-        price = item.cost_per_item
-        new_amount = item.total_amount
-        new_amount = new_amount + price
-        item.total_amount = new_amount
-        item.save()
+    if current_cart_item.last() == None or current_cart_item.last().catalog == catalog:
+
+        user_specific_items = cart.objects.filter(customer=logged_user, item=item_name)
+        if user_specific_items.exists():
+            item = user_specific_items.first()
+        
+            #increase quantity
+            new_quantity=item.quantity
+            new_quantity = new_quantity + 1
+            item.quantity = new_quantity
+
+            #increase total_amount
+            price = item.cost_per_item
+            new_amount = item.total_amount
+            new_amount = new_amount + price
+            item.total_amount = new_amount
+            item.save()
+
+        else:
+            new_entry = cart(item = item_name, cost_per_item = item_cost, quantity=quantities, total_amount=item_cost, customer=logged_user, catalog=catalog)
+            new_entry.save()
+
+    # Retrieve all instances of OrderAmount
+        existing_amounts = OrderAmount.objects.filter(customer=logged_user)
+
+        if existing_amounts.exists():
+            existing_amount = existing_amounts.first()
+
+            existing_amount.amount_due += item_cost      # order amount
+            existing_amount.cart_count += 1              # cart count  
+            existing_amount.save()
+        else:
+            # If no instances exist, create a new one
+            new_price = OrderAmount(amount_due=item_cost, customer=logged_user, cart_count=quantities)
+            new_price.save()
+
+        #badge cart count
+        cart_record = OrderAmount.objects.get(customer=logged_user)
+        request.session['cart_count'] = cart_record.cart_count
+        print(cart_record.cart_count)
+        
+        messages.success(request, "Item added to cart")
 
     else:
-        new_entry = cart(item = item_name, cost_per_item = item_cost, quantity=quantities, total_amount=item_cost, customer=logged_user)
-        new_entry.save()
-
-   # Retrieve all instances of OrderAmount
-    existing_amounts = OrderAmount.objects.filter(customer=logged_user)
-
-    if existing_amounts.exists():
-        existing_amount = existing_amounts.first()
-
-        existing_amount.amount_due += item_cost      # order amount
-        existing_amount.cart_count += 1              # cart count  
-        existing_amount.save()
-    else:
-        # If no instances exist, create a new one
-        new_price = OrderAmount(amount_due=item_cost, customer=logged_user, cart_count=quantities)
-        new_price.save()
-
-    #badge cart count
-    cart_record = OrderAmount.objects.get(customer=logged_user)
-    request.session['cart_count'] = cart_record.cart_count
-    print(cart_record.cart_count)
-    
-    messages.success(request, "Item added to cart")
+        messages.warning(request, "Items from one catalog allowed per order!")
     return redirect("products")
 
 @login_required
@@ -534,10 +543,12 @@ def confirm_order(request, pk):
     #adjust inventory table
     logged_user = request.user
     cart_items = cart.objects.filter(customer=logged_user)
+    
 
     for item in cart_items:
         product_name = item.item
-        inventory = Inventory.objects.get(name=product_name)
+        specific_catalog = item.catalog
+        inventory = Inventory.objects.get(name=product_name, catalog_id=specific_catalog)
         ordered_quantity = item.quantity
         quantity_in_stock = inventory.quantity_in_stock
         inventory.quantity_in_stock = max(0, quantity_in_stock - ordered_quantity)

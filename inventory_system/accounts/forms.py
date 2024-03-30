@@ -9,9 +9,13 @@ class CatalogForm(forms.ModelForm):
         fields = ['name', 'description']
 
 class InventoryForm(forms.ModelForm):
+    def __init__(self, user, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.fields['catalog'].queryset = Catalog.objects.filter(supplier=user)
+
     class Meta:
         model = Inventory
-        fields = ['catalog', 'name', 'cost_per_item', 'quantity_in_stock', 'quantity_sold', 'barcode', 'image']
+        fields = ['catalog', 'name', 'cost_per_item', 'quantity_in_stock', 'quantity_sold', 'image']
 
     # Define a hidden field for catalog_id
     # catalog_id = forms.IntegerField(widget=forms.HiddenInput())

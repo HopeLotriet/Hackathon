@@ -7,6 +7,7 @@ class cart(models.Model):
     quantity = models.IntegerField(null=False, blank=False)
     total_amount = models.DecimalField(max_digits=19, decimal_places=2, null=False, blank=False)
     customer = models.CharField(max_length=100, default="")
+    catalog = models.IntegerField(null=True, blank=False)
     
 
     def __str__(self) -> str:
@@ -95,7 +96,7 @@ class Invoice(models.Model):
     total_amount = models.DecimalField(max_digits=10, decimal_places=2, null=True)
     
     billing_name = models.CharField(max_length=255)
-    billing_address = models.TextField()
+    billing_address = models.TextField(null=True, blank=True)
     billing_email = models.EmailField()
 
     payment_status = models.CharField(max_length=20, choices=PAYMENT_STATUS_CHOICES, default='Pending')

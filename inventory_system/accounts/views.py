@@ -99,7 +99,7 @@ def inventory_list(request):
 @login_required
 def create_inventory(request):
     if request.method == 'POST':
-        form = InventoryForm(request.POST)
+        form = InventoryForm(request.user, request.POST, request.FILES)
         if form.is_valid():
             inventory = form.save(commit=False)
             inventory.sales = inventory.cost_per_item * inventory.quantity_sold
@@ -114,13 +114,12 @@ def create_inventory(request):
             barcode_image.save(image_io, format='PNG')
             barcode_image_file = ContentFile(image_io.getvalue())
             inventory.barcode.save(f'barcode_{barcode_data}.png', barcode_image_file, save=False)
-
             inventory.save()
 
             messages.success(request, "Successfully Added Product")
             return redirect('inventory_list')
     else:
-        form = InventoryForm()
+        form = InventoryForm(request.user)
 
     return render(request, 'accounts/create_inventory.html', {'form': form})
 
@@ -128,7 +127,7 @@ def create_inventory(request):
 @login_required
 def add_product(request):
     if request.method == "POST":
-        updateForm = AddInventoryForm(request.POST, request.FILES)
+        updateForm = AddInventoryForm(request.POST, request.FILES, request.user)
         if updateForm.is_valid():
             new_inventory = updateForm.save(commit=False)
             new_inventory.sales = float(
@@ -154,7 +153,7 @@ def add_product(request):
             return redirect('stock')  # You can adjust the redirect URL
 
     else:
-        updateForm = AddInventoryForm()
+        updateForm = AddInventoryForm(request.user)
 
     return render(request, 'accounts/inventory_add.html', {'form': updateForm})
 
@@ -212,8 +211,6 @@ def add_product(request):
         updateForm = AddInventoryForm()
 
     return render(request, 'accounts/inventory_add.html', {'form': updateForm})
-
-
 
 
 # @login_required
