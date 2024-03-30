@@ -3,6 +3,7 @@ from django.urls import reverse_lazy
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordChangeView
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.contrib.auth.decorators import login_required
 from .models import Profile
@@ -17,7 +18,7 @@ from orders.models import Invoice, cart, cart_records, customerOrderHistory, Ord
 
 @login_required
 def logout(request):
-    return render(request, 'users/login.html')
+    return redirect(to='')
 
 # custom 404 view
 
@@ -35,7 +36,7 @@ class RegisterView(View):
     def dispatch(self, request, *args, **kwargs):
         # will redirect to the home page if a user tries to access the register page while logged in
         if request.user.is_authenticated:
-            return redirect(to='/')
+            return redirect(to='')
 
         # else process dispatch as it otherwise normally would
         return super(RegisterView, self).dispatch(request, *args, **kwargs)
@@ -76,11 +77,6 @@ class RegisterView(View):
             user.save()  # Now commit the changes to the database
 
             user.groups.add(group)  # Add the user to the group after saving
-            
-            # Check if the user is a farmer and create an inventory for them
-            if role == 'farmer':
-                inventory = Inventory(farmer=user, name='Example Inventory', cost_per_item=0, quantity_in_stock=0, quantity_sold=0)
-                inventory.save()
 
             username = form.cleaned_data.get('username')
             messages.success(request, f'Account created for {username}')
@@ -92,7 +88,7 @@ class RegisterView(View):
 # Class based view that extends from the built in login view to add a remember me functionality
 
 
-class CustomLoginView(LoginView):
+class CustomLoginView(LoginView, SuccessMessageMixin, LoginRequiredMixin):
     form_class = LoginForm
 
     def form_valid(self, form):
@@ -146,28 +142,24 @@ def profile(request):
         profile_form = UpdateProfileForm(instance=request.user.profile)
 
         # update order management
-    customer_name = request.session['old_username']
-    Invoice.objects.filter(billing_name=customer_name).update(
-        billing_email=logged_user.email)
-    cart.objects.filter(customer=customer_name).update(
-        customer=request.user.username)
-    customerOrderHistory.objects.filter(
-        customer=customer_name).update(customer=request.user.username)
-    cart_records.objects.filter(customer=customer_name).update(
-        customer=request.user.username)
-    OrderAmount.objects.filter(customer=customer_name).update(
-        customer=request.user.username)
-
+    customer_name = request.session.get('old_username', None)
+    if customer_name is not None:
+        Invoice.objects.filter(billing_name=customer_name).update(billing_email=logged_user.email)
+        cart.objects.filter(customer=customer_name).update(customer=request.user.username)
+        customerOrderHistory.objects.filter(customer=customer_name).update(customer=request.user.username)
+        cart_records.objects.filter(customer=customer_name).update(customer=request.user.username)
+        OrderAmount.objects.filter(customer=customer_name).update(customer=request.user.username)
+    
     users = None
     if request.user.is_superuser:
         users = User.objects.exclude(is_superuser=True)
-
+        
     if request.user.is_superuser:
         return render(request, 'users/admin_profile.html', {'users': users})
     else:
         return render(request, 'users/profile.html', {'user_form': user_form, 'profile_form': profile_form, 'profile': profile_info, 'user': logged_user})
 
-
+@login_required
 def view_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     # You can fetch additional information related to the user if needed

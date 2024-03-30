@@ -29,8 +29,10 @@ urlpatterns = [
     path('accounts/', include('accounts.urls')),
     path('user/', include('user.urls')),
     path('orders/', include('orders.urls')),
+    
+    path('', views.home, name='home'),
 
-    path('', CustomLoginView.as_view(redirect_authenticated_user=True, template_name='users/login.html',
+    path('login', CustomLoginView.as_view(redirect_authenticated_user=True, template_name='users/login.html',
                                            authentication_form=LoginForm), name='login'),
 
     path('logout/', auth_views.LogoutView.as_view(template_name='users/logout.html'), name='logout'),

@@ -28,7 +28,7 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 
 LOW_QUANTITY = getattr(settings, 'LOW_QUANTITY', 5)
 
-@login_required
+
 def home(request):
     logged_user = request.user
     request.session['old_username'] = logged_user.username

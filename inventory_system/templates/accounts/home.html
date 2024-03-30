@@ -283,6 +283,7 @@
                     <li class="nav-item">
                         <a class="nav-link active text-white" aria-current="page" href="{% url 'home' %}">Home</a>
                     </li>
+                    {% if request.user.is_authenticated %}
                     {% if is_customer %}
                     <li class="nav-item">
                         <a class="nav-link active text-white" href="{% url 'products' %}">Products</a>
@@ -359,9 +360,10 @@
                     <li class="nav-item">
                         <a class="nav-link active text-white" href="{% url 'users-profile' %}">Profile</a>
                     </li>
+                    {% endif %}
                 </ul>
 
-
+                 {% if request.user.is_authenticated %}
                 <div>
                     <form class="d-flex" method="POST" action="{% url 'search' %}">
                         {% csrf_token %}
@@ -370,15 +372,20 @@
                         <button class="btn custom-search-btn" type="submit">Search</button>
                     </form>
                 </div>
+                {% endif %}
                 <br>
 
                 <div>
-
+                    {% if not request.user.is_authenticated %}
+                    <form action="{% url 'login' %}" method="get" style="display: inline;">
+                        <button type="submit" class="btn custom-logout-btn">Login</button>
+                    </form>
+                    {% else %}
                     <form action="{% url 'logout' %}" method="post" style="display: inline;">
                         {% csrf_token %}
                         <button type="submit" class="btn custom-logout-btn">Logout</button>
                     </form>
-
+                    {% endif %}
                 </div>
 
             </div>
