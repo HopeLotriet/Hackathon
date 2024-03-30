@@ -33,6 +33,7 @@ class customerOrderHistory(models.Model):
     customer_order_status = models.CharField(max_length=100, default='pending', null=True)
     payment_method = models.CharField(max_length=100, default="")
     payment_status = models.CharField(max_length=100, default="")
+    catalog = models.IntegerField(null=True, blank=False)
 
     def __str__(self) -> str:
         return str(self.order_id)
@@ -64,8 +65,8 @@ class Order(models.Model):
     payment_method = models.CharField(max_length=100, default="")
     payment_status = models.CharField(max_length=100, default="")
     order_status = models.CharField(max_length=20, choices=ORDER_STATUS_CHOICES, default='pending')
-
-    catalog = models.ForeignKey('accounts.Catalog', on_delete=models.CASCADE, related_name='orders', null=True)
+    supplier = models.CharField(max_length=100, default="")
+    catalog = models.IntegerField(null=True, blank=False)
     supplier_email = models.EmailField(null=True)
 
     def __str__(self):

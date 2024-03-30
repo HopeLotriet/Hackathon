@@ -203,8 +203,9 @@ def delete_cart(request):
 #Order management
 @login_required
 def order_list(request):
-    order_lists = Order.objects.all() 
-    return render(request, 'orders/order_list.html', {'orders': order_lists})
+    logged_supplier = request.user.first_name
+    order_lists = Order.objects.filter(supplier=logged_supplier)
+    return render(request, 'orders/order_list.html', {'orders': order_lists, 'supplier': logged_supplier})
 
 
 @login_required
@@ -315,7 +316,7 @@ def return_order(request, order_id):
                 for item in item_quantities:
                     item_name = item['item']
                     returning_quantity = item['each_item_quantity']
-                    inventory_product = get_object_or_404(Inventory, name=item_name)
+                    inventory_product = get_object_or_404(Inventory, name=item_name, catalog_id=current_order.catalog)
                     ajusted_quantity = inventory_product.quantity_in_stock + returning_quantity
                     inventory_product.quantity_in_stock = ajusted_quantity
 
@@ -578,6 +579,9 @@ def confirm_order(request, pk):
     amount = invoice.total_amount
 
     #save order history
+    chosen_catalog = Catalog.objects.get(id=cart_items.last().catalog)
+    chosen_supplier = User.objects.get(id=chosen_catalog.supplier_id)
+
     order_entry = Order(
         order_id=order, 
         customer=customer_name,
@@ -585,7 +589,9 @@ def confirm_order(request, pk):
         quantity_ordered=total_quantity,
         amount_spent=amount,
         payment_method = invoice.payment_method,
-        payment_status = invoice.payment_status
+        payment_status = invoice.payment_status,
+        catalog= chosen_catalog.id,
+        supplier = chosen_supplier.first_name
         )
     order_entry.save()
     
@@ -596,7 +602,8 @@ def confirm_order(request, pk):
         amount_spent=amount,
         customer=request.user.username,
         payment_method = invoice.payment_method,
-        payment_status = invoice.payment_status
+        payment_status = invoice.payment_status,
+        catalog= chosen_catalog.id
     )
     customer_order_entry.save()
 
