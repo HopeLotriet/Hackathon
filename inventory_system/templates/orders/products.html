@@ -57,7 +57,7 @@
     </div>
 
     <!-- Section for customer ratings and testimonials -->
-    <section class="ratings-testimonials-section sec_space_small" data-aos="fade-up" data-aos-duration="2000">
+    <!-- <section class="ratings-testimonials-section sec_space_small" data-aos="fade-up" data-aos-duration="2000">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
@@ -68,7 +68,7 @@
                                 {% for rating in latest_ratings %}
                                     <li>
                                         <div class="rating">
-                                            <span class="user">{{ rating.user }}</span> rated
+                                            <span class="user">{{ rating.user.all }}</span> rated
                                             <span class="product">{{ rating.inventory.name }}</span>:
                                             <span class="stars">
                                                 {% for choice in rating.RATING_CHOICES %}
@@ -105,7 +105,7 @@
                 </div>
             </div>
         </div>
-    </section>
+    </section> -->
 
     <br>
     <br>

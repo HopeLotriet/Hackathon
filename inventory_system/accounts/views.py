@@ -536,3 +536,19 @@ def submit_testimonial(request, inventory_id):
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [supplier_email])
 
     return redirect('rate')  # Redirect to the rate page
+
+
+# def display_ratings_testimonials(request):
+#     # Retrieve all ratings and testimonials from the database
+#     all_ratings = Rating.objects.all()
+#     all_testimonials = Testimonial.objects.all()
+
+#     # Pass the ratings and testimonials to the template
+#     context = {
+#         'all_ratings': all_ratings,
+#         'all_testimonials': all_testimonials,
+#     }
+
+#     # Render the template with the context data
+#     return render(request, 'accounts/rate.html', context)
+
