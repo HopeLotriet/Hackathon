@@ -21,7 +21,7 @@
                 {% endif %}
             {% endfor %}
         </div>
-        {% endif %}
+    {% endif %}
 
     {% for catalog in catalogs %}
     <div class="container m-5 p-3 shadow bg-light text-center">
@@ -55,6 +55,61 @@
             <a href="{% url 'rate' %}" class="btn btn-lg btn-primary">Rate the Products</a>
         </div>
     </div>
+
+    <!-- Section for customer ratings and testimonials -->
+    <section class="ratings-testimonials-section sec_space_small" data-aos="fade-up" data-aos-duration="2000">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="card-title">Customer Ratings</h2>
+                            <ul class="ratings-list">
+                                {% for rating in latest_ratings %}
+                                    <li>
+                                        <div class="rating">
+                                            <span class="user">{{ rating.user }}</span> rated
+                                            <span class="product">{{ rating.inventory.name }}</span>:
+                                            <span class="stars">
+                                                {% for choice in rating.RATING_CHOICES %}
+                                                    {% if choice.0 <= rating.rating %}
+                                                        <i class="fas fa-star"></i> <!-- Filled star -->
+                                                    {% else %}
+                                                        <i class="far fa-star"></i> <!-- Empty star -->
+                                                    {% endif %}
+                                                {% endfor %}
+                                            </span>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h2 class="card-title">Latest Testimonials</h2>
+                            <ul class="testimonials-list">
+                                {% for testimonial in latest_testimonials %}
+                                    <li>
+                                        <div class="testimonial">
+                                            <span class="user">{{ testimonial.user }}</span>:
+                                            <span class="quote">{{ testimonial.text }}</span>
+                                        </div>
+                                    </li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <br>
+    <br>
+    <br>
 
     <script>
         // Function to hide messages after a delay
