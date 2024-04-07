@@ -6,12 +6,14 @@ from django.contrib import messages
 from .models import Catalog, Inventory, SalesData, Subscriber, Rating, Testimonial
 from orders.models import OrderAmount
 from django.shortcuts import get_object_or_404
-from .forms import InventoryUpdateForm, AddInventoryForm, SubscriptionForm, BulkEmailForm, CatalogForm, InventoryForm
+from .forms import InventoryUpdateForm, AddInventoryForm, SubscriptionForm, BulkEmailForm, CatalogForm, InventoryForm, uploadCatalogForm
 from django.conf import settings
 from django_pandas.io import read_frame
 import pandas as pd
 import plotly
 import plotly.express as px
+import openpyxl
+import zipfile
 import json
 from django.core.mail import send_mail
 from barcode.writer import ImageWriter
@@ -63,12 +65,60 @@ def catalog_create(request):
         form = CatalogForm(request.POST)
         if form.is_valid():
             catalog = form.save(commit=False)
-            catalog.supplier = request.user  # Assign the current user as the supplier
+            catalog.supplier = request.user  #Assign the current user as the supplier
             catalog.save()
             return redirect('catalog_list')
     else:
         form = CatalogForm()
     return render(request, 'accounts/catalog_create.html', {'form': form})
+
+@login_required
+def upload_catalog(request):
+    if request.method == 'POST':
+        form = uploadCatalogForm(request.POST, request.FILES)
+        if form.is_valid():
+            catalog = form.save(commit=False)
+            catalog.supplier = request.user  #Assign the current user as the supplier
+            catalog.save()
+            return redirect('extract_catalog_data', pk=catalog.pk)
+    else:
+        form = uploadCatalogForm()
+    return render(request, 'accounts/upload_catalog.html', {'form': form})
+
+@login_required
+def extract_catalog_data (request, pk):
+    uploaded_catalog = get_object_or_404(Catalog, pk=pk)
+    file = uploaded_catalog.catalog_file
+    catalog_data = pd.read_excel(file)
+    print(catalog_data)
+    
+    # extract images from catalog images
+    
+
+    #extract data from file and save in inventory
+    for index, row in catalog_data.iterrows():
+        inventory_data = Inventory(
+            catalog = uploaded_catalog,
+            name=row['name'],
+            cost_per_item=row['cost_per_item'],
+            quantity_in_stock=row['quantity_in_stock']
+        )
+        inventory_data.sales = inventory_data.cost_per_item * inventory_data.quantity_sold
+        
+        # Generate barcode and save it to the new inventory item
+        barcode_data = str(inventory_data.pk) + " " + inventory_data.name  # Barcode data
+        code128 = Code128(barcode_data, writer=ImageWriter())
+        barcode_image = code128.render()
+
+        # Convert the barcode image to PNG format
+        image_io = BytesIO()
+        barcode_image.save(image_io, format='PNG')
+        barcode_image_file = ContentFile(image_io.getvalue())
+        inventory_data.barcode.save(f'barcode_{barcode_data}.png', barcode_image_file, save=False)
+        inventory_data.save()
+
+    messages.success(request, "Products successfully saved in the inventory")
+    return redirect('catalog_list')
 
 @login_required
 def inventory_list(request):
