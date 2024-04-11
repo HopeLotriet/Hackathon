@@ -8,6 +8,11 @@ class CatalogForm(forms.ModelForm):
         model = Catalog
         fields = ['name', 'description']
 
+class uploadCatalogForm(forms.ModelForm):
+    class Meta:
+        model = Catalog
+        fields = ['name', 'description', 'catalog_file', 'catalog_images']
+
 class InventoryForm(forms.ModelForm):
     def __init__(self, user, *args, **kwargs):
         super().__init__(*args, **kwargs)

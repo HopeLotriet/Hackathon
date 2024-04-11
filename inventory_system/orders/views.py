@@ -305,8 +305,8 @@ def order_history(request):
 
 @login_required
 def return_order(request, order_id):
-    current_order = get_object_or_404(customerOrderHistory, id=order_id)
     logged_user = request.user
+    current_order = customerOrderHistory.objects.filter(customer=logged_user).get(id=order_id)
     last_order = customerOrderHistory.objects.filter(customer=logged_user).last()
     if current_order == last_order:
         if current_order.customer_order_status != "Order canceled":
@@ -322,6 +322,7 @@ def return_order(request, order_id):
                     item_name = item['item']
                     returning_quantity = item['each_item_quantity']
                     inventory_product = get_object_or_404(Inventory, name=item_name, catalog_id=current_order.catalog)
+                    print(inventory_product)
                     ajusted_quantity = inventory_product.quantity_in_stock + returning_quantity
                     inventory_product.quantity_in_stock = ajusted_quantity
 
@@ -419,7 +420,7 @@ def order_details(request):
     logged_user = request.user
     #initialise status
     status = "delivered"
-    if customerOrderHistory.objects.exists():
+    if customerOrderHistory.objects.filter(customer=logged_user).exists():
         previous_order =  customerOrderHistory.objects.filter(customer=logged_user).last()
         status = previous_order.customer_order_status
     else:
