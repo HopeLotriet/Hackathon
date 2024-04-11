@@ -30,14 +30,16 @@
         {% if catalog.inventory_set.exists %}
         <div class="row gy-5">
             {% for inventory in catalog.inventory_set.all %}
-            <div class="col-3">
-                <img src="{{ inventory.image.url }}" alt="Inventory Image" width="100px" height="90px">
-                <div>
-                    <span class="p-2">{{ inventory.name }}</span>
-                    <span class="p-2">Each: R{{ inventory.cost_per_item }}</span>
+            <div class="col-md-3">
+                <div class="card" style="cursor: pointer;" onclick="window.location = '{% url 'each_product' inventory.id %}'">
+                    <img src="{{ inventory.image.url }}" alt="Inventory Image" class="card-img-top" style="width: 100px; height: 90px;">
+                    <div class="card-body">
+                        <h5 class="card-title">{{ inventory.name }}</h5>
+                        <p class="card-text">Each: R{{ inventory.cost_per_item }}</p>
+                        <p class="card-text">In stock: {{ inventory.quantity_in_stock }}</p>
+                        <a href="{% url 'add_to_cart' inventory.id %}" class="btn btn-success">Add to Cart</a>
+                    </div>
                 </div>
-                <div class="p-2">In stock: {{ inventory.quantity_in_stock }}</div>
-                <a href="{% url 'add_to_cart' inventory.id %}" class="btn btn-success">Add to cart</a>
             </div>
             {% endfor %}
         </div>
@@ -48,65 +50,7 @@
     </div>
     {% endfor %}
 
-    <!-- Section for rating the products -->
-    <div class="container mb-5 text-center">
-        <div class="py-3">
-            <p class="lead">Please rate the products to help us improve.</p>
-            <a href="{% url 'rate' %}" class="btn btn-lg btn-primary">Rate the Products</a>
-        </div>
-    </div>
-
-    <!-- Section for customer ratings and testimonials -->
-    <!-- <section class="ratings-testimonials-section sec_space_small" data-aos="fade-up" data-aos-duration="2000">
-        <div class="container">
-            <div class="row">
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <h2 class="card-title">Customer Ratings</h2>
-                            <ul class="ratings-list">
-                                {% for rating in latest_ratings %}
-                                    <li>
-                                        <div class="rating">
-                                            <span class="user">{{ rating.user.all }}</span> rated
-                                            <span class="product">{{ rating.inventory.name }}</span>:
-                                            <span class="stars">
-                                                {% for choice in rating.RATING_CHOICES %}
-                                                    {% if choice.0 <= rating.rating %}
-                                                        <i class="fas fa-star"></i> <!-- Filled star -->
-                                                    {% else %}
-                                                        <i class="far fa-star"></i> <!-- Empty star -->
-                                                    {% endif %}
-                                                {% endfor %}
-                                            </span>
-                                        </div>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-6">
-                    <div class="card">
-                        <div class="card-body">
-                            <h2 class="card-title">Latest Testimonials</h2>
-                            <ul class="testimonials-list">
-                                {% for testimonial in latest_testimonials %}
-                                    <li>
-                                        <div class="testimonial">
-                                            <span class="user">{{ testimonial.user }}</span>:
-                                            <span class="quote">{{ testimonial.text }}</span>
-                                        </div>
-                                    </li>
-                                {% endfor %}
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section> -->
-
+ 
     <br>
     <br>
     <br>

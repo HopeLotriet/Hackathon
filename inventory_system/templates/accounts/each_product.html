@@ -1,0 +1,56 @@
+{% extends 'accounts/home.html' %}
+{% load static %}
+
+{% block title %}FarmFresh - {{ inventory.name }}{% endblock %}
+
+{% block content %}
+<div class="content-wrapper">
+    <div class="container mt-5" style="padding-top: 2.0rem;">
+        <div class="row">
+            <div class="col-md-4">
+                <div class="card mb-4">
+                    <img src="{% if inventory.image %}{{ inventory.image.url }}{% else %}{% static 'img/default_product_image.jpg' %}{% endif %}" class="card-img-top" alt="Product Image">
+                </div>
+            </div>
+            <div class="col-md-8">
+                <div class="card mb-4">
+                    <div class="card-body">
+                        <h2 class="card-title">{{ inventory.name }}</h2>
+                        <p class="card-text">{{ inventory.description }}</p>
+                        <p class="card-text"><strong>Price Per Item:</strong> R{{ inventory.cost_per_item }}</p>
+                        <p class="card-text"><strong>Quantity in Stock:</strong> {{ inventory.quantity_in_stock }}</p>
+                        <p class="card-text"><strong>Price Per Item:</strong> R{{ inventory.cost_per_item }}</p>
+
+                        <!-- Rating Section -->
+                        <div class="mt-4">
+                            <h4>Rate this product:</h4>
+                            <div class="rating">
+                                <span class="star" data-value="1">&#9733;</span>
+                                <span class="star" data-value="2">&#9733;</span>
+                                <span class="star" data-value="3">&#9733;</span>
+                                <span class="star" data-value="4">&#9733;</span>
+                                <span class="star" data-value="5">&#9733;</span>
+                            </div>
+                        </div>
+
+                        <!-- Review Section -->
+                        <div class="mt-4">
+                            <h4>Write a Review:</h4>
+                            <textarea class="form-control" rows="3"></textarea>
+                            <button type="button" class="btn btn-primary mt-2">Submit Review</button>
+                        </div>
+                        <br>
+                        <br>
+
+                    </div>
+                </div>
+            </div>
+            <br>
+            <a href="{% url 'products' %}" class="btn btn-dark btn-sm mb-2">Back</a>
+        </div>
+    </div>
+</div>
+<br>
+<br>
+<br>
+{% endblock %}

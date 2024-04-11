@@ -165,6 +165,14 @@ def per_product(request, pk):
     }
     return render(request, "accounts/per_product.html", context=context)
 
+@login_required
+def each_product(request, pk):
+    inventory = get_object_or_404(Inventory, pk=pk)
+    context = {
+        'inventory': inventory
+    }
+    return render(request, "accounts/each_product.html", context=context)
+
 def products(request):
     catalogs = Catalog.objects.filter(is_deleted=False)  # Fetch all non-deleted catalogs
     context = {
