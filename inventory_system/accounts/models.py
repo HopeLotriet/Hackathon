@@ -8,7 +8,6 @@ class Catalog(models.Model):
     is_deleted = models.BooleanField(default=False)
     description = models.CharField(max_length=200)
     catalog_file = models.FileField(upload_to='uploaded_catalogs/', null=True, blank=True)
-    catalog_images = models.FileField(upload_to='catalog_images/', null=True, blank=True)
     supplier = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
