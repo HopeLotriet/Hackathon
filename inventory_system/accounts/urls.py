@@ -10,6 +10,7 @@ urlpatterns = [
     path('extract_catalog_data/<int:pk>/', views.extract_catalog_data, name='extract_catalog_data'),
     path('products/', login_required(views.products), name='products'),
     path('per_product/<int:pk>/', login_required(views.per_product), name='per_product'),
+    path('each_product/<int:pk>/', login_required(views.each_product), name='each_product'),
     path("product_update/<int:pk>/", login_required(views.update), name="product_update"),
     path("delete/<int:pk>/", login_required(views.delete), name="product_delete"),
     path("add/", login_required(views.add_product), name="product_add"),

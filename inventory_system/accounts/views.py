@@ -235,6 +235,14 @@ def per_product(request, pk):
     }
     return render(request, "accounts/per_product.html", context=context)
 
+@login_required
+def each_product(request, pk):
+    inventory = get_object_or_404(Inventory, pk=pk)
+    context = {
+        'inventory': inventory
+    }
+    return render(request, "accounts/each_product.html", context=context)
+
 def products(request):
     catalogs = Catalog.objects.filter(is_deleted=False)  # Fetch all non-deleted catalogs
     context = {
@@ -606,3 +614,19 @@ def submit_testimonial(request, inventory_id):
         send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [supplier_email])
 
     return redirect('rate')  # Redirect to the rate page
+
+
+# def display_ratings_testimonials(request):
+#     # Retrieve all ratings and testimonials from the database
+#     all_ratings = Rating.objects.all()
+#     all_testimonials = Testimonial.objects.all()
+
+#     # Pass the ratings and testimonials to the template
+#     context = {
+#         'all_ratings': all_ratings,
+#         'all_testimonials': all_testimonials,
+#     }
+
+#     # Render the template with the context data
+#     return render(request, 'accounts/rate.html', context)
+
