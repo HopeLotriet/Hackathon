@@ -12,7 +12,6 @@ from django_pandas.io import read_frame
 import pandas as pd
 import plotly
 import plotly.express as px
-import openpyxl
 import zipfile
 import json
 from django.core.mail import send_mail
@@ -26,6 +25,7 @@ from statsmodels.tsa.arima.model import ARIMA
 from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
+# import openpyxl 
 
 
 LOW_QUANTITY = getattr(settings, 'LOW_QUANTITY', 5)

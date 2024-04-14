@@ -32,6 +32,7 @@ lxml
 matplotlib
 numpy
 oauthlib
+openpyxl==3.1.2
 oscrypto
 packaging
 pandas

@@ -175,5 +175,5 @@ AUTHENTICATION_BACKENDS = (
 LOW_QUANTITY = 5
 
 # login redirect path settings
-LOGIN_REDIRECT_URL = '/user/profile/'
-LOGIN_URL = 'users-profile'
+LOGIN_REDIRECT_URL = '/accounts'
+LOGIN_URL = 'home'
