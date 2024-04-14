@@ -12,7 +12,11 @@ from django_pandas.io import read_frame
 import pandas as pd
 import plotly
 import plotly.express as px
+import openpyxl
+from django.core.files import File
+from openpyxl_image_loader import SheetImageLoader
 import zipfile
+import os
 import json
 from django.core.mail import send_mail
 from barcode.writer import ImageWriter
@@ -90,21 +94,38 @@ def extract_catalog_data (request, pk):
     uploaded_catalog = get_object_or_404(Catalog, pk=pk)
     file = uploaded_catalog.catalog_file
     catalog_data = pd.read_excel(file)
-    print(catalog_data)
-    
-    # extract images from catalog images
-    
 
-    #extract data from file and save in inventory
+    # Edit catalog data
     for index, row in catalog_data.iterrows():
+
+        #Fetch images for each product
+        image_name = row['image']
+        stored_images = 'media/images'
+        image_names = os.listdir(stored_images)
+
+        for name in image_names:
+            if image_name in name:
+                image_path = os.path.join(stored_images, name).replace('\\', '/')
+                catalog_data.at[index, 'image'] = image_path
+                print("Image found:", image_path) 
+    print(catalog_data)
+
+    for index, product in catalog_data.iterrows():       
+        #Save to the Inventory
         inventory_data = Inventory(
             catalog = uploaded_catalog,
-            name=row['name'],
-            cost_per_item=row['cost_per_item'],
-            quantity_in_stock=row['quantity_in_stock']
+            name=product['name'],
+            cost_per_item=product['cost_per_item'],
+            quantity_in_stock=product['quantity_in_stock']
         )
         inventory_data.sales = inventory_data.cost_per_item * inventory_data.quantity_sold
         
+        #fetch and upload the images
+        print(type(product['image']))
+        with open(product['image'], 'rb') as image:
+            image_file = File(image)
+            inventory_data.image.save(product['image'],image_file, save=True)
+
         # Generate barcode and save it to the new inventory item
         barcode_data = str(inventory_data.pk) + " " + inventory_data.name  # Barcode data
         code128 = Code128(barcode_data, writer=ImageWriter())
@@ -116,7 +137,7 @@ def extract_catalog_data (request, pk):
         barcode_image_file = ContentFile(image_io.getvalue())
         inventory_data.barcode.save(f'barcode_{barcode_data}.png', barcode_image_file, save=False)
         inventory_data.save()
-
+    
     messages.success(request, "Products successfully saved in the inventory")
     return redirect('catalog_list')
 
@@ -251,7 +272,7 @@ def update(request, pk):
 def delete(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
     inventory.is_deleted = True
-    inventory.save()
+    inventory.delete()
     messages.success(request, "Inventory Deleted")
     return redirect('inventory_list')
 

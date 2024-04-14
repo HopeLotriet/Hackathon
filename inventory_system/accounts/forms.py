@@ -11,7 +11,7 @@ class CatalogForm(forms.ModelForm):
 class uploadCatalogForm(forms.ModelForm):
     class Meta:
         model = Catalog
-        fields = ['name', 'description', 'catalog_file', 'catalog_images']
+        fields = ['name', 'description', 'catalog_file']
 
 class InventoryForm(forms.ModelForm):
     def __init__(self, user, *args, **kwargs):
