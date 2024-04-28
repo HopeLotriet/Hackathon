@@ -43,7 +43,15 @@ class RegisterView(View):
 
     def get(self, request, *args, **kwargs):
         form = self.form_class(initial=self.initial)
-        return render(request, self.template_name, {'form': form})
+
+        is_supplier = False
+        is_distributor = False
+
+        if request.user.is_authenticated:
+            is_supplier = request.user.role == 'supplier'
+            is_distributor = request.user.role == 'distributor'
+
+        return render(request, self.template_name, {'form': form, 'is_supplier': is_supplier, 'is_distributor': is_distributor})
 
     def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
@@ -63,6 +71,8 @@ class RegisterView(View):
                 group_name = 'admin'
             elif role == 'supplier':
                 group_name = 'supplier'
+            elif role == 'distributor':
+                group_name = 'distributor'
 
             try:
                 group = Group.objects.get(name=group_name)
@@ -164,3 +174,4 @@ def view_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     # You can fetch additional information related to the user if needed
     return render(request, 'users/view_user.html', {'user': user})
+

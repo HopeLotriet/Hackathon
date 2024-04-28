@@ -270,37 +270,46 @@
 
     <nav class="navbar navbar-expand-lg navbar-success bg-success">
         <div class="container-fluid py-3">
-            <a class="navbar-brand fs-1 text-white" href="#"><img src="{% static 'images/logo.jpeg' %}"
-                    alt="FarmFresh Logo" width="75" class="d-inline-block align-text-top">FarmFresh</a>
-            <button class="navbar-toggler" type="button" data-bs-toggle="collapse"
-                data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false"
-                aria-label="Toggle navigation">
+            <a class="navbar-brand fs-1 text-white" href="#"><img src="{% static 'images/logo.jpeg' %}" alt="FarmFresh Logo"
+                    width="75" class="d-inline-block align-text-top">FarmFresh</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent"
+                aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
                 <span class="navbar-toggler-icon"></span>
             </button>
             <div class="collapse navbar-collapse" id="navbarSupportedContent">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-
+    
                     <li class="nav-item">
                         <a class="nav-link active text-white" aria-current="page" href="{% url 'home' %}">Home</a>
                     </li>
+    
+    
                     {% if request.user.is_authenticated %}
                     {% if is_customer %}
                     <li class="nav-item">
                         <a class="nav-link active text-white" href="{% url 'products' %}">Products</a>
                     </li>
-
+    
                     <li class="nav-item">
                         <a class="nav-link active text-white" href="{% url 'view_cart' %}">Cart
                             <span class="badge text-bg-warning">{{ request.session.cart_count|default:0 }}</span>
                         </a>
                     </li>
-
-
+    
                     <li class="nav-item">
                         <a class="nav-link active text-white" href="{% url 'order_history' %}">Order History</a>
                     </li>
-                    {% else %}
+    
+                    <!-- Display marketing page link for customers -->
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="{% url 'marketing' %}"
+                            class="text-white no-underline">Marketing</a>
+                    </li>
 
+                    {% endif %}
+
+                    {% if is_supplier %}
+    
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle active text-white" href="#" id="navbarDropdown" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
@@ -317,7 +326,7 @@
                             </li>
                         </ul>
                     </li>
-
+    
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle active text-white" href="#" id="navbarDropdown" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
@@ -327,7 +336,7 @@
                             <li><a class="dropdown-item" href="{% url 'order_list' %}">Order List</a></li>
                         </ul>
                     </li>
-
+    
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle active text-white" href="#" id="navbarDropdown" role="button"
                             data-bs-toggle="dropdown" aria-expanded="false">
@@ -341,28 +350,37 @@
                             <li><a class="dropdown-item" href="{% url 'analyze_sales_data' %}">Forecast</a></li>
                         </ul>
                     </li>
-
-
-                    {% endif %}
-
-                    {% if is_customer %}
-                    <!-- Display marketing page link for customers -->
-                    <li class="nav-item"><a class="nav-link active text-white" href="{% url 'marketing' %}"
-                        class="text-white no-underline">Marketing</a></li>
-                {% else %}
+    
                     <!-- Display bulk email page link for admin -->
                     <li class="nav-item">
                         <a class="nav-link active text-white" href="{% url 'send_bulk_emails' %}">Notifications</a>
                     </li>
-                {% endif %}
 
+                    <!-- Display distribution form link for distributors -->
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="{% url 'distributor_list' %}">Distributors</a>
+                    </li>
+
+                    {% endif %}
+    
+                    {% if is_distributor %}
+
+                    <!-- Display distributor's list for suppliers -->
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="{% url 'distributor' %}">Form</a>
+                    </li>
+
+
+                    {% endif %}
+    
+    
                     <li class="nav-item">
                         <a class="nav-link active text-white" href="{% url 'users-profile' %}">Profile</a>
                     </li>
                     {% endif %}
                 </ul>
-
-                 {% if request.user.is_authenticated %}
+    
+                {% if request.user.is_authenticated %}
                 <div>
                     <form class="d-flex" method="POST" action="{% url 'search' %}">
                         {% csrf_token %}
@@ -373,7 +391,7 @@
                 </div>
                 {% endif %}
                 <br>
-
+    
                 <div>
                     {% if not request.user.is_authenticated %}
                     <form action="{% url 'login' %}" method="get" style="display: inline;">
@@ -386,7 +404,7 @@
                     </form>
                     {% endif %}
                 </div>
-
+    
             </div>
         </div>
     </nav>
@@ -428,7 +446,7 @@
                 <div class="carousel-item">
                     <img src="{% static 'images/image4.jpg' %}" class="d-block w-100" alt="produce">
                     <div class="carousel-caption d-md-block">
-                            <h5>Click <a href="{% url 'login' %}" style="color: white">here</a> to login and see what the suppliers have to offer</h5>
+                            <h5>See what your friendly neighborhood suppliers have to offer</h5>
                             <h6>Explore our ever-expanding catalog of farm-fresh delights, just a click away</h6>
                      
                     </div>

@@ -26,5 +26,9 @@ urlpatterns = [
     path('inventory_list/', login_required(views.inventory_list), name='inventory_list'),
     path('rate/', login_required(views.rate), name='rate'),
     path('rate_inventory/<int:inventory_id>/', login_required(views.rate_inventory), name='rate_inventory'),
-    path('submit_testimonial/<int:inventory_id>/', login_required(views.submit_testimonial), name='submit_testimonial')
+    path('distributor/', login_required(views.distributor), name='distributor'),
+    path('distributor_list/', login_required(views.distributor_list), name='distributor_list'),
+    path('each_product/<int:inventory_id>/', login_required(views.review), name='each_product'),
+    path('delete_testimonial/<int:testimonial_id>/', login_required(views.delete_testimonial), name='delete_testimonial'),
+    path('review_success/', login_required(views.review_success), name='review_success')
 ]

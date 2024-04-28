@@ -3,18 +3,18 @@ from django.urls import reverse
 from django.contrib.auth.decorators import login_required, user_passes_test
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
-from .models import Catalog, Inventory, SalesData, Subscriber, Rating, Testimonial
+from .models import Catalog, Inventory, SalesData, Subscriber, Rating, Testimonial, Distributor
 from orders.models import OrderAmount
 from django.shortcuts import get_object_or_404
-from .forms import InventoryUpdateForm, AddInventoryForm, SubscriptionForm, BulkEmailForm, CatalogForm, InventoryForm, uploadCatalogForm
+from .forms import InventoryUpdateForm, AddInventoryForm, SubscriptionForm, BulkEmailForm, CatalogForm, InventoryForm, uploadCatalogForm, DistributorForm, TestimonialForm
 from django.conf import settings
 from django_pandas.io import read_frame
 import pandas as pd
 import plotly
 import plotly.express as px
-import openpyxl
+# import openpyxl
 from django.core.files import File
-from openpyxl_image_loader import SheetImageLoader
+# from openpyxl_image_loader import SheetImageLoader
 import zipfile
 import os
 import json
@@ -29,7 +29,8 @@ from statsmodels.tsa.arima.model import ARIMA
 from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-# import openpyxl 
+from django.http import JsonResponse
+from django.views.decorators.csrf import csrf_exempt
 
 
 LOW_QUANTITY = getattr(settings, 'LOW_QUANTITY', 5)
@@ -391,13 +392,13 @@ def dashboard(request):
     return render(request, "accounts/dashboard.html", context=context)
 
 
-login_required
+@login_required
 def marketing(request):
     context = {}
     return render(request, 'accounts/marketing.html', context)
 
 
-login_required
+@login_required
 def about(request):
     context = {}
     return render(request, 'accounts/about.html', context)
@@ -600,34 +601,74 @@ def rate_inventory(request, inventory_id):
     return redirect('rate')  # Redirect to the rate page
 
 @login_required
-def submit_testimonial(request, inventory_id):
+def distributor(request):
     if request.method == 'POST':
-        inventory = Inventory.objects.get(id=inventory_id)
-        user = request.user
-        text = request.POST.get('testimonial')
-        Testimonial.objects.create(inventory=inventory, user=user, text=text)
-        messages.success(request, 'Testimonial submitted successfully!')
+        form = DistributorForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, 'Distributor details saved successfully')
+            return redirect('distributor')
+    else:
+        form = DistributorForm()
+    return render(request, 'accounts/distributor.html', {'form': form})
+
+@login_required
+def distributor_list(request):
+    distributors = Distributor.objects.all()  # Retrieve all distributors from the database
+    return render(request, 'accounts/distributor_list.html', {'distributors': distributors})
+
+@login_required
+def review(request, inventory_id):
+    print("Entering review function")
+    
+    try:
+        inventory = Inventory.objects.get(pk=inventory_id)
+        print("Inventory retrieved successfully:", inventory)
+    except Inventory.DoesNotExist:
+        print("Inventory with ID", inventory_id, "does not exist")
+        messages.error(request, 'Inventory does not exist.')
+        return redirect('products')
+    
+    testimonials = Testimonial.objects.filter(inventory=inventory)
+    
+    if request.method == 'POST':
+        print("Request method is POST")
         
-        # Send email notification to the supplier
-        supplier_email = inventory.catalog.supplier.email
-        subject = 'New testimonial submitted'
-        message = f'A new testimonial has been submitted for the product "{inventory.name}".'
-        send_mail(subject, message, settings.DEFAULT_FROM_EMAIL, [supplier_email])
+        form = TestimonialForm(request.POST)
+        if form.is_valid():
+            print("Form is valid")
+            
+            testimonial = form.save(commit=False)
+            testimonial.inventory = inventory
+            testimonial.user = request.user
+            testimonial.save()
+            
+            messages.success(request, 'Your review has been submitted successfully.')
+            print("Testimonial saved successfully:", testimonial)
+            
+            return redirect('review_success')
+        else:
+            print("Form is not valid")
+            messages.error(request, 'Failed to submit review. Please correct the errors.')
+            print("Form errors:", form.errors)
+    else:
+        print("Request method is not POST")
+        form = TestimonialForm()
 
-    return redirect('rate')  # Redirect to the rate page
+    print("Rendering the template with form and testimonials data")
+    return render(request, 'accounts/each_product.html', {'inventory': inventory, 'form': form, 'testimonials': testimonials})
 
+@login_required
+def delete_testimonial(request, testimonial_id):
+    testimonial = Testimonial.objects.get(pk=testimonial_id)
+    if testimonial.user == request.user:
+        testimonial.delete()
+        messages.success(request, 'Your review has been deleted successfully.')
+    else:
+        messages.error(request, 'You are not authorized to delete this review.')
+    return redirect('each_product', inventory_id=testimonial.inventory.id)
 
-# def display_ratings_testimonials(request):
-#     # Retrieve all ratings and testimonials from the database
-#     all_ratings = Rating.objects.all()
-#     all_testimonials = Testimonial.objects.all()
-
-#     # Pass the ratings and testimonials to the template
-#     context = {
-#         'all_ratings': all_ratings,
-#         'all_testimonials': all_testimonials,
-#     }
-
-#     # Render the template with the context data
-#     return render(request, 'accounts/rate.html', context)
-
+@login_required
+def review_success(request):
+    context = {}
+    return render(request, 'accounts/review_success.html', context)

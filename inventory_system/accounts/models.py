@@ -131,3 +131,18 @@ class Testimonial(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+class Distributor(models.Model):
+    name = models.CharField(max_length=100)
+    contact = models.TextField()
+    email = models.TextField()
+    area = models.CharField(max_length=200, null=True, blank=True)
+    delivery_schedule = models.CharField(max_length=200)
+    types_of_food = models.CharField(max_length=200)
+    delivery_vehicles = models.CharField(max_length=200)
+    delivery_process = models.TextField()
+    minimum_order_requirements = models.CharField(max_length=100)
+    delivery_fees = models.CharField(max_length=100)
+
+    def __str__(self):
+        return self.name
