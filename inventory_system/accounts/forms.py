@@ -1,6 +1,6 @@
 from django import forms
 from django.forms import ModelForm, ChoiceField, Select, Form
-from .models import Catalog, Inventory, Order, Subscriber
+from .models import Catalog, Inventory, Order, Subscriber, Distributor, Testimonial
 from orders.models import Invoice
 
 class CatalogForm(forms.ModelForm):
@@ -43,8 +43,6 @@ class OrderForm(ModelForm):
     class Meta:
         model = Order
         fields = ['product', 'customer','quantity_ordered']
-
-
 
 class UpdateStatusForm(Form):
     STATUS_CHOICES = [
@@ -97,3 +95,12 @@ class BulkEmailForm(forms.Form):
     file = forms.FileField(label='Upload File', required=False)
 
 
+class DistributorForm(forms.ModelForm):
+    class Meta:
+        model = Distributor
+        fields = '__all__'
+
+class TestimonialForm(forms.ModelForm):
+    class Meta:
+        model = Testimonial
+        fields = ['text']
