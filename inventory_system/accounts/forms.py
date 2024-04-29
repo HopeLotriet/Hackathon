@@ -103,4 +103,4 @@ class DistributorForm(forms.ModelForm):
 class TestimonialForm(forms.ModelForm):
     class Meta:
         model = Testimonial
-        fields = ['text']
+        fields = '__all__'

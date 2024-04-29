@@ -12,9 +12,9 @@ from django_pandas.io import read_frame
 import pandas as pd
 import plotly
 import plotly.express as px
-import openpyxl
+# import openpyxl
 from django.core.files import File
-from openpyxl_image_loader import SheetImageLoader
+# from openpyxl_image_loader import SheetImageLoader
 import zipfile
 import os
 import json
@@ -240,10 +240,41 @@ def per_product(request, pk):
 @login_required
 def each_product(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
-    context = {
-        'inventory': inventory
-    }
-    return render(request, "accounts/each_product.html", context=context)
+    
+    if request.method == 'POST':
+        text = request.POST.get('text', '')
+
+        if text:
+            testimonial = Testimonial.objects.create(
+                inventory=inventory,
+                text=text,
+                created_by=request.user
+            )
+
+            return redirect('each_product', pk=pk)
+    return render(request, "accounts/each_product.html", {'inventory':inventory})
+
+# @login_required
+# def testimonial(request, pk):
+#     inventory = get_object_or_404(Inventory, pk=pk)
+
+#     if request.method == 'POST':
+#         form = TestimonialForm(request.POST)
+#         if form.is_valid():
+#             testimonial = form.save(commit=False)
+#             testimonial.user = request.user
+#             testimonial.name = inventory
+#             testimonial.save()
+#             messages.success(request, 'Thank you for your review!')
+#             return redirect('each_product', pk=pk)  # Redirect to the product detail page
+#     else:
+#         form = TestimonialForm()
+
+#     context = {
+#         'inventory': inventory,
+#         'form': form
+#     }
+#     return render(request, 'accounts/each_product.html', context=context)
 
 def products(request):
     catalogs = Catalog.objects.filter(is_deleted=False)  # Fetch all non-deleted catalogs
@@ -291,29 +322,6 @@ def add_product(request):
         updateForm = AddInventoryForm()
 
     return render(request, 'accounts/inventory_add.html', {'form': updateForm})
-
-
-# @login_required
-# def update(request, pk):
-#     inventory = get_object_or_404(Inventory, pk=pk)
-#     if request.method == "POST":
-#         updateForm = InventoryUpdateForm(
-#             request.POST, request.FILES, instance=inventory)
-#         if updateForm.is_valid():
-#             inventory.name = updateForm.data['name']
-#             inventory.quantity_in_stock = updateForm.data['quantity_in_stock']
-#             inventory.quantity_sold = updateForm.data['quantity_sold']
-#             inventory.cost_per_item = updateForm.data['cost_per_item']
-#             inventory.sales = float(
-#                 inventory.cost_per_item) * float(inventory.quantity_sold)
-#             inventory.save()
-#             inventory.image = updateForm['image']
-#             messages.success(request, "Update Successful")
-#             return redirect(reverse('per_product', kwargs={'pk': pk}))
-#     else:
-#         updateForm = InventoryUpdateForm(instance=inventory)
-
-#     return render(request, 'accounts/inventory_update.html', {'form': updateForm})
 
 
 @login_required
@@ -617,46 +625,7 @@ def distributor_list(request):
     distributors = Distributor.objects.all()  # Retrieve all distributors from the database
     return render(request, 'accounts/distributor_list.html', {'distributors': distributors})
 
-@login_required
-def review(request, inventory_id):
-    print("Entering review function")
-    
-    try:
-        inventory = Inventory.objects.get(pk=inventory_id)
-        print("Inventory retrieved successfully:", inventory)
-    except Inventory.DoesNotExist:
-        print("Inventory with ID", inventory_id, "does not exist")
-        messages.error(request, 'Inventory does not exist.')
-        return redirect('products')
-    
-    testimonials = Testimonial.objects.filter(inventory=inventory)
-    
-    if request.method == 'POST':
-        print("Request method is POST")
-        
-        form = TestimonialForm(request.POST)
-        if form.is_valid():
-            print("Form is valid")
-            
-            testimonial = form.save(commit=False)
-            testimonial.inventory = inventory
-            testimonial.user = request.user
-            testimonial.save()
-            
-            messages.success(request, 'Your review has been submitted successfully.')
-            print("Testimonial saved successfully:", testimonial)
-            
-            return redirect('review_success')
-        else:
-            print("Form is not valid")
-            messages.error(request, 'Failed to submit review. Please correct the errors.')
-            print("Form errors:", form.errors)
-    else:
-        print("Request method is not POST")
-        form = TestimonialForm()
 
-    print("Rendering the template with form and testimonials data")
-    return render(request, 'accounts/each_product.html', {'inventory': inventory, 'form': form, 'testimonials': testimonials})
 
 @login_required
 def delete_testimonial(request, testimonial_id):

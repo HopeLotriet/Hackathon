@@ -6,6 +6,23 @@
 {% block title %}FarmFresh - {{ inventory.name }}{% endblock %}
 
 {% block content %}
+
+{% if messages %}
+<div class="row mt-3">
+    {% for message in messages %}
+    {% if message.tags == 'error' %}
+    <div class="col-md-10 col-12 mx-auto alert alert-danger">
+        {{ message }}
+    </div>
+    {% else %}
+    <div class="col-md-10 col-12 mx-auto alert alert-success">
+        {{ message }}
+    </div>
+    {% endif %}
+    {% endfor %}
+</div>
+{% endif %}
+
 <div class="content-wrapper">
     <div class="container mt-5" style="padding-top: 2.0rem;">
         <div class="row">
@@ -39,11 +56,11 @@
                         <!-- Form for submitting testimonial -->
                         <div class="mt-4">
                             <h4>Write a Review:</h4>
-                            <form method="post" action="{% url 'each_product' inventory_id=inventory.id %}">
+                            <form method="post">
                                 {% csrf_token %}
                                 <div class="form-group">
                                     <label for="id_text">Review:</label>
-                                    <textarea class="form-control" id="id_text" name="text" rows="4"></textarea>
+                                    <textarea class="form-control"  name="text" rows="4"></textarea>
                                 </div>
                                 <button type="submit" class="btn btn-primary mt-2">Submit Review</button>
                             </form>
@@ -125,6 +142,21 @@ document.addEventListener('DOMContentLoaded', function () {
         console.error('No stars found'); // Error handling
     }
 });
+
+    // Function to hide messages after a delay
+    function hideMessages() {
+        var messagesElements = document.querySelectorAll('.alert');
+        if (messagesElements) {
+            setTimeout(function() {
+                messagesElements.forEach(function(element) {
+                    element.style.display = 'none';
+                });
+            }, 3000);  // 5000 milliseconds (5 seconds)
+        }
+    }
+
+    // Call the function when the page loads
+    window.onload = hideMessages;
 
 </script>
 

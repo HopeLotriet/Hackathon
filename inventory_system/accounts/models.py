@@ -127,10 +127,13 @@ class Rating(models.Model):
     rating = models.IntegerField(choices=RATING_CHOICES)
 
 class Testimonial(models.Model):
-    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE)
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    created_by = models.ForeignKey(User, on_delete=models.CASCADE)
+    inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, default=None)  # ForeignKey relationship
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.text
 
 class Distributor(models.Model):
     name = models.CharField(max_length=100)
