@@ -43,14 +43,9 @@ class RegisterView(View):
 
     def get(self, request, *args, **kwargs):
         form = self.form_class(initial=self.initial)
-
-        is_supplier = False
-        is_distributor = False
-
-        if request.user.is_authenticated:
-            is_supplier = request.user.role == 'supplier'
-            is_distributor = request.user.role == 'distributor'
-
+        is_supplier = request.user.groups.filter(name='supplier').exists()
+        is_distributor = request.user.groups.filter(name='distributor').exists()
+        
         return render(request, self.template_name, {'form': form, 'is_supplier': is_supplier, 'is_distributor': is_distributor})
 
     def post(self, request, *args, **kwargs):
@@ -98,7 +93,7 @@ class RegisterView(View):
 # Class based view that extends from the built in login view to add a remember me functionality
 
 
-class CustomLoginView(LoginView, SuccessMessageMixin, LoginRequiredMixin):
+class CustomLoginView(LoginView, SuccessMessageMixin):
     form_class = LoginForm
 
     def form_valid(self, form):
