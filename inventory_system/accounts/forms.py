@@ -103,4 +103,8 @@ class DistributorForm(forms.ModelForm):
 class TestimonialForm(forms.ModelForm):
     class Meta:
         model = Testimonial
-        fields = '__all__'
+        fields = ['text']
+
+class SearchForm(forms.Form):
+    address = forms.CharField(label='Enter your address', max_length=100)
+

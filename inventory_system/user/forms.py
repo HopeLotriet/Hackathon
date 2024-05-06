@@ -100,3 +100,6 @@ class UpdateProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
         fields = ['avatar', 'bio', 'phone_number', 'address']
+
+class SearchForm(forms.Form):
+    address = forms.CharField(label='Enter your address', max_length=100)

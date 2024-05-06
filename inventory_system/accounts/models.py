@@ -99,7 +99,7 @@ class accountantPermissions(models.Model):
 
 class SalesData(models.Model):
     product = models.ForeignKey(
-        Inventory, on_delete=models.CASCADE, default=None)
+    Inventory, on_delete=models.CASCADE, default=None)
     date = models.DateField()
     quantity_sold = models.IntegerField()
 

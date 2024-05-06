@@ -14,20 +14,20 @@
                     <h1 class="text-center mb-4">Catalog List</h1>
 
                     {% for catalog in catalogs %}
-                    <div class="card mb-3">
+                    <div class="card mb-3 text-center">
                         <div class="card-body">
-                            <h5 class="card-title">{{ catalog.name }}</h5>
-                            <h6 class="card-subtitle mb-2 text-muted">{{ catalog.supplier }}</h6>
-                            <p class="card-text">{{ catalog.description }}</p>
+                            <h3 class="card-title" style="font-size: 1.5rem;">{{ catalog.name }}</h3>
+                            <h5 class="card-subtitle mb-2 text-muted" style="font-size: 1.2rem;">{{ catalog.supplier }}</h5>
+                            <p class="card-text" style="font-size: 1.1rem;">{{ catalog.description }}</p>
                         </div>
                     </div>
                     {% empty %}
-                    <p>No catalogs available.</p>
+                    <p class="text-center">No catalogs available.</p>
                     {% endfor %}
 
                     <div class="text-center">
-                        <a href="{% url 'catalog_create' %}" class="btn btn-success btn-sm">Create New Catalog</a>
-                        <a href="{% url 'upload_catalog' %}" class="btn btn-success btn-sm">Upload New Catalog</a>
+                        <a href="{% url 'catalog_create' %}" class="btn btn-success btn-m">Create New Catalog</a>
+                        <a href="{% url 'upload_catalog' %}" class="btn btn-success btn-m">Upload New Catalog</a>
                     </div>
                 </div>
 

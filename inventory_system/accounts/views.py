@@ -1,12 +1,12 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
-from django.contrib.auth.decorators import login_required, user_passes_test
+from django.contrib.auth.decorators import login_required
 from django.http import HttpResponse, HttpResponseRedirect
 from django.contrib import messages
 from .models import Catalog, Inventory, SalesData, Subscriber, Rating, Testimonial, Distributor
 from orders.models import OrderAmount
 from django.shortcuts import get_object_or_404
-from .forms import InventoryUpdateForm, AddInventoryForm, SubscriptionForm, BulkEmailForm, CatalogForm, InventoryForm, uploadCatalogForm, DistributorForm, TestimonialForm
+from .forms import InventoryUpdateForm, AddInventoryForm, SubscriptionForm, BulkEmailForm, CatalogForm, InventoryForm, uploadCatalogForm, DistributorForm, TestimonialForm, SearchForm
 from django.conf import settings
 from django_pandas.io import read_frame
 import pandas as pd
@@ -29,12 +29,11 @@ from statsmodels.tsa.arima.model import ARIMA
 from django.contrib.auth.models import User
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-from django.http import JsonResponse
-from django.views.decorators.csrf import csrf_exempt
-
+import requests
+import logging
+from accounts import views as accounts_views
 
 LOW_QUANTITY = getattr(settings, 'LOW_QUANTITY', 5)
-
 
 def home(request):
     logged_user = request.user
@@ -240,42 +239,56 @@ def per_product(request, pk):
 @login_required
 def each_product(request, pk):
     inventory = get_object_or_404(Inventory, pk=pk)
+
+    testimonials = Testimonial.objects.filter(inventory=inventory)
+
+    return render(request, "accounts/each_product.html", {'inventory':inventory, 'testimonials':testimonials})  
     
+@login_required
+def write_review(request, pk):
+    inventory = get_object_or_404(Inventory, pk=pk)
+
     if request.method == 'POST':
-        text = request.POST.get('text', '')
+        form = TestimonialForm(request.POST)
+        if form.is_valid():
+            testimonial = form.save(commit=False)
+            testimonial.created_by = request.user
+            testimonial.inventory = inventory
+            testimonial.save()
+            messages.success(request, 'Thank you for your review!')
+            return redirect('each_product', pk=pk)  # Redirect to the product detail page
+    else:
+        form = TestimonialForm()
 
-        if text:
-            testimonial = Testimonial.objects.create(
-                inventory=inventory,
-                text=text,
-                created_by=request.user
-            )
+    return render(request, 'accounts/write_review.html', {'form': form, 'inventory': inventory})
 
-            return redirect('each_product', pk=pk)
-    return render(request, "accounts/each_product.html", {'inventory':inventory})
+@login_required
+def delete_testimonial(request, pk):
+    testimonial = get_object_or_404(Testimonial, pk=pk)
+    if testimonial.created_by == request.user:
+        testimonial.delete()
+        messages.success(request, 'Testimonial deleted successfully.')
+    else:
+        messages.error(request, 'You are not authorized to delete this testimonial.')
+    return redirect('accounts/each_product', pk=testimonial.inventory.pk)
 
-# @login_required
-# def testimonial(request, pk):
-#     inventory = get_object_or_404(Inventory, pk=pk)
+@login_required
+def update_testimonial(request, pk):
+    testimonial = get_object_or_404(Testimonial, pk=pk)
+    if request.method == 'POST':
+        if testimonial.created_by == request.user:
+            form = TestimonialForm(request.POST, instance=testimonial)
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'Testimonial updated successfully.')
+                return redirect('accounts/each_product', pk=testimonial.inventory.pk)
+        else:
+            messages.error(request, 'You are not authorized to update this testimonial.')
+    else:
+        form = TestimonialForm(instance=testimonial)
+    return render(request, 'accounts/update_testimonial.html', {'form': form, 'testimonial': testimonial})
 
-#     if request.method == 'POST':
-#         form = TestimonialForm(request.POST)
-#         if form.is_valid():
-#             testimonial = form.save(commit=False)
-#             testimonial.user = request.user
-#             testimonial.name = inventory
-#             testimonial.save()
-#             messages.success(request, 'Thank you for your review!')
-#             return redirect('each_product', pk=pk)  # Redirect to the product detail page
-#     else:
-#         form = TestimonialForm()
-
-#     context = {
-#         'inventory': inventory,
-#         'form': form
-#     }
-#     return render(request, 'accounts/each_product.html', context=context)
-
+@login_required
 def products(request):
     catalogs = Catalog.objects.filter(is_deleted=False)  # Fetch all non-deleted catalogs
     context = {
@@ -625,19 +638,74 @@ def distributor_list(request):
     distributors = Distributor.objects.all()  # Retrieve all distributors from the database
     return render(request, 'accounts/distributor_list.html', {'distributors': distributors})
 
+#set up logging
+logging.basicConfig(level=logging.DEBUG)
 
+api_key = 'AIzaSyAiRFgP00JifQMC-mDCp3Pl26325BNTG9s'
 
-@login_required
-def delete_testimonial(request, testimonial_id):
-    testimonial = Testimonial.objects.get(pk=testimonial_id)
-    if testimonial.user == request.user:
-        testimonial.delete()
-        messages.success(request, 'Your review has been deleted successfully.')
+def geocode_address(api_key, address):
+    url = "https://maps.googleapis.com/maps/api/geocode/json"
+    params = {
+        "address": address,
+        "key": api_key
+    }
+    response = requests.get(url, params=params)
+    data = response.json()
+    logging.debug(f"Geocoding response: {data}")
+    if 'results' in data and data['results']:
+        location = data['results'][0]['geometry']['location']
+        latitude = location['lat']
+        longitude = location['lng']
+        return latitude, longitude
     else:
-        messages.error(request, 'You are not authorized to delete this review.')
-    return redirect('each_product', inventory_id=testimonial.inventory.id)
+        return None, None
 
-@login_required
-def review_success(request):
-    context = {}
-    return render(request, 'accounts/review_success.html', context)
+
+#Function to find nearby places
+def find_nearby_places(api_key, location, radius, keyword):
+    url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+    params = {
+        "key": api_key,
+        "location": location,
+        "radius": radius,
+        "keyword": keyword
+    }
+    response = requests.get(url, params=params)
+    logging.debug(f"Nearby places response: {response.url}")
+    logging.debug(f"Nearby places response: {response.status_code}")
+    data = response.json()
+    logging.debug(f"Nearby places response: {data}")
+    if 'results' in data:
+        return data['results']
+    else:
+        return []
+
+
+# Function to display nearby suppliers
+def nearby_suppliers(request):
+    api_key = 'AIzaSyAiRFgP00JifQMC-mDCp3Pl26325BNTG9s'
+
+    form = SearchForm(request.POST or None)
+    suppliers = None
+    address = None
+
+    if request.method == 'POST':
+        if form.is_valid():
+            address = form.cleaned_data['address']
+            latitude, longitude = geocode_address(api_key, address)
+
+            if latitude is None and longitude is not None:
+                location = f"{latitude},{longitude}"
+                radius = 10000
+                supplier_keyword = 'supplier'
+
+                logging.debug(f"Location: {location}, Radius: {radius}, Keyword: {supplier_keyword}")
+
+                suppliers = find_nearby_places(api_key, location, radius, supplier_keyword)
+
+    context = {
+        'form': form,
+        'suppliers': suppliers,
+        'address': address,
+    }
+    return render(request, 'users/nearby_suppliers.html', context)
