@@ -618,45 +618,18 @@ def distributor_list(request):
     return render(request, 'accounts/distributor_list.html', {'distributors': distributors})
 
 @login_required
-def review(request, inventory_id):
-    print("Entering review function")
-    
-    try:
-        inventory = Inventory.objects.get(pk=inventory_id)
-        print("Inventory retrieved successfully:", inventory)
-    except Inventory.DoesNotExist:
-        print("Inventory with ID", inventory_id, "does not exist")
-        messages.error(request, 'Inventory does not exist.')
-        return redirect('products')
-    
-    testimonials = Testimonial.objects.filter(inventory=inventory)
-    
+def testimonial(request):
     if request.method == 'POST':
-        print("Request method is POST")
-        
         form = TestimonialForm(request.POST)
         if form.is_valid():
-            print("Form is valid")
-            
             testimonial = form.save(commit=False)
-            testimonial.inventory = inventory
             testimonial.user = request.user
             testimonial.save()
-            
-            messages.success(request, 'Your review has been submitted successfully.')
-            print("Testimonial saved successfully:", testimonial)
-            
+            messages.success(request, 'Thank you for your review!')
             return redirect('review_success')
-        else:
-            print("Form is not valid")
-            messages.error(request, 'Failed to submit review. Please correct the errors.')
-            print("Form errors:", form.errors)
     else:
-        print("Request method is not POST")
         form = TestimonialForm()
-
-    print("Rendering the template with form and testimonials data")
-    return render(request, 'accounts/each_product.html', {'inventory': inventory, 'form': form, 'testimonials': testimonials})
+    return render(request, 'accounts/testimonial.html', {'form': form})
 
 @login_required
 def delete_testimonial(request, testimonial_id):
