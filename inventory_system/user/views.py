@@ -3,17 +3,14 @@ from django.urls import reverse_lazy
 from django.contrib.auth.views import LoginView, PasswordResetView, PasswordChangeView
 from django.contrib import messages
 from django.contrib.messages.views import SuccessMessageMixin
-from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views import View
 from django.contrib.auth.decorators import login_required
 from .models import Profile
-from accounts.models import Inventory
 from user.forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileForm
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User, Group
-from django.views.decorators.csrf import csrf_protect
-from django.contrib.auth import logout
 from orders.models import Invoice, cart, cart_records, customerOrderHistory, OrderAmount
+from accounts.views import geocode_address, find_nearby_places
 
 
 @login_required
@@ -140,6 +137,26 @@ def profile(request):
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
+
+            # Geocode the updated address
+            latitude, longitude = geocode_address(profile.address)
+            
+            if latitude is not None and longitude is not None:
+                # Use the coordinates to find nearby suppliers
+                location = f"{latitude},{longitude}"
+                radius = 10000  # Adjust as needed
+                supplier_keyword = 'supplier'  # Adjust as needed
+                suppliers = find_nearby_places(location, radius, supplier_keyword)
+                
+                # Pass the nearby suppliers to the template
+                return render(request, 'users/profile.html', {'user_form': user_form, 'profile_form': profile_form, 'profile': profile_info, 'user': logged_user, 'suppliers': suppliers})
+            else:
+                messages.error(request, 'Failed to geocode address. Please ensure your address is valid.')
+                return redirect('users-profile')
+        else:
+            messages.error(request, 'Failed to update profile. Please check the provided information.')
+            return redirect('users-profile')
+
             messages.success(request, 'Your profile is updated successfully')
             return redirect(to='users-profile')
     else:
@@ -164,9 +181,9 @@ def profile(request):
     else:
         return render(request, 'users/profile.html', {'user_form': user_form, 'profile_form': profile_form, 'profile': profile_info, 'user': logged_user})
 
+
 @login_required
 def view_user(request, user_id):
     user = get_object_or_404(User, id=user_id)
     # You can fetch additional information related to the user if needed
     return render(request, 'users/view_user.html', {'user': user})
-

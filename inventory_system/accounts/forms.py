@@ -104,3 +104,7 @@ class TestimonialForm(forms.ModelForm):
     class Meta:
         model = Testimonial
         fields = ['text']
+
+class SearchForm(forms.Form):
+    address = forms.CharField(label='Enter your address', max_length=100)
+

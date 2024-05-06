@@ -28,7 +28,9 @@ urlpatterns = [
     path('rate_inventory/<int:inventory_id>/', login_required(views.rate_inventory), name='rate_inventory'),
     path('distributor/', login_required(views.distributor), name='distributor'),
     path('distributor_list/', login_required(views.distributor_list), name='distributor_list'),
-    path('each_product/<int:inventory_id>/', login_required(views.review), name='each_product'),
+    path('write_review/<int:pk>/', login_required(views.write_review), name='write_review'),
     path('delete_testimonial/<int:testimonial_id>/', login_required(views.delete_testimonial), name='delete_testimonial'),
-    path('review_success/', login_required(views.review_success), name='review_success')
+    path('update_testimonial/<int:testimonial_id>/', login_required(views.update_testimonial), name='update_testimonial'),
+    path('nearby_suppliers/', views.nearby_suppliers, name='nearby_suppliers')
+
 ]
