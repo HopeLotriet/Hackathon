@@ -12,9 +12,9 @@ from django_pandas.io import read_frame
 import pandas as pd
 import plotly
 import plotly.express as px
-# import openpyxl
+import openpyxl
 from django.core.files import File
-# from openpyxl_image_loader import SheetImageLoader
+from openpyxl_image_loader import SheetImageLoader
 import zipfile
 import os
 import json
@@ -32,6 +32,8 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import requests
 import logging
 from accounts import views as accounts_views
+from geopy.distance import geodesic
+from django.contrib.gis.db.models.functions import Distance
 
 LOW_QUANTITY = getattr(settings, 'LOW_QUANTITY', 5)
 
@@ -638,6 +640,8 @@ def distributor_list(request):
     distributors = Distributor.objects.all()  # Retrieve all distributors from the database
     return render(request, 'accounts/distributor_list.html', {'distributors': distributors})
 
+logging.basicConfig(level=logging.DEBUG)
+logging.debug("Logging started")
 api_key = 'AIzaSyAiRFgP00JifQMC-mDCp3Pl26325BNTG9s'
 
 def geocode_address(api_key, address):

@@ -13,6 +13,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 
 from pathlib import Path
 import os, sys
+import platform
 
 
 
@@ -177,3 +178,7 @@ LOW_QUANTITY = 5
 # login redirect path settings
 LOGIN_REDIRECT_URL = '/accounts'
 LOGIN_URL = 'home'
+
+GDAL_LIBRARY_PATH = 
+
+
