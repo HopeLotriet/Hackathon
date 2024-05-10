@@ -5,27 +5,57 @@
 
 {% block content %}
 
-<div class="content-wrapper">
-    <div class="container mt-5">
-
-        <h1 class="text-center mb-4" style="padding-top: 2.0rem;">Search Nearby Suppliers</h1>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <div class="form-group pt-4">
-                <button class="btn btn-outline-success" type="submit">Search</button>
-            </div>
-        </form>
-    
-        {% if suppliers %}
-        <h2>Search Results</h2>
-        <ul>
-            {% for supplier in suppliers %}
-                <li>{{ supplier.name }} - {{ supplier.vicinity }}</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
+    <h1>Search Nearby Suppliers</h1>
+    <form id="searchForm">
+        <label for="userAddress">Enter Your Address:</label>
+        <input type="text" id="userAddress" name="userAddress" required>
+        <button type="submit">Search</button>
+    </form>
+    <div id="results">
+        <!-- Results will be displayed here -->
     </div>
-</div>
+
+    <script>
+        document.getElementById("searchForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // Prevent default form submission
+
+            // Get user input
+            var userAddress = document.getElementById("userAddress").value;
+
+            // Send AJAX request to retrieve nearby suppliers
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "/search/?user_address=" + encodeURIComponent(userAddress), true);
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState == 4 && xhr.status == 200) {
+                    // Parse JSON response
+                    var results = JSON.parse(xhr.responseText);
+
+                    // Display results
+                    displayResults(results);
+                }
+            };
+            xhr.send();
+        });
+
+        function displayResults(results) {
+            var resultsDiv = document.getElementById("results");
+            resultsDiv.innerHTML = ""; // Clear previous results
+
+            // Create list element to display suppliers
+            var ul = document.createElement("ul");
+
+            // Loop through each result and create list items
+            results.forEach(function(result) {
+                var li = document.createElement("li");
+                li.textContent = result.user__username; // Assuming username is a field in the User model
+                ul.appendChild(li);
+            });
+
+            // Append the list to the results div
+            resultsDiv.appendChild(ul);
+        }
+    </script>
+
+
 
 {% endblock %}

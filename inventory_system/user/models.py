@@ -10,6 +10,8 @@ class Profile(models.Model):
     bio = models.TextField()
     phone_number = PhoneNumberField(null=True, blank=True)
     address = models.CharField(max_length=200, null=True, blank=True)
+    latitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, default='')
+    longitude = models.DecimalField(max_digits=9, decimal_places=6, null=True, blank=True, default='')
 
     def __str__(self):
         return self.user.username

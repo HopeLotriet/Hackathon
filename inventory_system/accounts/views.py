@@ -32,8 +32,9 @@ from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import requests
 import logging
 from accounts import views as accounts_views
-from geopy.distance import geodesic
-from django.contrib.gis.db.models.functions import Distance
+from user.models import Profile
+from django.contrib.gis.geos import Point
+from geopy.geocoders import Nominatim
 
 LOW_QUANTITY = getattr(settings, 'LOW_QUANTITY', 5)
 
@@ -640,73 +641,44 @@ def distributor_list(request):
     distributors = Distributor.objects.all()  # Retrieve all distributors from the database
     return render(request, 'accounts/distributor_list.html', {'distributors': distributors})
 
-logging.basicConfig(level=logging.DEBUG)
-logging.debug("Logging started")
-api_key = 'AIzaSyAiRFgP00JifQMC-mDCp3Pl26325BNTG9s'
+def geocode_addresses():
+    geolocator = Nominatim(user_agent="geoapiExercises")
 
-def geocode_address(api_key, address):
-    url = "https://maps.googleapis.com/maps/api/geocode/json"
-    params = {
-        "address": address,
-        "key": api_key
-    }
-    response = requests.get(url, params=params)
-    data = response.json()
-    logging.debug(f"Geocoding response: {data}")
-    if 'results' in data and data['results']:
-        location = data['results'][0]['geometry']['location']
-        latitude = location['lat']
-        longitude = location['lng']
-        return latitude, longitude
+    # Query all profiles without latitude and longitude
+    profiles_without_coordinates = Profile.objects.filter(latitude=None, longitude=None)
+
+    for profile in profiles_without_coordinates:
+        # Geocode the address
+        location = geolocator.geocode(profile.address)
+
+        if location:
+            # Update the profile with latitude and longitude
+            profile.latitude = location.latitude
+            profile.longitude = location.longitude
+            profile.save()
+
+# Call the function to geocode and update the addresses
+geocode_addresses()
+
+def search_nearby_suppliers(user_address):
+    # Convert user address to geographic coordinates
+    user_location = geocode_address(user_address)
+
+    # Query nearby suppliers using GeoDjango's Distance function
+    suppliers = Profile.objects.annotate(
+        distance=Distance('location', user_location)
+    ).order_by('distance')
+
+    return suppliers
+
+def geocode_address(address):
+    # Use a geocoding service to obtain latitude and longitude for the address
+    geolocator = Nominatim(user_agent="geoapiExercises")
+    location = geolocator.geocode(address)
+
+    if location:
+        # Return a Point object with latitude and longitude
+        return Point(location.longitude, location.latitude)
     else:
-        return None, None
-
-
-#Function to find nearby places
-def find_nearby_places(api_key, location, radius, keyword):
-    url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
-    params = {
-        "key": api_key,
-        "location": location,
-        "radius": radius,
-        "keyword": keyword
-    }
-    response = requests.get(url, params=params)
-    logging.debug(f"Nearby places response: {response.url}")
-    logging.debug(f"Nearby places response: {response.status_code}")
-    data = response.json()
-    logging.debug(f"Nearby places response: {data}")
-    if 'results' in data:
-        return data['results']
-    else:
-        return []
-
-
-# Function to display nearby suppliers
-def nearby_suppliers(request):
-    api_key = 'AIzaSyAiRFgP00JifQMC-mDCp3Pl26325BNTG9s'
-
-    form = SearchForm(request.POST or None)
-    suppliers = None
-    address = None
-
-    if request.method == 'POST':
-        if form.is_valid():
-            address = form.cleaned_data['address']
-            latitude, longitude = geocode_address(api_key, address)
-
-            if latitude is None and longitude is not None:
-                location = f"{latitude},{longitude}"
-                radius = 10000
-                supplier_keyword = 'supplier'
-
-                logging.debug(f"Location: {location}, Radius: {radius}, Keyword: {supplier_keyword}")
-
-                suppliers = find_nearby_places(api_key, location, radius, supplier_keyword)
-
-    context = {
-        'form': form,
-        'suppliers': suppliers,
-        'address': address,
-    }
-    return render(request, 'users/nearby_suppliers.html', context)
+        # Handle cases where geocoding fails
+        return None
