@@ -31,6 +31,6 @@ urlpatterns = [
     path('write_review/<int:pk>/', login_required(views.write_review), name='write_review'),
     path('delete_testimonial/<int:testimonial_id>/', login_required(views.delete_testimonial), name='delete_testimonial'),
     path('update_testimonial/<int:testimonial_id>/', login_required(views.update_testimonial), name='update_testimonial'),
-    # path('nearby_suppliers/', views.nearby_suppliers, name='nearby_suppliers')
+    path('nearby_suppliers/', login_required(views.nearby_suppliers), name='nearby_suppliers'),
 
 ]

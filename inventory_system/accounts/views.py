@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.contrib import messages
 from .models import Catalog, Inventory, SalesData, Subscriber, Rating, Testimonial, Distributor
 from orders.models import OrderAmount
@@ -33,8 +33,8 @@ import requests
 import logging
 from accounts import views as accounts_views
 from user.models import Profile
-from django.contrib.gis.geos import Point
-from geopy.geocoders import Nominatim
+
+logging.basicConfig(level=logging.INFO)
 
 LOW_QUANTITY = getattr(settings, 'LOW_QUANTITY', 5)
 
@@ -641,44 +641,30 @@ def distributor_list(request):
     distributors = Distributor.objects.all()  # Retrieve all distributors from the database
     return render(request, 'accounts/distributor_list.html', {'distributors': distributors})
 
-def geocode_addresses():
-    geolocator = Nominatim(user_agent="geoapiExercises")
 
-    # Query all profiles without latitude and longitude
-    profiles_without_coordinates = Profile.objects.filter(latitude=None, longitude=None)
+def extract_city_from_address(address):
+    if address:
+        parts = address.split(',')
+        return parts[2].strip() if len(parts) > 2 else ''
+    return ''
 
-    for profile in profiles_without_coordinates:
-        # Geocode the address
-        location = geolocator.geocode(profile.address)
+@login_required
+def nearby_suppliers(request):
+    if 'q' in request.GET:
+        query = request.GET.get('q')
+        profiles = Profile.objects.filter(is_supplier=True)
+        suggestions = []
 
-        if location:
-            # Update the profile with latitude and longitude
-            profile.latitude = location.latitude
-            profile.longitude = location.longitude
-            profile.save()
+        for profile in profiles:
+            city = extract_city_from_address(profile.address)
+            if query.lower() in city.lower():
+                supplier_info = {'city': city, 'username': profile.user.username}
+                # Check if the supplier has a catalog
+                catalog = Catalog.objects.filter(supplier=profile.user).first()
+                if catalog:
+                    supplier_info['catalog_name'] = catalog.name
+                    supplier_info['pk'] = catalog.pk
+                suggestions.append(supplier_info)
 
-# Call the function to geocode and update the addresses
-geocode_addresses()
-
-def search_nearby_suppliers(user_address):
-    # Convert user address to geographic coordinates
-    user_location = geocode_address(user_address)
-
-    # Query nearby suppliers using GeoDjango's Distance function
-    suppliers = Profile.objects.annotate(
-        distance=Distance('location', user_location)
-    ).order_by('distance')
-
-    return suppliers
-
-def geocode_address(address):
-    # Use a geocoding service to obtain latitude and longitude for the address
-    geolocator = Nominatim(user_agent="geoapiExercises")
-    location = geolocator.geocode(address)
-
-    if location:
-        # Return a Point object with latitude and longitude
-        return Point(location.longitude, location.latitude)
-    else:
-        # Handle cases where geocoding fails
-        return None
+        return JsonResponse(suggestions, safe=False)
+    return render(request, 'users/nearby_suppliers.html')

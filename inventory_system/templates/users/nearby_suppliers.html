@@ -1,61 +1,48 @@
-{% extends 'accounts/home.html' %}
+{% extends "accounts/home.html" %}
 {% load static %}
-
-{% block title %}Search Suppliers{% endblock %}
+{% block title %}Nearby Supplier{% endblock title %}
 
 {% block content %}
-
-    <h1>Search Nearby Suppliers</h1>
-    <form id="searchForm">
-        <label for="userAddress">Enter Your Address:</label>
-        <input type="text" id="userAddress" name="userAddress" required>
-        <button type="submit">Search</button>
-    </form>
-    <div id="results">
-        <!-- Results will be displayed here -->
+<div class="content-wrapper">
+    <div class="container mt-5">
+        <h1 class="text-center">Search Nearby Supplier</h1>
+        <br>
+        <input type="text" id="city-search" class="form-control" placeholder="Enter your town/city" autocomplete="off">
+        <ul id="suggestions" class="list-group mt-3"></ul>
     </div>
-
-    <script>
-        document.getElementById("searchForm").addEventListener("submit", function(event) {
-            event.preventDefault(); // Prevent default form submission
-
-            // Get user input
-            var userAddress = document.getElementById("userAddress").value;
-
-            // Send AJAX request to retrieve nearby suppliers
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", "/search/?user_address=" + encodeURIComponent(userAddress), true);
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState == 4 && xhr.status == 200) {
-                    // Parse JSON response
-                    var results = JSON.parse(xhr.responseText);
-
-                    // Display results
-                    displayResults(results);
-                }
-            };
-            xhr.send();
+</div>
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script>
+    $(document).ready(function () {
+        $('#city-search').on('keyup', function () {
+            let query = $(this).val();
+            if (query.length > 0) {
+                console.log("Sending AJAX request with query:", query);
+                $.ajax({
+                    url: '{% url "nearby_suppliers" %}',
+                    data: { 'q': query },
+                    dataType: 'json',
+                    success: function (data) {
+                        console.log("Received data:", data);
+                        $('#suggestions').empty();
+                        $.each(data, function (index, value) {
+                            let suggestion = '<li>' + value.city + ' - ' + value.username;
+                            if (value.catalog_name && value.pk) {
+                                suggestion += ' - <a href="/products/?catalog_id=' + value.pk + '">' + value.catalog_name + '</a>';
+                            }
+                            suggestion += '</li>';
+                            $('#suggestions').append(suggestion);
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX request failed:", status, error);
+                    }
+                });
+            } else {
+                $('#suggestions').empty();
+            }
         });
-
-        function displayResults(results) {
-            var resultsDiv = document.getElementById("results");
-            resultsDiv.innerHTML = ""; // Clear previous results
-
-            // Create list element to display suppliers
-            var ul = document.createElement("ul");
-
-            // Loop through each result and create list items
-            results.forEach(function(result) {
-                var li = document.createElement("li");
-                li.textContent = result.user__username; // Assuming username is a field in the User model
-                ul.appendChild(li);
-            });
-
-            // Append the list to the results div
-            resultsDiv.appendChild(ul);
-        }
-    </script>
-
-
-
-{% endblock %}
+    });
+</script>
+{% endblock content %}

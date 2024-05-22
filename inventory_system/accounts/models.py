@@ -12,6 +12,7 @@ class Catalog(models.Model):
 
     def __str__(self):
         return self.name
+    
 
 class Inventory(models.Model):
     catalog = models.ForeignKey(Catalog, on_delete=models.CASCADE)
