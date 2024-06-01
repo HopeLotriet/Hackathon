@@ -10,7 +10,6 @@ from user.forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileFor
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User, Group
 from orders.models import Invoice, cart, cart_records, customerOrderHistory, OrderAmount
-from accounts.views import geocode_address, nearby_suppliers
 
 
 @login_required

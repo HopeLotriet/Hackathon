@@ -1,31 +1,48 @@
-{% extends 'accounts/home.html' %}
+{% extends "accounts/home.html" %}
 {% load static %}
-
-{% block title %}Search Suppliers{% endblock %}
+{% block title %}Nearby Supplier{% endblock title %}
 
 {% block content %}
-
 <div class="content-wrapper">
     <div class="container mt-5">
-
-        <h1 class="text-center mb-4" style="padding-top: 2.0rem;">Search Nearby Suppliers</h1>
-        <form method="post">
-            {% csrf_token %}
-            {{ form.as_p }}
-            <div class="form-group pt-4">
-                <button class="btn btn-outline-success" type="submit">Search</button>
-            </div>
-        </form>
-    
-        {% if suppliers %}
-        <h2>Search Results</h2>
-        <ul>
-            {% for supplier, distance in suppliers %}
-                <li>{{ supplier.user.username }} - {{ supplier.address }} ({{ distance }} kilometers)</li>
-            {% endfor %}
-        </ul>
-        {% endif %}
+        <h1 class="text-center">Search Nearby Supplier</h1>
+        <br>
+        <input type="text" id="city-search" class="form-control" placeholder="Enter your town/city" autocomplete="off">
+        <ul id="suggestions" class="list-group mt-3"></ul>
     </div>
 </div>
-
-{% endblock %}
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"
+    integrity="sha256-/xUj+3OJU5yExlq6GSYGSHk7tPXikynS7ogEvDej/m4=" crossorigin="anonymous"></script>
+<script>
+    $(document).ready(function () {
+        $('#city-search').on('keyup', function () {
+            let query = $(this).val();
+            if (query.length > 0) {
+                console.log("Sending AJAX request with query:", query);
+                $.ajax({
+                    url: '{% url "nearby_suppliers" %}',
+                    data: { 'q': query },
+                    dataType: 'json',
+                    success: function (data) {
+                        console.log("Received data:", data);
+                        $('#suggestions').empty();
+                        $.each(data, function (index, value) {
+                            let suggestion = '<li>' + value.city + ' - ' + value.username;
+                            if (value.catalog_name && value.pk) {
+                                suggestion += ' - <a href="/products/?catalog_id=' + value.pk + '">' + value.catalog_name + '</a>';
+                            }
+                            suggestion += '</li>';
+                            $('#suggestions').append(suggestion);
+                        });
+                    },
+                    error: function (xhr, status, error) {
+                        console.error("AJAX request failed:", status, error);
+                    }
+                });
+            } else {
+                $('#suggestions').empty();
+            }
+        });
+    });
+</script>
+{% endblock content %}

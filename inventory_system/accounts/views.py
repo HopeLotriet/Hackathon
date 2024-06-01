@@ -1,7 +1,7 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse
 from django.contrib.auth.decorators import login_required
-from django.http import HttpResponse, HttpResponseRedirect
+from django.http import HttpResponse, HttpResponseRedirect, JsonResponse
 from django.contrib import messages
 from .models import Catalog, Inventory, SalesData, Subscriber, Rating, Testimonial, Distributor
 from orders.models import OrderAmount
@@ -12,9 +12,9 @@ from django_pandas.io import read_frame
 import pandas as pd
 import plotly
 import plotly.express as px
-# import openpyxl
+import openpyxl
 from django.core.files import File
-# from openpyxl_image_loader import SheetImageLoader
+from openpyxl_image_loader import SheetImageLoader
 import zipfile
 import os
 import json
@@ -31,7 +31,10 @@ from user.models import Profile
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 import logging
-from user.utils import geocode_address
+from accounts import views as accounts_views
+from user.models import Profile
+
+logging.basicConfig(level=logging.INFO)
 
 LOW_QUANTITY = getattr(settings, 'LOW_QUANTITY', 5)
 
@@ -638,60 +641,30 @@ def distributor_list(request):
     distributors = Distributor.objects.all()  # Retrieve all distributors from the database
     return render(request, 'accounts/distributor_list.html', {'distributors': distributors})
 
-logging.basicConfig(level=logging.DEBUG)
 
-# Function to display nearby suppliers
+def extract_city_from_address(address):
+    if address:
+        parts = address.split(',')
+        return parts[2].strip() if len(parts) > 2 else ''
+    return ''
+
+@login_required
 def nearby_suppliers(request):
-    api_key = 'AIzaSyAiRFgP00JifQMC-mDCp3Pl26325BNTG9s'
-    form = SearchForm(request.POST or None)
-    suppliers = None
-    address = None
-    nearby_suppliers = []
+    if 'q' in request.GET:
+        query = request.GET.get('q')
+        profiles = Profile.objects.filter(is_supplier=True)
+        suggestions = []
 
-    if request.method == 'POST':
-        if form.is_valid():
-            address = form.cleaned_data['address']
-            latitude, longitude = geocode_address(api_key, address)
-            print("Latitude:", latitude, "Longitude:", longitude)
+        for profile in profiles:
+            city = extract_city_from_address(profile.address)
+            if query.lower() in city.lower():
+                supplier_info = {'city': city, 'username': profile.user.username}
+                # Check if the supplier has a catalog
+                catalog = Catalog.objects.filter(supplier=profile.user).first()
+                if catalog:
+                    supplier_info['catalog_name'] = catalog.name
+                    supplier_info['pk'] = catalog.pk
+                suggestions.append(supplier_info)
 
-            if latitude is not None and longitude is not None:
-                suppliers = Profile.objects.filter(latitude__isnull=False, longitude__isnull=False)
-                nearby_suppliers = []
-                for supplier in suppliers:
-                    supplier_location = (supplier.latitude, supplier.longitude)
-                    distance = geodesic((latitude, longitude), supplier_location).kilometers
-                    if distance <= 15:
-                        nearby_suppliers.append((supplier, distance))
-                        print("Supplier:", supplier, "Distance:", distance)
-
-
-    context = {
-        'form': form,
-        'suppliers': nearby_suppliers,
-        'address': address,
-    }
-    return render(request, 'users/nearby_suppliers.html', context)
-
-#Function to find nearby places
-# def find_nearby_places(api_key, location, radius, keyword):
-#     url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
-#     params = {
-#         "key": api_key,
-#         "location": location,
-#         "radius": radius,
-#         "keyword": keyword
-#     }
-#     response = requests.get(url, params=params)
-#     print("Nearby places request URL:", response.url)
-#     print("Nearby places response status code:", response.status_code)
-#     data = response.json()
-#     print("Nearby places response data:", data)
-#     if 'results' in data:
-#         return data['results']
-#     else:
-#         return []
-    
-
-# results = find_nearby_places(api_key, location, radius, keyword)
-
-# print("Nearby suppliers:", results)
+        return JsonResponse(suggestions, safe=False)
+    return render(request, 'users/nearby_suppliers.html')
