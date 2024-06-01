@@ -27,11 +27,11 @@ import csv
 from matplotlib import pyplot as plt
 from statsmodels.tsa.arima.model import ARIMA
 from django.contrib.auth.models import User
+from user.models import Profile
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-import requests
 import logging
-from accounts import views as accounts_views
+from user.utils import geocode_address
 
 LOW_QUANTITY = getattr(settings, 'LOW_QUANTITY', 5)
 
@@ -638,71 +638,60 @@ def distributor_list(request):
     distributors = Distributor.objects.all()  # Retrieve all distributors from the database
     return render(request, 'accounts/distributor_list.html', {'distributors': distributors})
 
-api_key = 'AIzaSyAiRFgP00JifQMC-mDCp3Pl26325BNTG9s'
-
-def geocode_address(api_key, address):
-    url = "https://maps.googleapis.com/maps/api/geocode/json"
-    params = {
-        "address": address,
-        "key": api_key
-    }
-    response = requests.get(url, params=params)
-    data = response.json()
-    logging.debug(f"Geocoding response: {data}")
-    if 'results' in data and data['results']:
-        location = data['results'][0]['geometry']['location']
-        latitude = location['lat']
-        longitude = location['lng']
-        return latitude, longitude
-    else:
-        return None, None
-
-
-#Function to find nearby places
-def find_nearby_places(api_key, location, radius, keyword):
-    url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
-    params = {
-        "key": api_key,
-        "location": location,
-        "radius": radius,
-        "keyword": keyword
-    }
-    response = requests.get(url, params=params)
-    logging.debug(f"Nearby places response: {response.url}")
-    logging.debug(f"Nearby places response: {response.status_code}")
-    data = response.json()
-    logging.debug(f"Nearby places response: {data}")
-    if 'results' in data:
-        return data['results']
-    else:
-        return []
-
+logging.basicConfig(level=logging.DEBUG)
 
 # Function to display nearby suppliers
 def nearby_suppliers(request):
     api_key = 'AIzaSyAiRFgP00JifQMC-mDCp3Pl26325BNTG9s'
-
     form = SearchForm(request.POST or None)
     suppliers = None
     address = None
+    nearby_suppliers = []
 
     if request.method == 'POST':
         if form.is_valid():
             address = form.cleaned_data['address']
             latitude, longitude = geocode_address(api_key, address)
+            print("Latitude:", latitude, "Longitude:", longitude)
 
-            if latitude is None and longitude is not None:
-                location = f"{latitude},{longitude}"
-                radius = 10000
-                supplier_keyword = 'supplier'
+            if latitude is not None and longitude is not None:
+                suppliers = Profile.objects.filter(latitude__isnull=False, longitude__isnull=False)
+                nearby_suppliers = []
+                for supplier in suppliers:
+                    supplier_location = (supplier.latitude, supplier.longitude)
+                    distance = geodesic((latitude, longitude), supplier_location).kilometers
+                    if distance <= 15:
+                        nearby_suppliers.append((supplier, distance))
+                        print("Supplier:", supplier, "Distance:", distance)
 
-                logging.debug(f"Location: {location}, Radius: {radius}, Keyword: {supplier_keyword}")
-
-                suppliers = find_nearby_places(api_key, location, radius, supplier_keyword)
 
     context = {
         'form': form,
-        'suppliers': suppliers,
+        'suppliers': nearby_suppliers,
         'address': address,
     }
     return render(request, 'users/nearby_suppliers.html', context)
+
+#Function to find nearby places
+# def find_nearby_places(api_key, location, radius, keyword):
+#     url = "https://maps.googleapis.com/maps/api/place/nearbysearch/json"
+#     params = {
+#         "key": api_key,
+#         "location": location,
+#         "radius": radius,
+#         "keyword": keyword
+#     }
+#     response = requests.get(url, params=params)
+#     print("Nearby places request URL:", response.url)
+#     print("Nearby places response status code:", response.status_code)
+#     data = response.json()
+#     print("Nearby places response data:", data)
+#     if 'results' in data:
+#         return data['results']
+#     else:
+#         return []
+    
+
+# results = find_nearby_places(api_key, location, radius, keyword)
+
+# print("Nearby suppliers:", results)

@@ -20,8 +20,8 @@
         {% if suppliers %}
         <h2>Search Results</h2>
         <ul>
-            {% for supplier in suppliers %}
-                <li>{{ supplier.name }} - {{ supplier.vicinity }}</li>
+            {% for supplier, distance in suppliers %}
+                <li>{{ supplier.user.username }} - {{ supplier.address }} ({{ distance }} kilometers)</li>
             {% endfor %}
         </ul>
         {% endif %}

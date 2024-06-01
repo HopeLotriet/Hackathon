@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 from PIL import Image
 from phonenumber_field.modelfields import PhoneNumberField
+from .utils import geocode_address
 
 # Extending User Model Using a One-To-One Link
 class Profile(models.Model):
@@ -10,17 +11,21 @@ class Profile(models.Model):
     bio = models.TextField()
     phone_number = PhoneNumberField(null=True, blank=True)
     address = models.CharField(max_length=200, null=True, blank=True)
+    latitude = models.FloatField(null=True, blank=True)
+    longitude = models.FloatField(null=True, blank=True)
 
     def __str__(self):
         return self.user.username
 
-    # resizing images
     def save(self, *args, **kwargs):
-        super().save()
+        if self.address:
+            latitude, longitude = geocode_address(self.address)
+            self.latitude = latitude
+            self.longitude = longitude
+        super().save(*args, **kwargs)
 
         img = Image.open(self.avatar.path)
-
         if img.height > 100 or img.width > 100:
-            new_img = (100, 100)
-            img.thumbnail(new_img)
+            output_size = (100, 100)
+            img.thumbnail(output_size)
             img.save(self.avatar.path)

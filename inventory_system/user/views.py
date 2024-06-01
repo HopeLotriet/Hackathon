@@ -10,7 +10,7 @@ from user.forms import RegisterForm, LoginForm, UpdateUserForm, UpdateProfileFor
 from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.models import User, Group
 from orders.models import Invoice, cart, cart_records, customerOrderHistory, OrderAmount
-from accounts.views import geocode_address, find_nearby_places
+from accounts.views import geocode_address, nearby_suppliers
 
 
 @login_required
@@ -131,32 +131,11 @@ def profile(request):
 
     if request.method == 'POST':
         user_form = UpdateUserForm(request.POST, instance=request.user)
-        profile_form = UpdateProfileForm(
-            request.POST, request.FILES, instance=request.user.profile)
+        profile_form = UpdateProfileForm(request.POST, request.FILES, instance=request.user.profile)
 
         if user_form.is_valid() and profile_form.is_valid():
             user_form.save()
             profile_form.save()
-
-            # Geocode the updated address
-            latitude, longitude = geocode_address(profile.address)
-            
-            if latitude is not None and longitude is not None:
-                # Use the coordinates to find nearby suppliers
-                location = f"{latitude},{longitude}"
-                radius = 10000  # Adjust as needed
-                supplier_keyword = 'supplier'  # Adjust as needed
-                suppliers = find_nearby_places(location, radius, supplier_keyword)
-                
-                # Pass the nearby suppliers to the template
-                return render(request, 'users/profile.html', {'user_form': user_form, 'profile_form': profile_form, 'profile': profile_info, 'user': logged_user, 'suppliers': suppliers})
-            else:
-                messages.error(request, 'Failed to geocode address. Please ensure your address is valid.')
-                return redirect('users-profile')
-        else:
-            messages.error(request, 'Failed to update profile. Please check the provided information.')
-            return redirect('users-profile')
-
             messages.success(request, 'Your profile is updated successfully')
             return redirect(to='users-profile')
     else:
