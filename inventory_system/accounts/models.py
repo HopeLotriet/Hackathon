@@ -138,8 +138,8 @@ class Testimonial(models.Model):
 
 class Distributor(models.Model):
     name = models.CharField(max_length=100)
-    contact = models.TextField()
-    email = models.TextField()
+    contact = models.CharField(max_length=20)
+    email = models.EmailField(unique=True)
     area = models.CharField(max_length=200, null=True, blank=True)
     delivery_schedule = models.CharField(max_length=200)
     types_of_food = models.CharField(max_length=200)

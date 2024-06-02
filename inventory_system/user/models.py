@@ -2,7 +2,6 @@ from django.db import models
 from django.contrib.auth.models import User
 from PIL import Image
 from phonenumber_field.modelfields import PhoneNumberField
-from .utils import geocode_address
 
 # Extending User Model Using a One-To-One Link
 class Profile(models.Model):
@@ -18,10 +17,6 @@ class Profile(models.Model):
         return self.user.username
 
     def save(self, *args, **kwargs):
-        if self.address:
-            latitude, longitude = geocode_address(self.address)
-            self.latitude = latitude
-            self.longitude = longitude
         super().save(*args, **kwargs)
 
         img = Image.open(self.avatar.path)
