@@ -132,6 +132,7 @@ class Testimonial(models.Model):
     inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, default=None)  # ForeignKey relationship
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    rating = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.text
