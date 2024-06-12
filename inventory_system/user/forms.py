@@ -95,8 +95,7 @@ class UpdateProfileForm(forms.ModelForm):
     bio = forms.CharField(widget=forms.Textarea(attrs={'class': 'form-control', 'rows': 5}))
     phone_number = PhoneNumberField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '+27 XX XXX XXXX'}))
     address = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-control', 'placeholder': '1234 Main St, City, Country'}))
-    
-
+   
     class Meta:
         model = Profile
         fields = ['avatar', 'bio', 'phone_number', 'address']

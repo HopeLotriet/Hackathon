@@ -132,14 +132,15 @@ class Testimonial(models.Model):
     inventory = models.ForeignKey(Inventory, on_delete=models.CASCADE, default=None)  # ForeignKey relationship
     text = models.TextField()
     created_at = models.DateTimeField(auto_now_add=True)
+    rating = models.PositiveIntegerField(default=0)
 
     def __str__(self):
         return self.text
 
 class Distributor(models.Model):
     name = models.CharField(max_length=100)
-    contact = models.TextField()
-    email = models.TextField()
+    contact = models.CharField(max_length=20)
+    email = models.EmailField(unique=True)
     area = models.CharField(max_length=200, null=True, blank=True)
     delivery_schedule = models.CharField(max_length=200)
     types_of_food = models.CharField(max_length=200)

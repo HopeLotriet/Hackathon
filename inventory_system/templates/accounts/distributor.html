@@ -24,14 +24,14 @@
 {% endif %}
 
 
-<div class="content-wrapper">
+<div class="content-wrapper" style="padding-top: 2.0rem;">
    <div class="container mt-5">
     <div class="content-section mb-5">
-        <h1>Enter Distributor Details</h1>
+        <h1 style="padding-top: 2.0rem;">Enter Distributor Details</h1>
         <form method="POST">
             {% csrf_token %}
             <fieldset>
-                <legend class="border-bottom pb-2 mb-4 text-center" style="padding-top: 2.0rem;">Create Catalog</legend>
+                <legend class="border-bottom pb-2 mb-4 text-center" style="padding-top: 2.0rem;">Create Form</legend>
                 {{ form|crispy }}
                 <div class="form-group pt-4">
                     <button class="btn btn-outline-success" type="submit">Submit</button>

@@ -12,7 +12,6 @@ from django.contrib.auth.models import User, Group
 from orders.models import Invoice, cart, cart_records, customerOrderHistory, OrderAmount
 
 
-
 @login_required
 def logout(request):
     return redirect(to='')

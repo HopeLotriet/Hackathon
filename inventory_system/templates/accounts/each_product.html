@@ -38,13 +38,20 @@
             <div class="col-md-8">
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h2 class="card-title">{{ inventory.name }}</h2>
+                        <h2 class="card-title" style="font-size: 50px;">{{ inventory.name }}</h2>
+                        <br>
                         <p class="card-text">{{ inventory.description }}</p>
-                        <p class="card-text"><strong>Price Per Item:</strong> R{{ inventory.cost_per_item }}</p>
-                        <p class="card-text"><strong>Quantity in Stock:</strong> {{ inventory.quantity_in_stock }}</p>
+                        <p class="card-text" style="font-size: 30px;"><strong>Price Per Item:</strong> R{{ inventory.cost_per_item }}</p>
+                        <p class="card-text" style="font-size: 30px;"><strong>Quantity in Stock:</strong> {{ inventory.quantity_in_stock }}</p>
+
+                        <br>
+                        <br>
+                        <br>
+                        <br>
+                        <br>
 
                         <!-- Rating Section -->
-                        <div class="mt-4">
+                        <!-- <div class="mt-4">
                             <h4>Rate this product:</h4>
                             <div class="rating" id="rating-stars">
                                 <span class="star" data-value="1">&#9733;</span>
@@ -54,7 +61,7 @@
                                 <span class="star" data-value="5">&#9733;</span>
                             </div>
                             <input type="hidden" id="rating-value" name="rating" value="0">
-                        </div>
+                        </div> -->
 
                         <!-- Form for submitting testimonial -->
                         <div class="mt-4">
@@ -71,6 +78,13 @@
                 {% for testimonial in testimonials %}
                 <div class="testimonial">
                     <p>{{ testimonial.text }}</p>
+                    <p>
+                        Rating: 
+                        {% for i in "12345"|slice:":testimonial.rating" %}
+                        <span class="star rated">&#9733;</span>
+                        {% endfor %}
+
+                    </p>
                     <p>By: {{ testimonial.created_by.username }}</p>
                     {% if testimonial.created_by == request.user %}
                     <a href="{% url 'update_testimonial' testimonial.pk %}" class="btn btn-primary btn-sm">Edit</a>
@@ -98,48 +112,26 @@
 <br>
 
 <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const stars = document.querySelectorAll('.star');
-        console.log('Stars:', stars); // Debugging statement
+document.addEventListener('DOMContentLoaded', function () {
+    const stars = document.querySelectorAll('.star');
+    const ratingValue = document.getElementById('rating-value');
+    let rating = 0;
 
-        if (stars.length > 0) {
-            const ratingValue = document.getElementById('rating-value');
-            const productId = '{{ inventory.id }}'; // Get the product ID
-            let rating = localStorage.getItem(`userRating_${productId}`) || 0;
+    stars.forEach((star, index) => {
+        star.addEventListener('click', () => {
+            rating = index + 1;
+            ratingValue.value = rating;
 
-            // Set initial rating based on localStorage
-            if (rating > 0) {
-                for (let i = 0; i < rating; i++) {
-                    if (stars[i]) { // Check if the star element exists
-                        stars[i].classList.add('rated');
-                    }
-                }
-            }
-
-            stars.forEach((star, index) => {
-                if (star) { // Check if the star element exists
-                    star.addEventListener('click', () => {
-                        rating = index + 1;
-                        ratingValue.value = rating;
-
-                        // Toggle 'rated' class for visual feedback
-                        stars.forEach((s, idx) => {
-                            if (s && idx < rating) { // Check if the star element exists
-                                s.classList.add('rated');
-                            } else if (s) {
-                                s.classList.remove('rated');
-                            }
-                        });
-
-                        // Store rating in localStorage
-                        localStorage.setItem(`userRating_${productId}`, rating);
-                    });
+            stars.forEach((s, idx) => {
+                if (idx < rating) {
+                    s.classList.add('rated');
+                } else {
+                    s.classList.remove('rated');
                 }
             });
-        } else {
-            console.error('No stars found'); // Error handling
-        }
+        });
     });
+});
 
     // Function to hide messages after a delay
     function hideMessages() {

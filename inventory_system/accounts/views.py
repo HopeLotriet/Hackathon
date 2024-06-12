@@ -12,9 +12,9 @@ from django_pandas.io import read_frame
 import pandas as pd
 import plotly
 import plotly.express as px
-import openpyxl
+# import openpyxl
 from django.core.files import File
-from openpyxl_image_loader import SheetImageLoader
+# from openpyxl_image_loader import SheetImageLoader
 import zipfile
 import os
 import json
@@ -27,9 +27,9 @@ import csv
 from matplotlib import pyplot as plt
 from statsmodels.tsa.arima.model import ARIMA
 from django.contrib.auth.models import User
+from user.models import Profile
 from django.core.mail import EmailMultiAlternatives
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
-import requests
 import logging
 from accounts import views as accounts_views
 from user.models import Profile
@@ -668,3 +668,16 @@ def nearby_suppliers(request):
 
         return JsonResponse(suggestions, safe=False)
     return render(request, 'users/nearby_suppliers.html')
+
+@login_required
+def each_catalog(request, catalog_id):
+    catalog = get_object_or_404(Catalog, pk=catalog_id)
+    my_products = Catalog.objects.filter(is_deleted=False)
+
+    context = {
+        "title": "Products",
+        "catalogs": my_products,
+        "catalog": catalog,
+    }
+    
+    return render(request, 'accounts/each_catalog.html', context=context)
