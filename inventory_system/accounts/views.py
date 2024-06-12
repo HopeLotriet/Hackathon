@@ -342,7 +342,22 @@ def add_product(request):
 
 @login_required
 def dashboard(request):
-    inventories = Inventory.objects.all()
+    # Get the currently logged-in user
+    supplier = request.user
+
+    # Ensure the user is authenticated
+    if not supplier.is_authenticated:
+        context = {
+            "message": "User is not authenticated."
+        }
+        return render(request, "accounts/empty_dashboard.html", context=context)
+
+    # Filter the inventory for the logged-in supplier user
+    inventories = Inventory.objects.filter(catalog__supplier=supplier)
+
+    # Debug: Print the current user and inventories count
+    print(f"Current user: {supplier}")
+    print(f"Inventories count: {inventories.count()}")
 
     # Check if the inventories are empty
     if not inventories:
@@ -355,56 +370,41 @@ def dashboard(request):
     # Convert Inventory queryset to DataFrame
     df = read_frame(inventories)
 
-    # sales graph
-    print(df.columns)
+    # Debug: Print the DataFrame
+    print(df)
 
-    sales_graph_df = df.groupby(by="last_sales_date", as_index=False, sort=False)[
-        'sales'].sum()
-    print(sales_graph_df.sales)
-    print(sales_graph_df.columns)
-    plt.ylim(0,)
-    plt.xlim(0,)
-    sales_graph = px.line(sales_graph_df, x=sales_graph_df.last_sales_date,
-                          y=sales_graph_df.sales, title="Sales Trend")
+    # sales graph
+    sales_graph_df = df.groupby(by="last_sales_date", as_index=False, sort=False)['sales'].sum()
+    sales_graph = px.line(sales_graph_df, x=sales_graph_df.last_sales_date, y=sales_graph_df.sales, title="Sales Trend")
     sales_graph = json.dumps(sales_graph, cls=plotly.utils.PlotlyJSONEncoder)
 
     # best performing product
     df['quantity_sold'] = df['quantity_sold'].astype(int)
-    best_performing_product_df = df.groupby(
-        by="name").sum().sort_values(by="quantity_sold")
+    best_performing_product_df = df.groupby(by="name").sum().sort_values(by="quantity_sold")
     colors = px.colors.qualitative.Set3[:len(best_performing_product_df)]
     best_performing_product = px.bar(best_performing_product_df,
                                      x=best_performing_product_df.index,
                                      y=best_performing_product_df.quantity_sold,
                                      color=best_performing_product_df.index,
-                                     title="Best Performing Product"
-                                     )
-    best_performing_product = json.dumps(
-        best_performing_product, cls=plotly.utils.PlotlyJSONEncoder)
+                                     title="Best Performing Product")
+    best_performing_product = json.dumps(best_performing_product, cls=plotly.utils.PlotlyJSONEncoder)
 
     # best performing product in sales
-    sales_graph_df_per_product_df = df.groupby(
-        by="name", as_index=False, sort=False)['sales'].sum()
+    sales_graph_df_per_product_df = df.groupby(by="name", as_index=False, sort=False)['sales'].sum()
     best_performing_product_per_product = px.pie(sales_graph_df_per_product_df,
                                                  names="name",
                                                  values="sales",
                                                  title="Product Performance By Sales",
-                                                 # https://plotly.com/python/discrete-color/
-                                                 color_discrete_sequence=px.colors.qualitative.Bold,
-                                                 )
-    best_performing_product_per_product = json.dumps(
-        best_performing_product_per_product, cls=plotly.utils.PlotlyJSONEncoder)
+                                                 color_discrete_sequence=px.colors.qualitative.Bold)
+    best_performing_product_per_product = json.dumps(best_performing_product_per_product, cls=plotly.utils.PlotlyJSONEncoder)
 
     # Most Product In Stock
-    most_product_in_stock_df = df.groupby(
-        by="name").sum().sort_values(by="quantity_in_stock")
+    most_product_in_stock_df = df.groupby(by="name").sum().sort_values(by="quantity_in_stock")
     most_product_in_stock = px.pie(most_product_in_stock_df,
                                    names=most_product_in_stock_df.index,
                                    values=most_product_in_stock_df.quantity_in_stock,
-                                   title="Most Product In Stock"
-                                   )
-    most_product_in_stock = json.dumps(
-        most_product_in_stock, cls=plotly.utils.PlotlyJSONEncoder)
+                                   title="Most Product In Stock")
+    most_product_in_stock = json.dumps(most_product_in_stock, cls=plotly.utils.PlotlyJSONEncoder)
 
     context = {
         "sales_graph": sales_graph,
@@ -441,8 +441,9 @@ def search(request):
 
 @login_required
 def generate_sales_report(request):
+    supplier = request.user
     # Get all inventory items
-    inventories = Inventory.objects.all()
+    inventories = Inventory.objects.filter(catalog__supplier=supplier)
 
     # Create a response object with CSV content
     response = HttpResponse(content_type='text/csv')
@@ -471,8 +472,9 @@ def generate_sales_report(request):
 
 @login_required
 def analyze_sales_data(request):
-    # Get the data from the Inventory model
-    inventories = Inventory.objects.all()
+    supplier = request.user
+    # Get all inventory items
+    inventories = Inventory.objects.filter(catalog__supplier=supplier)
 
     # Check if the inventories are empty
     if not inventories:
@@ -668,3 +670,17 @@ def nearby_suppliers(request):
 
         return JsonResponse(suggestions, safe=False)
     return render(request, 'users/nearby_suppliers.html')
+
+@login_required
+def each_catalog(request, catalog_id):
+    catalog = get_object_or_404(Catalog, pk=catalog_id)
+    my_products = Catalog.objects.filter(is_deleted=False, supplier=request.user)
+    
+    context = {
+        'title': 'Products',
+        'catalog': catalog,
+        'catalogs': my_products
+    }
+    
+    return render(request, 'accounts/each_catalog.html', context)
+    
