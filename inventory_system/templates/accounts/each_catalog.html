@@ -4,7 +4,7 @@
 {% block title %}FarmFresh - Products{% endblock %}
 
 {% block content %}
-<div class="content-wrapper container" style="padding-top: 2.0rem;">
+
 
     {% if messages %}
         <div class="row mt-3">
@@ -21,6 +21,9 @@
             {% endfor %}
         </div>
     {% endif %}
+
+    <div class="content-wrapper container" style="padding-top: 2.0rem;">
+        <div class="container mt-5" style="padding-top: 2.0rem;">
 
     <h2>Catalog: {{ catalog.name }}</h2>
     <p>Description: {{ catalog.description }}</p>
@@ -69,6 +72,6 @@
         // Call the function when the page loads
         window.onload = hideMessages;
     </script>
-
+</div>
 </div>
 {% endblock %}

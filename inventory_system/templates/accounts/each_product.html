@@ -38,13 +38,20 @@
             <div class="col-md-8">
                 <div class="card mb-4">
                     <div class="card-body">
-                        <h2 class="card-title">{{ inventory.name }}</h2>
+                        <h2 class="card-title" style="font-size: 50px;">{{ inventory.name }}</h2>
+                        <br>
                         <p class="card-text">{{ inventory.description }}</p>
-                        <p class="card-text"><strong>Price Per Item:</strong> R{{ inventory.cost_per_item }}</p>
-                        <p class="card-text"><strong>Quantity in Stock:</strong> {{ inventory.quantity_in_stock }}</p>
+                        <p class="card-text" style="font-size: 30px;"><strong>Price Per Item:</strong> R{{ inventory.cost_per_item }}</p>
+                        <p class="card-text" style="font-size: 30px;"><strong>Quantity in Stock:</strong> {{ inventory.quantity_in_stock }}</p>
+
+                        <br>
+                        <br>
+                        <br>
+                        <br>
+                        <br>
 
                         <!-- Rating Section -->
-                        <div class="mt-4">
+                        <!-- <div class="mt-4">
                             <h4>Rate this product:</h4>
                             <div class="rating" id="rating-stars">
                                 <span class="star" data-value="1">&#9733;</span>
@@ -54,7 +61,7 @@
                                 <span class="star" data-value="5">&#9733;</span>
                             </div>
                             <input type="hidden" id="rating-value" name="rating" value="0">
-                        </div>
+                        </div> -->
 
                         <!-- Form for submitting testimonial -->
                         <div class="mt-4">
@@ -76,9 +83,7 @@
                         {% for i in "12345"|slice:":testimonial.rating" %}
                         <span class="star rated">&#9733;</span>
                         {% endfor %}
-                        {% for i in "12345"|slice:testimonial.rating %}
-                        <span class="star">&#9733;</span>
-                        {% endfor %}
+
                     </p>
                     <p>By: {{ testimonial.created_by.username }}</p>
                     {% if testimonial.created_by == request.user %}
