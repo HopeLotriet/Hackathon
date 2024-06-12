@@ -342,22 +342,9 @@ def add_product(request):
 
 @login_required
 def dashboard(request):
-    # Get the currently logged-in user
     supplier = request.user
-
-    # Ensure the user is authenticated
-    if not supplier.is_authenticated:
-        context = {
-            "message": "User is not authenticated."
-        }
-        return render(request, "accounts/empty_dashboard.html", context=context)
-
-    # Filter the inventory for the logged-in supplier user
-    inventories = Inventory.objects.filter(catalog__supplier=supplier)
-
-    # Debug: Print the current user and inventories count
-    print(f"Current user: {supplier}")
-    print(f"Inventories count: {inventories.count()}")
+    # Get all inventory items
+    inventories = Inventory.objects.filter(catalog__supplier=request.user)
 
     # Check if the inventories are empty
     if not inventories:
