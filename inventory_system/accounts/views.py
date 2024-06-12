@@ -342,7 +342,9 @@ def add_product(request):
 
 @login_required
 def dashboard(request):
-    inventories = Inventory.objects.all()
+    supplier = request.user
+    # Get all inventory items
+    inventories = Inventory.objects.filter(catalog__supplier=request.user)
 
     # Check if the inventories are empty
     if not inventories:
@@ -441,8 +443,10 @@ def search(request):
 
 @login_required
 def generate_sales_report(request):
+
+    supplier = request.user
     # Get all inventory items
-    inventories = Inventory.objects.all()
+    inventories = Inventory.objects.filter(catalog__supplier=request.user)
 
     # Create a response object with CSV content
     response = HttpResponse(content_type='text/csv')
@@ -472,7 +476,9 @@ def generate_sales_report(request):
 @login_required
 def analyze_sales_data(request):
     # Get the data from the Inventory model
-    inventories = Inventory.objects.all()
+    supplier = request.user
+    # Get all inventory items
+    inventories = Inventory.objects.filter(catalog__supplier=request.user)
 
     # Check if the inventories are empty
     if not inventories:
