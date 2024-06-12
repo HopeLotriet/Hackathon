@@ -12,9 +12,9 @@ from django_pandas.io import read_frame
 import pandas as pd
 import plotly
 import plotly.express as px
-import openpyxl
+# import openpyxl
 from django.core.files import File
-from openpyxl_image_loader import SheetImageLoader
+# from openpyxl_image_loader import SheetImageLoader
 import zipfile
 import os
 import json
