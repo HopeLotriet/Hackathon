@@ -3,6 +3,7 @@ asgiref==3.7.2
 asn1crypto==1.5.1
 barcode==1.0.4
 beautifulsoup4==4.12.3
+Brotli==1.1.0
 certifi==2024.2.2
 cffi==1.16.0
 chardet==5.2.0
@@ -15,6 +16,7 @@ cryptography==42.0.5
 cssselect2==0.7.0
 cycler==0.12.1
 defusedxml==0.7.1
+dj-database-url==2.2.0
 Django==5.0.3
 django-crispy-forms==2.1
 django-filter==23.5
@@ -26,9 +28,11 @@ docopt==0.6.2
 et-xmlfile==1.1.0
 fontawesomefree==6.5.1
 fonttools==4.49.0
+GDAL @ file:///C:/Users/JBSLAB6/Documents/Hackathon/inventory_system/GDAL-3.8.4-cp311-cp311-win_amd64.whl#sha256=13115dae539ab85b7b4b5bf8b7eb13abf2026d95313cec0837bff034a8c25c58
 geographiclib==2.0
 geopy==2.4.1
 gunicorn==21.2.0
+h11==0.14.0
 html5lib==1.1
 idna==3.6
 Js2Py==0.74
@@ -49,6 +53,7 @@ pillow==10.2.0
 pipwin==0.5.2
 plotly==5.19.0
 psycopg2==2.9.9
+psycopg2-binary==2.9.9
 pycparser==2.21
 pyHanko==0.22.0
 pyhanko-certvalidator==0.26.3
@@ -86,6 +91,7 @@ tzdata==2024.1
 tzlocal==5.2
 uritools==4.0.2
 urllib3==2.2.1
+uvicorn==0.30.1
 webencodings==0.5.1
 whitenoise==6.6.0
 xhtml2pdf==0.2.15

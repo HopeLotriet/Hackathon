@@ -14,6 +14,7 @@ https://docs.djangoproject.com/en/5.0/ref/settings/
 from pathlib import Path
 import os, sys
 import platform
+import dj_database_url
 
 
 
@@ -36,9 +37,9 @@ SECRET_KEY = 'django-insecure-!ep!c0a=y@*l)l0#1z2@a#&==bj!!j&lya+sud7t&cm!3mkmj2
 
 # SECURITY WARNING: don't run with debug turned on in production!
 # DEBUG = False
-DEBUG = True
+DEBUG = False
 
-ALLOWED_HOSTS = ['localhost', '127.0.0.1', 'yourdomain.com', 'youripaddress', 'farmfresh-kmq6.onrender.com']
+ALLOWED_HOSTS = ['*']
 
 
 # Application definition
@@ -107,10 +108,10 @@ WSGI_APPLICATION = 'inventory_system.wsgi.application'
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+    'default': dj_database_url.config(
+        default='postgres://postgres:postgres@localhost:5432/inventory_system',
+        conn_max_age=600
+    )
 }
 
 
@@ -153,10 +154,9 @@ STATIC_URL = '/static/'
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / "media"
 
-STATIC_ROOT = 'staticfiles/'
-STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
-STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
-
+if not DEBUG:
+    STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+    STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
@@ -178,9 +178,3 @@ LOW_QUANTITY = 5
 # login redirect path settings
 LOGIN_REDIRECT_URL = '/accounts'
 LOGIN_URL = 'home'
-
-os.environ['PATH'] = os.path.join(BASE_DIR, r'venv\Lib\site-packages\osgeo') + ';' + os.environ['PATH']
-
-os.environ['PROJ_LIB'] = os.path.join(BASE_DIR, r'venv\Lib\site-packages\osgeo\data\proj') + ';' + os.environ['PATH']
-
-GDAL_LIBRARY_PATH = os.path.join(BASE_DIR, r'venv\Lib\site-packages\osgeo\gdal.dll') 
