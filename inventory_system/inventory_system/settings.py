@@ -19,6 +19,7 @@ import dj_database_url
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
+sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'inventory_system'))
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 #Automated mail settings
