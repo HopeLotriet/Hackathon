@@ -19,7 +19,6 @@ import dj_database_url
 
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
-sys.path.append(os.path.join(os.path.dirname(os.path.dirname(__file__)), 'inventory_system'))
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 #Automated mail settings
@@ -57,8 +56,7 @@ INSTALLED_APPS = [
     'orders',
     'fontawesomefree',
     'widget_tweaks',                            # uses 'django-widget-tweaks' app
-    'crispy_forms',                             # uses 'django-crispy-forms' app
-    # 'login_required', 
+    'crispy_forms',                             # uses 'django-crispy-forms' app 
     'crispy_bootstrap4',
     'django_filters',
     'social_django',
@@ -140,7 +138,7 @@ AUTH_PASSWORD_VALIDATORS = [
 
 LANGUAGE_CODE = 'en-us'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'GMT+2'
 
 USE_I18N = True
 
