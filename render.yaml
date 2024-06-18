@@ -9,7 +9,7 @@ services:
     plan: free
     name: inventory_system
     runtime: python
-    buildCommand: "./build.sh"
+    buildCommand: "inventory_system/build.sh"
     startCommand: "python -m gunicorn mysite.asgi:application -k uvicorn.workers.UvicornWorker"
     envVars:
       - key: DATABASE_URL
